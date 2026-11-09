@@ -1,0 +1,185 @@
+/*
+ * Designsysteem "Feestvilt" (docs/design/kralingse-plas-party-5-designsysteem).
+ * Felle feestkleuren, zacht vilt, ronde vormen. Alle schermen gebruiken deze variabelen.
+ */
+
+@font-face {
+  font-family: 'Fredoka';
+  src: url('./fonts/fredoka-latin-wght-normal.woff2') format('woff2');
+  font-weight: 300 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Nunito';
+  src: url('./fonts/nunito-latin-wght-normal.woff2') format('woff2');
+  font-weight: 200 1000;
+  font-display: swap;
+}
+
+:root {
+  /* Kleuren: elke kleur heeft een donkere schaduwtint (-d) */
+  --kp-pompoen: #F47B20;   --kp-pompoen-d: #C85A0A;  --kp-pompoen-rand: #FFB067;
+  --kp-geel: #FFC928;      --kp-geel-d: #E39A00;
+  --kp-blauw: #2F7DE1;     --kp-blauw-d: #1E5BB0;    --kp-blauw-rand: #86B8F5;
+  --kp-groen: #2FAE5B;     --kp-groen-d: #1F8344;
+  --kp-rood: #D62839;
+  --kp-paars: #8E5BD9;
+  --kp-meer: #16457A;
+  --kp-vilt: #FFF6E6;      --kp-vilt-d: #D9C29C;
+  --kp-zand: #F1E3CC;
+  --kp-inkt: #2B1D14;
+  --kp-inkt-2: #6B5444;
+
+  /* Spelers: kleur én vorm */
+  --kp-speler1: #E8433A;   --kp-speler1-d: #B42A23;  /* cirkel */
+  --kp-speler2: #2F7DE1;   --kp-speler2-d: #1E5BB0;  /* driehoek */
+  --kp-speler3: #2FAE5B;   --kp-speler3-d: #1F8344;  /* vierkant */
+  --kp-speler4: #F2B705;   --kp-speler4-d: #A87F00;  /* ruit */
+
+  /* Lettertypes: Fredoka voor koppen en cijfers, Nunito voor tekst */
+  --kp-font-kop: 'Fredoka', 'Arial Rounded MT Bold', system-ui, sans-serif;
+  --kp-font-tekst: 'Nunito', system-ui, sans-serif;
+
+  /* Vormen */
+  --kp-r-paneel: 28px;
+  --kp-r-knop: 24px;
+  --kp-r-pil: 999px;
+  --kp-schaduw-paneel: 0 6px 0 rgb(43 29 20 / .16), 0 16px 30px rgb(43 29 20 / .18);
+  --kp-schaduw-knop: 0 6px 0 var(--kp-pompoen-d), 0 12px 20px rgb(43 29 20 / .18);
+  --kp-tik-min: 44px;
+
+  /* iPad: veilige randen */
+  --veilig-boven: env(safe-area-inset-top, 0px);
+  --veilig-onder: env(safe-area-inset-bottom, 0px);
+  --veilig-links: env(safe-area-inset-left, 0px);
+  --veilig-rechts: env(safe-area-inset-right, 0px);
+}
+
+/* ---------- Vilt: crèmekleurig paneel met stoftextuur ---------- */
+.vilt {
+  background-color: var(--kp-vilt);
+  background-image: url('./vilt.svg');
+  background-size: 240px 240px;
+}
+.paneel {
+  border: 4px solid #FFFFFF;
+  border-radius: var(--kp-r-paneel);
+  box-shadow: var(--kp-schaduw-paneel);
+}
+
+/* ---------- Knoppen: speelgoedblokjes, zakken 4px in bij een tik ---------- */
+.knop {
+  --knop-kleur: var(--kp-pompoen);
+  --knop-schaduw: var(--kp-pompoen-d);
+  --knop-rand: var(--kp-pompoen-rand);
+  --knop-tekst: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 68px;
+  padding: 0 30px;
+  border: 3px solid var(--knop-rand);
+  border-radius: var(--kp-r-knop);
+  background: var(--knop-kleur);
+  color: var(--knop-tekst);
+  font-family: var(--kp-font-kop);
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  box-shadow: 0 6px 0 var(--knop-schaduw), 0 12px 20px rgb(43 29 20 / .18);
+  cursor: pointer;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+}
+.knop:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 var(--knop-schaduw), 0 6px 12px rgb(43 29 20 / .18);
+}
+.knop-blauw { --knop-kleur: var(--kp-blauw); --knop-schaduw: var(--kp-blauw-d); --knop-rand: var(--kp-blauw-rand); }
+.knop-groen { --knop-kleur: var(--kp-groen); --knop-schaduw: var(--kp-groen-d); --knop-rand: #7FD69C; }
+.knop-wit { --knop-kleur: #FFFFFF; --knop-schaduw: var(--kp-vilt-d); --knop-rand: #FFFFFF; --knop-tekst: var(--kp-inkt); }
+.knop-s { min-height: 54px; font-size: 20px; padding: 0 22px; border-radius: 20px; }
+.knop svg { flex-shrink: 0; }
+
+/* Ronde iconknop (turbo, menu, terug): 56px */
+.iconknop {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid #FFFFFF;
+  background: var(--kp-vilt);
+  box-shadow: 0 5px 0 var(--kp-vilt-d), 0 10px 18px rgb(43 29 20 / .2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+}
+.iconknop:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--kp-vilt-d); }
+
+/* ---------- Tekstballon (Pommie, Ratje) ---------- */
+.ballon {
+  position: relative;
+  max-width: 330px;
+  background: #FFFFFF;
+  border-radius: 24px;
+  padding: 20px 22px 16px;
+  box-shadow: 0 6px 0 rgb(43 29 20 / .14), 0 14px 26px rgb(43 29 20 / .2);
+}
+.ballon::after {
+  content: '';
+  position: absolute;
+  left: 46px;
+  bottom: -10px;
+  width: 22px;
+  height: 22px;
+  background: #FFFFFF;
+  transform: rotate(45deg);
+  border-radius: 4px;
+}
+.ballon-naam {
+  position: absolute;
+  left: 18px;
+  top: -14px;
+  background: var(--kp-pompoen);
+  color: #FFFFFF;
+  font-family: var(--kp-font-kop);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.4px;
+  padding: 3px 12px;
+  border-radius: var(--kp-r-pil);
+  border: 2px solid #FFFFFF;
+}
+.ballon p {
+  position: relative;
+  margin: 0;
+  font-family: var(--kp-font-tekst);
+  font-weight: 800;
+  font-size: 21px;
+  line-height: 1.3;
+  color: var(--kp-inkt);
+  text-wrap: pretty;
+}
+
+/* ---------- Kleine labels ---------- */
+.label-hoofdletters {
+  font-family: var(--kp-font-kop);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--kp-inkt-2);
+}
+
+/* Donkere pil (melding, "Tik om te gooien") */
+.pil-donker {
+  background: rgb(43 29 20 / .88);
+  color: #FFFFFF;
+  font-family: var(--kp-font-kop);
+  font-weight: 600;
+  border-radius: var(--kp-r-pil);
+  white-space: nowrap;
+}

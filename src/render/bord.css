@@ -1,0 +1,145 @@
+/* Het bord en de camera. Maten in bordpixels; de camera vergroot alles tegelijk. */
+
+.bord {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #7CC754;
+}
+
+.bord-wereld {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.bord-laag {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+.bord-sprites {
+  position: absolute;
+  inset: 0;
+}
+
+.bord-sprite {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  pointer-events: none;
+}
+
+.bord-ster {
+  animation: ster-zweef 2.4s ease-in-out infinite alternate;
+}
+@keyframes ster-zweef {
+  from { translate: 0 0; }
+  to { translate: 0 -5px; }
+}
+
+/* Plaatsnamen, zoals in het design */
+.bord-label {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  z-index: 1500;
+  background: rgb(255 246 230 / .94);
+  color: var(--kp-inkt);
+  font-family: var(--kp-font-kop);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 3px 10px;
+  border-radius: var(--kp-r-pil);
+  white-space: nowrap;
+  box-shadow: 0 3px 8px rgb(0 0 0 / .18);
+  pointer-events: none;
+}
+.bord-label.onder { transform: translate(-50%, 0); }
+
+/* Figuren: (0,0) is het punt waar ze op het vakje staan */
+.figuur {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+  pointer-events: none;
+}
+.figuur-plaatje {
+  position: absolute;
+  display: block;
+  object-fit: contain;
+}
+.figuur-plaatje.handgetekend {
+  filter: drop-shadow(0 0 1.5px #FFFFFF) drop-shadow(0 0 1.5px #FFFFFF) drop-shadow(0 3px 3px rgb(43 29 20 / .3));
+}
+.figuur .vervanger {
+  border-radius: 50%;
+  border: 3px solid #FFFFFF;
+}
+.figuur-schaduw {
+  position: absolute;
+  left: -25px;
+  top: -8px;
+  width: 51px;
+  height: 15px;
+  border-radius: 50%;
+  background: rgb(0 0 0 / .22);
+}
+.figuur-ring {
+  display: none;
+  position: absolute;
+  left: -41px;
+  top: -14px;
+  width: 81px;
+  height: 28px;
+  border-radius: 50%;
+  border: 4px solid #FFF3A0;
+  box-shadow: 0 0 12px rgb(255 228 120 / .9);
+}
+.figuur.actief .figuur-ring { display: block; }
+
+/* Zweeft boven het figuur dat aan zet is, op vaste schermgrootte */
+.bord-boven {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  z-index: 5000;
+  transform-origin: 0 0;
+}
+.bord-boven > * {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+}
+
+.bord-vignet {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 60%, rgb(20 40 10 / .22) 100%);
+}
+
+/* Vervanger als een plaatje ontbreekt: gekleurde cirkel met letter */
+.vervanger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-family: var(--kp-font-kop);
+  font-weight: 700;
+  font-size: 32px;
+  border-radius: 50%;
+}

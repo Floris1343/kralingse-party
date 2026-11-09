@@ -1,20 +1,39 @@
 /**
  * Het bord: vakjes, routes en sterplekken.
- * Het echte bord komt later uit `src/data/board.json`; voor nu is er een klein testbord.
+ * Het echte bord staat in `src/data/board.json`; voor de tests is er ook een klein testbord.
  */
 
-export type VakjeType = 'start' | 'blauw' | 'rood' | 'event' | 'item' | 'kans' | 'pech' | 'hertenkamp';
+export type VakjeType =
+  | 'start' | 'blauw' | 'rood' | 'event' | 'item' | 'kans' | 'pech'
+  | 'hertenkamp' | 'boot' | 'ijs';
+
+/** Extra eigenschappen van een vakje: 's nachts anders, of welk event het is. */
+export type VakjeVlag =
+  | 'nachtRood' | 'nachtVleermuis'
+  | 'lantaarnpaal' | 'strandtent' | 'windvlaag' | 'zeilwedstrijd';
 
 export interface Vakje {
   id: string;
-  /** Bordcoördinaten 0–1000. */
+  /** Bordcoördinaten: pixels van het design-bord (1180 × 820). Het punt is het midden van de bovenkant. */
   x: number;
   y: number;
   type: VakjeType;
   /** De vakjes waar je hierna heen kunt. Meer dan één = splitsing. */
   next: string[];
-  zone?: string;
-  flags?: string[];
+  zone: string;
+  flags?: VakjeVlag[];
+}
+
+export type SplitsingSoort = 'hertenkamp' | 'boot' | 'ijspad';
+
+export interface Splitsing {
+  /** Op dit vakje kies je. */
+  vakje: string;
+  soort: SplitsingSoort;
+  /** Gewoon doorlopen. */
+  hoofdpad: string;
+  /** Het hertenkamp-pad, de boot of het ijspad. */
+  zijpad: string;
 }
 
 export interface Sterplek {
@@ -22,12 +41,34 @@ export interface Sterplek {
   naam: string;
   /** Langs dit vakje lopen = langs de ster lopen. */
   vakje: string;
+  /** Waar de ster staat (naast het pad). */
+  x: number;
+  y: number;
+}
+
+export interface Plek {
+  vakje: string;
+  x: number;
+  y: number;
+}
+
+export interface BordLabel {
+  tekst: string;
+  x: number;
+  y: number;
+  /** true = het label hangt onder het punt, anders erboven. */
+  onder: boolean;
 }
 
 export interface Bord {
+  breedte: number;
+  hoogte: number;
   start: string;
   vakjes: Vakje[];
+  splitsingen: Splitsing[];
   sterplekken: Sterplek[];
+  plekken: { winkel: Plek; nachtwinkel: Plek; ratje: Plek };
+  labels: BordLabel[];
 }
 
 const opzoekCache = new WeakMap<Bord, Map<string, Vakje>>();
@@ -43,8 +84,17 @@ export function vakje(bord: Bord, id: string): Vakje {
   return v;
 }
 
-/** Het volgende vakje op de route. Splitsingen komen in een latere stap; nu geldt de eerste route. */
+export function splitsingBij(bord: Bord, id: string): Splitsing | undefined {
+  return bord.splitsingen.find((s) => s.vakje === id);
+}
+
+/**
+ * Het volgende vakje op de route. Bij een splitsing is dat voorlopig altijd het hoofdpad;
+ * kiezen komt in een latere stap.
+ */
 export function volgendVakje(bord: Bord, id: string): string {
+  const splitsing = splitsingBij(bord, id);
+  if (splitsing) return splitsing.hoofdpad;
   const v = vakje(bord, id);
   if (v.next.length === 0) throw new Error(`Vakje ${id} heeft geen vervolg`);
   return v.next[0];
@@ -65,15 +115,22 @@ export function maakTestbord(): Bord {
       y: Math.round(500 - 400 * Math.cos(hoek)),
       type,
       next: [`v${(i + 1) % n}`],
+      zone: 'test',
     };
   });
+  const plek = (v: string): Plek => ({ vakje: v, x: 500, y: 500 });
   return {
+    breedte: 1000,
+    hoogte: 1000,
     start: 'v0',
     vakjes,
+    splitsingen: [],
     sterplekken: [
-      { id: 'noord', naam: 'Noord', vakje: 'v2' },
-      { id: 'oost', naam: 'Oost', vakje: 'v6' },
-      { id: 'west', naam: 'West', vakje: 'v10' },
+      { id: 'noord', naam: 'Noord', vakje: 'v2', x: 500, y: 150 },
+      { id: 'oost', naam: 'Oost', vakje: 'v6', x: 850, y: 500 },
+      { id: 'west', naam: 'West', vakje: 'v10', x: 150, y: 500 },
     ],
+    plekken: { winkel: plek('v4'), nachtwinkel: plek('v8'), ratje: plek('v9') },
+    labels: [],
   };
 }

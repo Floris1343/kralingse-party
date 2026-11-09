@@ -17,10 +17,14 @@ Het volledige spelontwerp staat hier en is leidend:
 ## Techniek
 
 - **Vite + TypeScript**, zonder game-engine.
+- **Uiterlijk: het design is leidend voor hoe het eruitziet** (`docs/design/`, gemaakt in Claude Design). `docs/ONTWERP.md` blijft leidend voor de spelregels: toont het design andere items, bonussterren of regels (zoals Muizenval, Gouden sleutel of Pechster), volg dan ONTWERP.md, maar wel in het uiterlijk van het design. Het winkelscherm (`bord-winkel.html`) en het bonusster-/eindscherm (`eindscherm.html`) gebruik je dus wél, gevuld met de items en bonussterren uit ONTWERP.md.
+  - Stijl "Feestvilt": alle kleuren, lettertypes (Fredoka en Nunito, lokaal in `src/ui/fonts/`), knoppen en panelen staan als variabelen in `src/ui/thema.css`. Gebruik die in elk scherm.
+  - Tekeningen (Pommie, Ratje, de figuren, iconen, de bordlagen) worden **letterlijk** uit het design gekopieerd met `node scripts/bord-uit-design.mjs`. Teken ze nooit zelf opnieuw.
 - **Rendering:** HTML/SVG/CSS.
-  - Het bord is één laag. Het schuine bovenaanzicht ontstaat met CSS `perspective` + `rotateX(~50deg)`.
-  - Figuren, ster, host en dergelijke zijn rechtopstaande sprites die **niet** mee kantelen: zet ze in een aparte laag en reken posities om.
-  - De camera volgt de speler die aan zet is, door de bordlaag te verschuiven.
+  - Het bord uit het design is al schuin van bovenaf getekend (vakjes zijn ovaal en worden naar achteren kleiner). Er komt dus **geen** extra CSS-kanteling bij; dat zou het design platdrukken.
+  - Lagen zoals in het design: grond (gras, plas, pad) → vakjes (getekend uit `board.json` met de vakjesformule van het design) → decoratie (bomen, gebouwen) → sprites (ster, Ratje, figuren, labels).
+  - Rechtopstaande dingen worden naar achteren kleiner volgens dezelfde diepteformule (`src/render/diepte.ts`).
+  - De camera volgt de speler die aan zet is: de hele wereld wordt met één transform verschoven en vergroot.
 - **Animaties:** Web Animations API en CSS-transitions. **Geluid:** Web Audio API. Het gebrabbel van de host wordt in de code gemaakt (korte lage blips per lettergreep met een licht wisselende toonhoogte).
 - **Spellogica** staat in `src/logic/`. Het zijn pure functies zonder DOM.
   - De hele spelstand is één serialiseerbaar object: `GameState`.
@@ -28,9 +32,9 @@ Het volledige spelontwerp staat hier en is leidend:
   - De random generator heeft een seed, en die seed zit in de state. Zo gaat een bewaard spel na het herladen precies hetzelfde verder.
 - **Tests:** Vitest voor alle logica: bewegen, splitsingen, vakje-effecten, sterren, winkel, Ratje, dag/nacht, eindspel, bonussterren en opslaan/laden.
 - **Opslaan:** autosave van `GameState` naar `localStorage` na elke actie. Geef de opslag een versienummer.
-- **Bord-data:** `src/data/board.json` bevat de vakjes (`id`, `x`, `y`, `type`, `next[]`, `zone`, `flags`, zoals `nachtRood` en `nachtVleermuis`), de splitsingen (ook de boot en het ijspad, dat alleen in de winter open is), de sterplekken en de plekken voor de winkel, de Nachtwinkel en Ratje. De coördinaten zijn bordcoördinaten 0–1000, gebaseerd op de kaart.
-- **Bord-editor:** met `?editor` in de URL kun je vakjes op het bord slepen en de JSON exporteren. Zo kan de eigenaar posities zelf bijschaven.
-- **Plaatjes:** eigen PNG's uit `public/assets/` (zie `assets/README.md`). Ontbreekt een PNG, toon dan een nette tijdelijke vervanger (gekleurde cirkel met een letter). De code moet blijven werken zonder de echte plaatjes.
+- **Bord-data:** `src/data/board.json` bevat de vakjes (`id`, `x`, `y`, `type`, `next[]`, `zone`, `flags`, zoals `nachtRood` en `nachtVleermuis`), de splitsingen (ook de boot en het ijspad, dat alleen in de winter open is), de sterplekken en de plekken voor de winkel, de Nachtwinkel en Ratje. De coördinaten zijn pixels van het design-bord (1180 × 820); (x, y) is het midden van de bovenkant van een vakje. De kaart is alleen gebruikt om te controleren dat de zones in de goede volgorde liggen.
+- **Bord-editor:** met `?editor` in de URL kun je vakjes, sterplekken, de winkel, de Nachtwinkel en Ratje slepen en de JSON kopiëren of downloaden. Zo kan de eigenaar posities zelf bijschaven. `node scripts/bord-uit-design.mjs --bord` maakt `board.json` opnieuw en overschrijft dat werk.
+- **Plaatjes:** de tekeningen uit het design staan in `public/assets/` (zie `assets/README.md`). Ontbreekt er een, toon dan een nette tijdelijke vervanger (gekleurde cirkel met een letter). De code moet blijven werken zonder de plaatjes.
 - **iPad:**
   - liggend, alleen aanraken, geen hover
   - knoppen minimaal 48 px
@@ -48,8 +52,10 @@ src/
   logic/      spelregels (puur, getest)
   data/       board.json, items, teksten.ts (alle hosttekst)
   ui/         schermen en componenten
-  render/     bord, perspectief, sprites, camera, dag/nacht
+  render/     bord, diepte, sprites, camera, dag/nacht
+  editor/     de bord-editor (?editor)
   audio/      gebrabbel en geluidjes
-public/assets/  figuren/, host/, bord/ (PNG's van de eigenaar)
-docs/         ONTWERP.md, BESLISSINGEN.md, STARTPROMPTS.md
+public/assets/  figuren/, personages/, iconen/, bord/ (uit het design)
+scripts/        bord-uit-design.mjs (haalt de tekeningen uit docs/design/)
+docs/         ONTWERP.md, BESLISSINGEN.md, STARTPROMPTS.md, design/ (Claude Design)
 ```

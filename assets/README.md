@@ -1,41 +1,18 @@
-# Plaatjes aanleveren
+# Plaatjes
 
-Alle plaatjes zijn **PNG met een transparante achtergrond**. Zet ze in deze map met precies deze bestandsnamen. Claude Code verplaatst ze naar `public/assets/`.
+Alle tekeningen komen uit het design (`docs/design/`, gemaakt in Claude Design). Je hoeft dus zelf geen PNG's meer aan te leveren.
 
-Ontbreekt een plaatje? Dan toont het spel een tijdelijke vervanger, dus je kunt op elk moment aanvullen.
+Het script `node scripts/bord-uit-design.mjs` kopieert ze letterlijk naar `public/assets/`. Draai het opnieuw als het design verandert. Met `--bord` maakt het ook `src/data/board.json` opnieuw, maar dan gaat wat je in de bord-editor hebt bijgeschaafd verloren.
 
-## Figuren (`figuren/`)
+## Wat waar staat
 
-Ongeveer 512 px hoog. Het figuur staat met de voorkant naar je toe en de voeten onderaan het plaatje.
+| Map in `public/assets/` | Wat | Uit het design |
+|---|---|---|
+| `figuren/` | `floris.png` en `speler2.png` (handgetekend), `pion-groen.svg` (Bot 1) en `pion-geel.svg` (Bot 2) | `floris.png`, `speler2.png`, `pawn3.svg`, `pawn4.svg` |
+| `personages/` | `pommie.svg` (host) en `ratje.svg` (de kerstrat) | `pommie.svg`, `ratje.svg` |
+| `iconen/` | munt, ster, zon, maan, sneeuw, dobbelsteen, vlaggetjes, vilttextuur en de vakje-iconen | gelijknamige SVG's |
+| `bord/` | het bord in lagen: `grond-*.svg`, `decor-*.svg` en `effect-*.svg` voor dag, nacht, winter en mist, plus de losse `ster.svg` en `ratje.svg` op het bord | `board_dag.svg`, `board_nacht.svg`, enz. |
 
-| Bestand | Wat |
-|---|---|
-| `speler1.png` | figuur van speler 1 |
-| `speler2.png` | figuur van speler 2 |
-| `bot1.png` | figuur van bot 1 |
-| `bot2.png` | figuur van bot 2 |
-| `speler1-blij.png`, `speler1-sip.png` … | *optioneel*: een blije pose (ster gekocht) en een sippe pose (pech) per figuur |
+## Een figuur vervangen
 
-## Host en bewoners (`host/`)
-
-| Bestand | Wat |
-|---|---|
-| `pommie.png` | Pommie de pompoenbeer (host), neutraal |
-| `pommie-blij.png` | *optioneel*: juichend |
-| `pommie-schrik.png` | *optioneel*: geschrokken |
-| `ratje.png` | Ratje de kerstrat (vervangt Boo) |
-| `bok-dag.png` | *optioneel*: het hert overdag |
-| `bok-nacht.png` | *optioneel*: de wilde bok 's nachts |
-| `vleermuis.png` | *optioneel*: een vleermuis |
-
-## Bord (`bord/`), allemaal optioneel
-
-| Bestand | Wat |
-|---|---|
-| `bord-dag.png` | een eigen getekend bord, bovenaanzicht, vierkant, ongeveer 2000×2000 px |
-| `bord-winter.png` | hetzelfde bord in de winter (bevroren plas) |
-| `ster.png` | de ster |
-| `munt.png` | een munt |
-| `boot.png` | de boot |
-
-Zolang er geen eigen bord is, tekent het spel zelf een gestileerd bord van de Kralingse Plas.
+Wil je een andere tekening voor een figuur? Vervang dan het bestand in `public/assets/figuren/` door een nieuwe tekening met dezelfde naam. Zorg voor een transparante achtergrond, de voeten onderaan en de voorkant naar je toe. Ontbreekt een plaatje, dan toont het spel een gekleurde cirkel met een letter.

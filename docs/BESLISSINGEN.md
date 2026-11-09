@@ -14,3 +14,15 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 - **Gelijkspel na sterren én munten:** de gelijke spelers gooien opnieuw, elk een ander getal. Dat geldt voor alle plaatsen, niet alleen de eerste.
 - **Sterren per ronde** (voor de grafiek) worden genoteerd na de minigame van elke ronde, vóór de bonussterren.
 - **Opslagversie 2.** Een bewaard spel uit stap 1 wordt genegeerd; dat was nog geen echt spel.
+
+## Stap 3: design en bord
+
+- **Het bord uit het design is de basis.** De vorm van de plas, het pad en alle decoratie komen letterlijk uit `board_dag.svg`. Alleen de vakjes worden uit `board.json` getekend, met precies dezelfde tekenformule als het design.
+- **Geen extra CSS-kanteling.** Het design-bord is al schuin getekend (ovale vakjes, kleiner naar achteren). Nog eens kantelen zou het platdrukken. De camera schuift en zoomt wel mee.
+- **Aantal vakjes per zone volgt de vorm van het design-bord.** De oostkant is in het design korter dan de rest. Zodat het restaurantvakje naast het restaurant ligt, is de verdeling: Oostoever 3, Plaszoom 5, Zuidoever 7 (in plaats van 6, 4, 6). De hoofdroute heeft precies 38 vakjes.
+- **De bootsteiger is een eigen vakje** met het boot-icoon uit het design. Het geeft geen munten, net als het startvakje. Daarom zijn er 18 blauwe vakjes op de hoofdroute in plaats van 19.
+- **Het ijspad loopt van het Strand naar Plaszoom** (zoals in ONTWERP.md), niet van noord naar zuid zoals op het winterbord van het design. Het staat al in `board.json`, maar wordt pas getekend als de winter gebouwd wordt.
+- **Bij een splitsing loopt iedereen voorlopig over het hoofdpad.** Kiezen (en de boot betalen) komt in een latere stap.
+- **De sterren staan in de plas naast het pad**, zodat ze geen vakjes bedekken. De ster bij Plaszoom staat precies waar het design hem heeft.
+- **Spelers 1 en 2 zijn de handgetekende figuren uit het design** ("Floris" en "Speler 2"), de bots zijn het groene en het gele pionnetje. Het rode en het blauwe pionnetje uit de PDF zitten niet in de HTML-bestanden en worden niet gebruikt.
+- **Tijdelijk in deze stap:** "Nieuw spel" start meteen met 2 mensen en 2 bots, 10 rondes, zomer. Bij de minigame krijgt iedereen 10 munten. Het opstartscherm en het invullen van de uitslag komen in de volgende stap.

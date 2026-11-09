@@ -1,6 +1,6 @@
 /** Hulpjes voor de tests (wordt niet in het spel gebruikt). */
 import { loopUit, dobbelen, sterKeuze } from './beurt';
-import { maakTestbord } from './bord';
+import { maakTestbord, type Bord } from './bord';
 import { speelBotsAf } from './bot';
 import { draaiEindspelRad } from './eindspel';
 import type { AantalRondes, GameState } from './gameState';
@@ -69,6 +69,7 @@ export function speelUit(
   start: GameState,
   naElkeActie: (s: GameState) => GameState = (s) => s,
   maxActies = 10_000,
+  b: Bord = bord,
 ): { eind: GameState; staten: GameState[] } {
   let s = start;
   const staten: GameState[] = [s];
@@ -80,16 +81,16 @@ export function speelUit(
         break;
       }
       case 'dobbelen':
-        s = s.spelers[s.volgorde[s.aanZet]].isBot ? speelBotsAf(s, bord) : dobbelen(s);
+        s = s.spelers[s.volgorde[s.aanZet]].isBot ? speelBotsAf(s, b) : dobbelen(s);
         break;
       case 'lopen':
-        s = loopUit(s, bord);
+        s = loopUit(s, b);
         break;
       case 'sterKopen':
-        s = sterKeuze(s, bord, true);
+        s = sterKeuze(s, b, true);
         break;
       case 'eindspelRad':
-        s = draaiEindspelRad(s, bord);
+        s = draaiEindspelRad(s, b);
         break;
     }
     s = naElkeActie(s);

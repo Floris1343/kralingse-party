@@ -1,28 +1,82 @@
+import { zeg } from '../data/teksten';
+import { asset } from './asset';
+import { icoon } from './iconen';
+
 export interface HoofdmenuActies {
-  heeftOpgeslagenSpel: boolean;
+  /** Bijvoorbeeld "Ronde 3/10 · Zomer", of null als er geen bewaard spel is. */
+  opgeslagenSpel: string | null;
   nieuwSpel: () => void;
   verderSpelen: () => void;
 }
 
+/** Hoofdmenu zoals in het design (docs/design/.../hoofdmenu.html). */
 export function toonHoofdmenu(root: HTMLElement, acties: HoofdmenuActies): void {
   root.innerHTML = `
     <main class="hoofdmenu">
-      <div class="water" aria-hidden="true"></div>
-      <h1 class="titel">Kralingse Plas <span>Party</span></h1>
-      <nav class="knoppen">
-        ${acties.heeftOpgeslagenSpel ? '<button class="knop knop-groot" data-actie="verder">Verder spelen</button>' : ''}
-        <button class="knop knop-groot ${acties.heeftOpgeslagenSpel ? 'knop-tweede' : ''}" data-actie="nieuw">Nieuw spel</button>
+      <img class="hoofdmenu-bord" src="${asset('bord/bord-dag-compleet.svg')}" alt="">
+      <div class="hoofdmenu-waas"></div>
+      <img class="hoofdmenu-vlaggetjes" src="${asset('iconen/vlaggetjes.svg')}" alt="">
+      <h1 class="titel">
+        <span class="titel-boven">Kralingse Plas</span>
+        <span class="titel-onder"><span>PARTY</span><img src="${asset('iconen/ster.svg')}" alt=""></span>
+      </h1>
+      <nav class="hoofdmenu-knoppen vilt paneel">
+        ${
+          acties.opgeslagenSpel
+            ? `<button class="knop knop-verder" data-actie="verder">
+                 <span class="knop-verder-rond">${icoon.play()}</span>
+                 <span class="knop-verder-tekst"><span>Verder spelen</span><small></small></span>
+               </button>`
+            : ''
+        }
+        <button class="knop knop-blauw knop-links" data-actie="nieuw">${icoon.plus()}<span>Nieuw spel</span></button>
+        <button class="knop knop-wit knop-links" data-actie="instellingen">${icoon.tandwiel()}<span>Instellingen</span></button>
       </nav>
+      <div class="hoofdmenu-pommie">
+        <div class="ballon"><div class="ballon-naam">Pommie</div><p></p></div>
+        <img src="${asset('personages/pommie.svg')}" alt="Pommie, de host">
+      </div>
+      <img class="hoofdmenu-ratje" src="${asset('personages/ratje.svg')}" alt="Ratje">
     </main>
   `;
+  root.querySelector('.hoofdmenu-pommie p')!.textContent = zeg('welkom');
+  const klein = root.querySelector('.knop-verder small');
+  if (klein) klein.textContent = acties.opgeslagenSpel;
   root.querySelector('[data-actie="nieuw"]')?.addEventListener('click', acties.nieuwSpel);
   root.querySelector('[data-actie="verder"]')?.addEventListener('click', acties.verderSpelen);
+  root.querySelector('[data-actie="instellingen"]')?.addEventListener('click', () => toonMelding('Instellingen komen later!'));
+}
+
+/** Vraagt in de stijl van het spel om bevestiging. */
+export function bevestig(root: HTMLElement, vraag: string, ja: string, nee: string): Promise<boolean> {
+  const el = document.createElement('div');
+  el.className = 'overlay';
+  el.innerHTML = `
+    <div class="overlay-paneel vilt paneel">
+      <h2></h2>
+      <div class="overlay-knoppen">
+        <button class="knop" data-ja></button>
+        <button class="knop knop-wit" data-nee></button>
+      </div>
+    </div>`;
+  el.querySelector('h2')!.textContent = vraag;
+  el.querySelector('[data-ja]')!.textContent = ja;
+  el.querySelector('[data-nee]')!.textContent = nee;
+  root.append(el);
+  return new Promise((r) => {
+    const klaar = (antwoord: boolean) => {
+      el.remove();
+      r(antwoord);
+    };
+    el.querySelector('[data-ja]')!.addEventListener('click', () => klaar(true));
+    el.querySelector('[data-nee]')!.addEventListener('click', () => klaar(false));
+  });
 }
 
 /** Korte, niet-blokkerende melding onderin beeld. */
 export function toonMelding(tekst: string, duurMs = 1500): void {
   const el = document.createElement('div');
-  el.className = 'melding';
+  el.className = 'melding pil-donker';
   el.textContent = tekst;
   document.body.appendChild(el);
   el.animate(

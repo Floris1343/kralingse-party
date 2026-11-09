@@ -1,0 +1,45 @@
+.editor {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: #3F7F2E;
+  padding: var(--veilig-boven) var(--veilig-rechts) var(--veilig-onder) var(--veilig-links);
+}
+.editor-balk,
+.editor-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  font-family: var(--kp-font-kop);
+  font-size: 18px;
+  z-index: 2;
+}
+.editor-balk a { text-decoration: none; }
+.editor-status { margin-left: auto; font-size: 16px; }
+.editor-info { gap: 24px; min-height: 64px; }
+.editor-info p { margin: 0; }
+.editor-info select { font: inherit; font-size: 18px; min-height: 44px; margin-left: 8px; }
+.editor-veld { position: relative; overflow: hidden; }
+.editor-wereld { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.editor-decor { opacity: .55; }
+.editor-punten { pointer-events: auto; touch-action: none; }
+.editor-lijn { stroke: #2B1D14; stroke-width: 1.5; stroke-dasharray: 4 3; opacity: .55; }
+.editor-lijn.ster { stroke: #E39A00; opacity: .9; }
+.editor-punt { cursor: grab; }
+.editor-punt circle { fill: rgb(255 255 255 / .55); stroke: #2B1D14; stroke-width: 2; }
+.editor-punt.ster circle { fill: rgb(255 201 40 / .8); }
+.editor-punt.plek circle { fill: rgb(142 91 217 / .7); }
+.editor-punt.gekozen circle { fill: #F47B20; stroke: #FFFFFF; stroke-width: 3; }
+.editor-punt text {
+  font-family: var(--kp-font-kop);
+  font-size: 11px;
+  font-weight: 600;
+  text-anchor: middle;
+  fill: #2B1D14;
+  paint-order: stroke;
+  stroke: #FFFFFF;
+  stroke-width: 3px;
+  pointer-events: none;
+}
