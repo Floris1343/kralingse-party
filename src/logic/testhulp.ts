@@ -1,0 +1,101 @@
+/** Hulpjes voor de tests (wordt niet in het spel gebruikt). */
+import { loopUit, dobbelen, sterKeuze } from './beurt';
+import { maakTestbord } from './bord';
+import { speelBotsAf } from './bot';
+import { draaiEindspelRad } from './eindspel';
+import type { AantalRondes, GameState } from './gameState';
+import { verwerkMinigame, type MinigameUitslag } from './minigame';
+import { nieuwSpel, type NieuwSpelKeuzes } from './nieuwSpel';
+import { metKopie, trek } from './regels';
+
+export const bord = maakTestbord();
+
+export function keuzes(over: Partial<NieuwSpelKeuzes> = {}): NieuwSpelKeuzes {
+  return {
+    aantalRondes: 10,
+    seizoen: 'zomer',
+    bonussterren: true,
+    spelers: [
+      { naam: 'Anna', figuur: 'a', isBot: false },
+      { naam: 'Bram', figuur: 'b', isBot: false },
+      { naam: 'Bot 1', figuur: 'c', isBot: true },
+      { naam: 'Bot 2', figuur: 'd', isBot: true },
+    ],
+    ...over,
+  };
+}
+
+export function alleBots(): NieuwSpelKeuzes['spelers'] {
+  return keuzes().spelers.map((sp) => ({ ...sp, isBot: true }));
+}
+
+/** Een nieuw spel met een vaste seed, eventueel met aanpassingen. */
+export function spel(over: Partial<NieuwSpelKeuzes> = {}, seed = 1): GameState {
+  return nieuwSpel(bord, keuzes(over), seed);
+}
+
+/** Past een state aan voor een test (op een kopie). */
+export function met(state: GameState, wijzig: (s: GameState) => void): GameState {
+  return metKopie(state, wijzig);
+}
+
+/** Zet de speler die aan zet is klaar om `n` vakjes te lopen, zonder te dobbelen. */
+export function metWorp(state: GameState, n: number): GameState {
+  return met(state, (s) => {
+    s.fase = { soort: 'lopen', worp: n, resterend: n };
+  });
+}
+
+/** Willekeurige minigame-uitslag (met af en toe gelijke plekken), via de rng van de state. */
+export function willekeurigeUitslag(state: GameState): [MinigameUitslag, GameState] {
+  let uitslag: MinigameUitslag = [];
+  const na = met(state, (s) => {
+    const rest = s.spelers.map((_, i) => i);
+    while (rest.length) {
+      const grootte = trek(s, 1, 4) === 1 ? Math.min(2, rest.length) : 1;
+      const groep: number[] = [];
+      for (let k = 0; k < grootte; k++) groep.push(rest.splice(trek(s, 0, rest.length - 1), 1)[0]);
+      uitslag.push(groep);
+    }
+  });
+  return [uitslag, na];
+}
+
+/**
+ * Speelt een heel spel uit. Mensen dobbelen, lopen uit, kopen altijd een ster en draaien het rad.
+ * `naElkeActie` kan de state vervangen (bijv. opslaan en weer laden).
+ */
+export function speelUit(
+  start: GameState,
+  naElkeActie: (s: GameState) => GameState = (s) => s,
+  maxActies = 10_000,
+): { eind: GameState; staten: GameState[] } {
+  let s = start;
+  const staten: GameState[] = [s];
+  for (let i = 0; i < maxActies && s.fase.soort !== 'einde'; i++) {
+    switch (s.fase.soort) {
+      case 'minigame': {
+        const [uitslag, na] = willekeurigeUitslag(s);
+        s = verwerkMinigame(na, uitslag);
+        break;
+      }
+      case 'dobbelen':
+        s = s.spelers[s.volgorde[s.aanZet]].isBot ? speelBotsAf(s, bord) : dobbelen(s);
+        break;
+      case 'lopen':
+        s = loopUit(s, bord);
+        break;
+      case 'sterKopen':
+        s = sterKeuze(s, bord, true);
+        break;
+      case 'eindspelRad':
+        s = draaiEindspelRad(s, bord);
+        break;
+    }
+    s = naElkeActie(s);
+    staten.push(s);
+  }
+  return { eind: s, staten };
+}
+
+export const RONDES: AantalRondes[] = [10, 15, 20];

@@ -1,7 +1,7 @@
 import type { GameState } from './gameState';
 
 /** Verhoog dit als de vorm van GameState verandert. */
-export const OPSLAG_VERSIE = 1;
+export const OPSLAG_VERSIE = 2;
 export const OPSLAG_SLEUTEL = 'kralingse-plas-party/spel';
 
 interface Opgeslagen {
@@ -27,7 +27,7 @@ export function laad(opslag: Opslag): GameState | null {
   if (!ruw) return null;
   try {
     const data = JSON.parse(ruw) as Opgeslagen;
-    if (data?.versie !== OPSLAG_VERSIE || !data.state) return null;
+    if (data?.versie !== OPSLAG_VERSIE || !data.state || !Array.isArray(data.state.spelers)) return null;
     return data.state;
   } catch {
     return null;

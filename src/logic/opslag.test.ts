@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { GameState } from './gameState';
-import { bewaar, heeftOpgeslagenSpel, laad, OPSLAG_SLEUTEL, wis, type Opslag } from './opslag';
+import { bewaar, heeftOpgeslagenSpel, laad, OPSLAG_SLEUTEL, OPSLAG_VERSIE, wis, type Opslag } from './opslag';
+import { spel, speelUit } from './testhulp';
 
 function nepOpslag(): Opslag {
   const m = new Map<string, string>();
@@ -11,7 +11,7 @@ function nepOpslag(): Opslag {
   };
 }
 
-const voorbeeld: GameState = { rng: 12345, ronde: 3, aantalRondes: 10 };
+const voorbeeld = spel({}, 12345);
 
 describe('opslag', () => {
   it('bewaart en laadt hetzelfde spel', () => {
@@ -39,5 +39,31 @@ describe('opslag', () => {
     bewaar(o, voorbeeld);
     wis(o);
     expect(laad(o)).toBeNull();
+  });
+
+  it('negeert een spel in het oude formaat zonder spelers', () => {
+    const o = nepOpslag();
+    o.setItem(OPSLAG_SLEUTEL, JSON.stringify({ versie: OPSLAG_VERSIE, state: { rng: 1, ronde: 3 } }));
+    expect(laad(o)).toBeNull();
+  });
+
+  it('opslaan en laden na elke actie: het spel gaat precies hetzelfde verder', () => {
+    for (let seed = 0; seed < 5; seed++) {
+      const zonder = speelUit(spel({}, seed));
+      const o = nepOpslag();
+      const met = speelUit(spel({}, seed), (s) => {
+        bewaar(o, s);
+        return laad(o)!;
+      });
+      expect(met.staten).toEqual(zonder.staten);
+      expect(met.eind.eindtelling).toEqual(zonder.eind.eindtelling);
+    }
+  });
+
+  it('een spel halverwege laden en uitspelen geeft dezelfde winnaar', () => {
+    const { staten, eind } = speelUit(spel({}, 99));
+    const o = nepOpslag();
+    bewaar(o, staten[Math.floor(staten.length / 2)]);
+    expect(speelUit(laad(o)!).eind).toEqual(eind);
   });
 });
