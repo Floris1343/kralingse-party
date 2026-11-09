@@ -1,0 +1,133 @@
+:root {
+  --plas: #1e5a8a;
+  --plas-licht: #3b8ac4;
+  --zand: #f3d98b;
+  --gras: #5fae5a;
+  --tekst: #fffdf5;
+  --veilig-boven: env(safe-area-inset-top, 0px);
+  --veilig-onder: env(safe-area-inset-bottom, 0px);
+  --veilig-links: env(safe-area-inset-left, 0px);
+  --veilig-rechts: env(safe-area-inset-right, 0px);
+  font-family: ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, sans-serif;
+  color: var(--tekst);
+  background: var(--plas);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  /* geen pull-to-refresh / stuiteren */
+  overscroll-behavior: none;
+  /* geen tekstselectie of tik-menu's */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  /* geen dubbeltik-zoom */
+  touch-action: manipulation;
+}
+
+body { position: fixed; inset: 0; }
+
+#app { height: 100%; }
+
+.hoofdmenu {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6vh;
+  padding: calc(24px + var(--veilig-boven)) calc(24px + var(--veilig-rechts))
+    calc(24px + var(--veilig-onder)) calc(24px + var(--veilig-links));
+  overflow: hidden;
+  background: radial-gradient(ellipse 70% 60% at 50% 55%, var(--plas-licht), var(--plas) 70%),
+    var(--gras);
+}
+
+.hoofdmenu .water {
+  position: absolute;
+  inset: -20%;
+  background: repeating-radial-gradient(circle at 50% 55%, transparent 0 38px, rgba(255, 255, 255, 0.07) 38px 41px);
+  animation: golf 6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes golf {
+  from { transform: scale(1); }
+  to { transform: scale(1.06); }
+}
+
+.titel {
+  position: relative;
+  margin: 0;
+  text-align: center;
+  font-size: clamp(40px, 8vw, 96px);
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+}
+
+.titel span {
+  display: block;
+  color: var(--zand);
+  font-size: 1.3em;
+  transform: rotate(-3deg);
+}
+
+.knoppen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: min(360px, 80vw);
+}
+
+.knop {
+  min-height: 48px;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  color: #3a2a00;
+  background: var(--zand);
+  box-shadow: 0 6px 0 #b8952f;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+}
+
+.knop:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #b8952f;
+}
+
+.knop-groot {
+  min-height: 72px;
+  padding: 0 40px;
+  font-size: 28px;
+}
+
+.knop-tweede {
+  background: #fffdf5;
+  box-shadow: 0 6px 0 #c9c3b0;
+}
+.knop-tweede:active { box-shadow: 0 2px 0 #c9c3b0; }
+
+.melding {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + var(--veilig-onder));
+  transform: translateX(-50%);
+  padding: 14px 24px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.75);
+  font-size: 20px;
+  font-weight: 700;
+  pointer-events: none;
+  white-space: nowrap;
+}
