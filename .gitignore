@@ -4,3 +4,7 @@ dev-dist/
 referentie/
 .DS_Store
 *.log
+
+# Design: alleen HTML, tekeningen en lettertypes in git (geen PDF en JPG-afbeeldingen)
+docs/design/*.pdf
+docs/design/*/afbeeldingen/

@@ -1,0 +1,17 @@
+Kralingse Plas Party · Menu, nieuw spel, minigame en eindscherm
+========================================
+
+Inhoud
+- afbeeldingen/  JPG van elk scherm (2x, 2360 x 1640 px; designsysteem 3440 px breed)
+- html/          elk scherm als losse HTML/CSS-pagina, opent offline in de browser
+- assets/        de tekeningen, het bord, iconen en vakjes die deze schermen gebruiken
+- fonts/         Fredoka en Nunito (SIL Open Font License, zie fonts/OFL-*.txt)
+
+Schermen
+- hoofdmenu
+- nieuw-spel
+- minigame-uitslag
+- eindscherm
+
+Formaat: iPad / iPad Air 11" liggend, 1180 x 820 pt.
+De animaties (draaiend dobbelblok, wiebelen, zweven) werken in de HTML-bestanden.
