@@ -39,7 +39,7 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 - **Bots kiezen het zijpad alleen als ze daarmee sneller bij de ster zijn.** Voor de boot moeten ze na het betalen ook nog een ster kunnen kopen. Zo nemen ze de boot als de ster bij Plaszoom of Park Rozenburg staat (§6.2), en kiezen ze bij het hertenkamp het kortere hoofdpad.
 - **De turboknop blijft aan** tot je hem weer uitzet, ook na het herladen. Met turbo zijn de bots in één keer klaar, zonder lopen. Je ziet daarna alleen de korte melding.
 - **Minigame-uitslag:** tik de figuren op volgorde aan. "Gelijk met vorige" zet de volgende die je aantikt op dezelfde plek als de vorige. Heeft iedereen al een plek, dan schuift de laatste een plek op, naar de plek erboven. De laatste krijgt vanzelf de laatste plek. De knop "Bevestigen" is de bevestiging, en met "Opnieuw" begin je opnieuw.
-- **Het opstartscherm onthoudt je laatste keuzes** (namen, figuren, mens/bot, rondes). Tik je op een figuur, dan krijg je het volgende figuur. Heeft iemand anders dat figuur al, dan ruilen jullie. Er moet minstens één mens meedoen.
+- **Het opstartscherm onthoudt je laatste keuzes** (namen, figuren, mens/bot, rondes). Tik je op een figuur, dan zie je alle figuren en kies je er één. Bij elk figuur staat wie het nu heeft; kies je dat, dan ruilen jullie. (Eerst kreeg je bij elke tik het volgende figuur; met 6 figuren voelde dat willekeurig.) Er moet minstens één mens meedoen.
 - **Kleuren van de figuren zoals in het design:** Floris is blauw en Speler 2 is rood.
 - **Nieuw spel en de minigame-uitslag zijn precies op designmaat (1180 × 820) gebouwd** en schalen mee met het scherm. Zo zien ze er op elke iPad hetzelfde uit.
 

@@ -125,23 +125,64 @@ export function toonNieuwSpel(root: HTMLElement, acties: { terug: () => void; st
     knop.append(wissel);
   };
 
+  /** Geeft speler i dit figuur. Heeft iemand anders het al, dan ruilen jullie. */
+  const zetFiguur = (i: number, id: string) => {
+    const ander = k.spelers.findIndex((x, j) => j !== i && x.figuur === id);
+    if (ander >= 0) {
+      k.spelers[ander].figuur = k.spelers[i].figuur;
+      tekenFiguur(ander);
+    }
+    k.spelers[i].figuur = id;
+    tekenFiguur(i);
+  };
+
+  /** Tik op een figuur: alle figuren in een paneel, en jij kiest er één. */
+  const kiesFiguur = (i: number) => {
+    const naam = k.spelers[i].naam.trim() || STANDAARD_NAMEN[i];
+    const el = maak('div', 'figuurkeuze');
+    const paneel = maak('div', 'figuurkeuze-paneel vilt paneel');
+    paneel.setAttribute('role', 'dialog');
+    const kop = maak('h2', 'figuurkeuze-titel', `Kies een figuur voor ${naam}`);
+    const raster = maak('div', 'figuurkeuze-raster');
+    const sluit = () => el.remove();
+    for (const f of FIGUREN) {
+      const gekozen = k.spelers[i].figuur === f.id;
+      const houder = k.spelers.findIndex((x, j) => j !== i && x.figuur === f.id);
+      const kaart = maak('button', `figuurkeuze-kaart${gekozen ? ' gekozen' : ''}`);
+      kaart.type = 'button';
+      kaart.style.setProperty('--kleur', f.kleur);
+      const rond = maak('div', 'figuurkeuze-figuur');
+      rond.style.background = f.kleurLicht;
+      rond.append(figuurPlaatje(f, f.id, 'figuurkeuze-plaatje'));
+      if (gekozen) {
+        const vink = maak('span', 'figuurkeuze-vink');
+        vink.style.background = f.kleur;
+        vink.innerHTML = icoon.vinkje('#FFFFFF', 20);
+        rond.append(vink);
+      }
+      kaart.append(rond, maak('span', 'figuurkeuze-houder', gekozen ? 'Jouw figuur' : houder >= 0 ? `nu: ${k.spelers[houder].naam.trim() || STANDAARD_NAMEN[houder]}` : ''));
+      kaart.addEventListener('click', () => {
+        zetFiguur(i, f.id);
+        sluit();
+      }, { once: true });
+      raster.append(kaart);
+    }
+    const terug = maak('button', 'knop knop-wit figuurkeuze-terug', 'Terug');
+    terug.type = 'button';
+    terug.addEventListener('click', sluit, { once: true });
+    paneel.append(kop, raster, terug);
+    el.append(paneel);
+    // Tik naast het paneel = dicht, zonder iets te veranderen.
+    el.addEventListener('click', (e) => e.target === el && sluit());
+    scherm.append(el);
+  };
+
   k.spelers.forEach((sp, i) => {
     const rij = maak('div', 'nieuw-speler');
     const fk = maak('button', 'nieuw-figuurknop');
     fk.type = 'button';
     figuurKnoppen.push(fk);
-    // Tik = volgende figuur. Heeft iemand anders die al, dan ruilen jullie.
-    fk.addEventListener('click', () => {
-      const nu = FIGUREN.findIndex((f) => f.id === k.spelers[i].figuur);
-      const volgende = FIGUREN[(nu + 1) % FIGUREN.length].id;
-      const ander = k.spelers.findIndex((x) => x.figuur === volgende);
-      if (ander >= 0) {
-        k.spelers[ander].figuur = k.spelers[i].figuur;
-        tekenFiguur(ander);
-      }
-      k.spelers[i].figuur = volgende;
-      tekenFiguur(i);
-    });
+    fk.addEventListener('click', () => kiesFiguur(i));
 
     const naamVak = maak('div', 'nieuw-naamvak');
     const label = maak('label', 'label-hoofdletters', `SPELER ${i + 1}`);
