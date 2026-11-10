@@ -29,8 +29,8 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 
 ## Stap 4: spelen op de iPad
 
-- **Eén tik om te dobbelen.** In het design staat eerst een "Gooi!"-knop op het bord en daarna het dobbelscherm met "Tik op het blok!". Dat zijn twee tikken. Volgens §11 is het er één: als je aan de beurt bent, schuift de camera naar je figuur en verschijnt meteen het dobbelscherm.
-- **Bots krijgen geen dobbelscherm.** Hun beurt blijft op het bord (binnen 2 seconden, §11). Het bot-dobbelscherm uit het design (map 4) bewaren we voor later.
+- ~~Eén tik om te dobbelen.~~ *Vervangen in stap 8: een beurt begint nu met "Jouw beurt" en het keuzemenu.*
+- **Bots krijgen geen dobbelscherm** tijdens het spel. Hun beurt blijft op het bord (binnen 2 seconden, §11). Alleen bij de startworp gooien ze in het dobbelscherm (stap 8).
 - **De uitslag na het dobbelen verdwijnt vanzelf** na ongeveer een seconde, of eerder als je tikt. Hoog (7–10) geeft confetti en een oranje pil, laag (1–3) een donkere pil, de rest een blauwe pil.
 - **Bij een splitsing kies je met twee grote knoppen.** Dat gebeurt op het vakje vóór de splitsing, voordat je verder loopt. De keuze telt niet als stap.
   - Heb je minder dan 3 munten, dan krijg je de bootvraag niet (net als bij de ster).
@@ -119,3 +119,26 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 - **De grafiek "Sterren per ronde"** volgt de stijl van het design: elke speler in zijn eigen kleur, met een merkteken in de vorm van zijn figuur. Lijnen die over elkaar vallen, schuiven 2 px uit elkaar, zodat je ze allemaal ziet. De bonussterren tellen in de grafiek niet mee, want die komen pas na de laatste ronde.
 - **Statistiek:** een knop op het eindscherm opent een tabel met per speler sterren, munten, munten met minigames, de hoogste muntenstand, gekochte sterren, hoe vaak op rood, hoe vaak de bok en het aantal avonturen. De hoogste waarde per rij is oranje.
 - **Nog niet:** Pommie bij het bevriezen van de plas (dat komt met de seizoenen in fase 8).
+
+## Stap 8: tik om verder te gaan, de startworp en het keuzemenu
+
+- **Na een botbeurt blijft de melding staan** tot iemand tikt, met de hint "Tik om verder te gaan · Volgende: Bot 2". Is de minigame de volgende, dan staat er "Volgende: Minigame".
+  - Tikken mag overal, behalve op de knoppen in de spelersbalk: de turboknop blijft werken.
+  - Zet je turbo aan terwijl de melding wacht, dan gaat het spel meteen door. Met turbo aan wordt nooit gewacht.
+- **Aankondiging bij bots:** "Beurt van Bot 1" staat 0,6 s in beeld, zonder tik. Met turbo slaan de bots die over, anders zou turbo trager worden.
+- **Startworp:**
+  - Iedereen gooit in de volgorde van het opstartscherm. Bij gelijk gooien alleen die spelers opnieuw, zo vaak als nodig.
+  - Wie bij een eerdere worp al hoger gooide, blijft hoger. Voorbeeld: 8, 8, 4, 4 → eerst worden de twee achten beslist, dan de twee vieren.
+  - Een bot gooit zelf en daarna tik je door. Een mens tikt op het blok; de uitslag blijft 1,5 s staan, of korter als je tikt.
+  - Daarna toont het paneel "De volgorde" iedereen met zijn worpen, en tik je op "Start!".
+  - Het spel wordt na elke worp bewaard. Sluit je de app tijdens de startworp, dan ga je precies daar verder.
+- **Keuzemenu:** Dobbelen, Items en Bord bekijken zijn licht schuine banners in de Feestvilt-stijl. Het design heeft deze schermen en een kaart-icoon niet. Het kaart-icoon is daarom getekend in de stijl van de andere knop-icoontjes.
+- **Items kiezen en annuleren:**
+  - Dobbelstenen en Kies-je-worp werken pas bij het gooien. Die kun je annuleren met "Item annuleren" in het menu; het item gaat dan terug in je zak.
+  - De Wisseltruc, de Ratjebel en de gemene items werken meteen als je op "Gebruik" tikt. Die kun je niet terugdraaien, want je hebt dan al geruild of gestolen. Op hun knop staat daarom "werkt meteen".
+  - Het blijft één item per beurt: na een item is de knop Items grijs, en na een dobbel-item staat er "Item annuleren".
+- **Bord bekijken:**
+  - Je schuift met één vinger en zoomt met twee (op de Mac met het muiswiel), tot ongeveer 2,6 keer het hele bord. Verder uitzoomen dan het hele bord kan niet.
+  - Bij de winkel, de Nachtwinkel en Ratje staat een bordje, met erbij of de winkel open of dicht is.
+  - Bovenin staat hoeveel vakjes de ster van je af ligt; bij twee sterren de dichtstbijzijnde. Bij mist staat er "Ochtendmist: waar is de ster?".
+- **Opslagversie 5.** Een bewaard spel van versie 4 (en ouder) speelt gewoon verder: de oude startworp wordt omgezet en de startworp komt niet opnieuw.

@@ -3,7 +3,7 @@ import { dobbelen, loopUit, ratjeKeuze, stap, winkelKeuze } from './beurt';
 import { botActie, speelBotsAf } from './bot';
 import { botItemGebruik, botItemKoop, botKiesWorp } from './botKeuzes';
 import type { GameState } from './gameState';
-import { gebruikItem, kanItemGebruiken, WINKEL_ITEMS } from './items';
+import { annuleerItem, gebruikItem, kanItemAnnuleren, kanItemGebruiken, werktMeteen, WINKEL_ITEMS } from './items';
 import { ratjePrijs } from './ratje';
 import { bordMetPlekken, met, metWorp, spel } from './testhulp';
 
@@ -185,5 +185,51 @@ describe('bots en items', () => {
 
   it('stap werkt nog gewoon voor één vakje', () => {
     expect(stap(metWorp(basis(), 2), bord).spelers[0].vakje).toBe('v1');
+  });
+});
+
+describe('een item kiezen en annuleren (keuzemenu)', () => {
+  const metZak = (items: GameState['spelers'][0]['items']) => basis((x) => (x.spelers[0].items = items));
+
+  it('een dobbelsteen kiezen en weer annuleren: het item gaat terug in je zak', () => {
+    const gekozen = gebruikItem(metZak(['dubbel', 'kiesWorp']), 'dubbel');
+    expect(gekozen.fase).toEqual({ soort: 'dobbelen', gebruikt: 'dubbel' });
+    expect(kanItemAnnuleren(gekozen)).toBe(true);
+    const terug = annuleerItem(gekozen);
+    expect(terug.fase).toEqual({ soort: 'dobbelen' });
+    expect([...terug.spelers[0].items].sort()).toEqual(['dubbel', 'kiesWorp']);
+    expect(terug.verslag.some((g) => g.soort === 'item')).toBe(false);
+  });
+
+  it('na annuleren kun je een ander item kiezen, en daarna gewoon gooien', () => {
+    let s = annuleerItem(gebruikItem(metZak(['dubbel', 'kiesWorp']), 'dubbel'));
+    s = gebruikItem(s, 'kiesWorp');
+    expect(s.fase).toEqual({ soort: 'dobbelen', gebruikt: 'kiesWorp' });
+    expect(s.spelers[0].items).toEqual(['dubbel']);
+    s = dobbelen(s, 4);
+    expect(s.fase).toMatchObject({ soort: 'lopen', worp: 4 });
+  });
+
+  it('nog steeds maar één item per beurt', () => {
+    const s = gebruikItem(metZak(['dubbel', 'driedubbel']), 'dubbel');
+    expect(kanItemGebruiken(s, 'driedubbel')).toBe(false);
+    expect(() => gebruikItem(s, 'driedubbel')).toThrow();
+  });
+
+  it('na het dobbelen kun je niet meer annuleren', () => {
+    const s = dobbelen(gebruikItem(metZak(['dubbel']), 'dubbel'));
+    expect(kanItemAnnuleren(s)).toBe(false);
+    expect(() => annuleerItem(s)).toThrow();
+  });
+
+  it('items die meteen werken (Wisseltruc, gemene items) kun je niet annuleren', () => {
+    expect(werktMeteen('wisseltruc')).toBe(true);
+    expect(werktMeteen('zakkenroller')).toBe(true);
+    expect(werktMeteen('dubbel')).toBe(false);
+    const s = gebruikItem(metZak(['wisseltruc']), 'wisseltruc');
+    expect(kanItemAnnuleren(s)).toBe(false);
+    expect(() => annuleerItem(s)).toThrow();
+    // Zonder gekozen item valt er niets te annuleren.
+    expect(kanItemAnnuleren(metZak(['dubbel']))).toBe(false);
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { basisSchaal, cameraOp, cameraOverzicht, naarScherm } from './camera';
+import { basisSchaal, cameraOp, cameraOverzicht, MAX_VRIJ_ZOOM, naarScherm, vrijeCamera } from './camera';
 import { diepteSchaal, vakjeMaat } from './diepte';
 import { vakjeSvg, vakjesSvg } from './vakjes';
 import { VAKJE_TEKENINGEN } from './vakjeTekeningen';
@@ -70,5 +70,34 @@ describe('camera', () => {
       expect(cam.x + 1180 * cam.schaal).toBeGreaterThanOrEqual(1180 - 1e-9);
       expect(cam.y + 820 * cam.schaal).toBeGreaterThanOrEqual(820 - 1e-9);
     }
+  });
+});
+
+describe('bord bekijken: schuiven en zoomen', () => {
+  const start = cameraOp(590, 410, ipad, bord, 1.45);
+
+  it('schuiven: het bord gaat mee met je vinger', () => {
+    const na = vrijeCamera(start, ipad, bord, [600, 400], [560, 380]);
+    expect(na.schaal).toBe(start.schaal);
+    expect(na.x).toBeCloseTo(start.x - 40);
+    expect(na.y).toBeCloseTo(start.y - 20);
+  });
+
+  it('zoomen: het punt tussen je vingers blijft op zijn plek', () => {
+    const na = vrijeCamera(start, ipad, bord, [590, 410], [590, 410], 1.3);
+    expect(na.schaal).toBeCloseTo(start.schaal * 1.3);
+    const voor = [(590 - start.x) / start.schaal, (410 - start.y) / start.schaal];
+    const nu = [(590 - na.x) / na.schaal, (410 - na.y) / na.schaal];
+    expect(nu[0]).toBeCloseTo(voor[0]);
+    expect(nu[1]).toBeCloseTo(voor[1]);
+  });
+
+  it('nooit verder uit dan het hele bord, nooit verder in dan de grens, en altijd schermvullend', () => {
+    const basis = basisSchaal(ipad, bord);
+    expect(vrijeCamera(start, ipad, bord, [0, 0], [0, 0], 0.01).schaal).toBeCloseTo(basis);
+    expect(vrijeCamera(start, ipad, bord, [0, 0], [0, 0], 100).schaal).toBeCloseTo(basis * MAX_VRIJ_ZOOM);
+    const ver = vrijeCamera(start, ipad, bord, [0, 0], [5000, 5000]);
+    expect(ver.x).toBe(0);
+    expect(ver.y).toBe(0);
   });
 });

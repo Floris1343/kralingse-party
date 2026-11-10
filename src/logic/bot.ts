@@ -11,11 +11,14 @@ import type { GameState } from './gameState';
 import { gebruikItem, heeftDoel } from './items';
 import { botRatjeKeuze } from './ratje';
 import { spelerAanZet } from './regels';
+import { gooiStartworp } from './startworp';
 import { botKiestZijpad } from './splitsing';
 
 /** Moet er nu een bot iets doen? (De minigame-uitslag vult altijd een mens in.) */
 export function wachtOpBot(state: GameState): boolean {
   switch (state.fase.soort) {
+    case 'startworp':
+      return state.spelers[state.fase.teGooien[0]].isBot;
     case 'dobbelen':
     case 'lopen':
     case 'sterKopen':
@@ -35,6 +38,8 @@ export function wachtOpBot(state: GameState): boolean {
 export function botActie(state: GameState, bord: Bord): GameState | null {
   if (!wachtOpBot(state)) return null;
   switch (state.fase.soort) {
+    case 'startworp':
+      return gooiStartworp(state);
     case 'dobbelen': {
       const speler = spelerAanZet(state);
       if (!state.fase.gebruikt) {

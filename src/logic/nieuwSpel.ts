@@ -1,7 +1,7 @@
 /** Een nieuw spel opzetten vanuit het opstartscherm (§2, §3). */
 import type { Bord } from './bord';
 import type { GameState, Instellingen } from './gameState';
-import { kies, STARTMUNTEN, verschillendeWorpen } from './regels';
+import { kies, STARTMUNTEN } from './regels';
 
 export interface SpelerKeuze {
   naam: string;
@@ -41,11 +41,12 @@ export function nieuwSpel(bord: Bord, keuzes: NieuwSpelKeuzes, seed: number): Ga
         sterrenPerRonde: [],
       },
     })),
-    startworpen: [],
-    volgorde: [],
+    startworpen: spelers.map(() => []),
+    volgorde: spelers.map((_, i) => i),
     aanZet: 0,
     ronde: 1,
-    fase: { soort: 'dobbelen' },
+    // Eerst de startworp (§2): iedereen gooit één voor één, in de volgorde van het opstartscherm.
+    fase: { soort: 'startworp', teGooien: spelers.map((_, i) => i) },
     sterren: [],
     nacht: false,
     eindspelRegel: null,
@@ -54,10 +55,6 @@ export function nieuwSpel(bord: Bord, keuzes: NieuwSpelKeuzes, seed: number): Ga
     verslag: [],
     eindtelling: null,
   };
-
-  // Startworp: iedereen gooit één keer; hoogste begint. Elke worp is anders, dus nooit gelijkspel.
-  s.startworpen = verschillendeWorpen(s, spelers.length);
-  s.volgorde = spelers.map((_, i) => i).sort((a, b) => s.startworpen[b] - s.startworpen[a]);
 
   s.sterren = [{ plek: kies(s, bord.sterplekken).id }];
   return s;

@@ -6,7 +6,7 @@
 import { figuur } from '../data/figuren';
 import { zeg } from '../data/teksten';
 import {
-  ITEM_SOORTEN, itemDoelen, itemInfo, kanKopen, kanRatjeDoen, NACHT_ITEM_SOORTEN, ratjeDoelen, ratjePrijs,
+  ITEM_SOORTEN, itemDoelen, itemInfo, kanItemGebruiken, kanKopen, werktMeteen, kanRatjeDoen, NACHT_ITEM_SOORTEN, ratjeDoelen, ratjePrijs,
   ZAKKENROLLER_BUIT, type DoelItem, type GameState, type ItemSoort, type RatjeKeuze, type RatjeWat,
 } from '../logic';
 import { asset } from './asset';
@@ -119,6 +119,37 @@ function winkel(
     const niks = knop('Niks kopen', 'knop-wit');
     niks.addEventListener('click', () => klaar(null), { once: true });
     voet.append(niks);
+  });
+}
+
+/**
+ * Je items (keuzemenu): elk met icoon, naam, uitleg en "Gebruik". Items die meteen werken (de
+ * Wisseltruc, de Ratjebel en de gemene items) zeggen dat erbij, want die kun je niet annuleren.
+ */
+export function vraagItem(laag: HTMLElement, s: GameState, speler: number): Promise<ItemSoort | null> {
+  const sp = s.spelers[speler];
+  const { el, kaarten, voet, hint } = winkelOverlay(laag, s, speler, {
+    icoon: 'iconen/vakje-item.svg',
+    titel: 'Je items',
+    uitleg: 'Eén item per beurt, vóór het dobbelen',
+  });
+  el.classList.add('items-overlay');
+  kaarten.classList.add(`aantal-${Math.max(1, sp.items.length)}`);
+  hint.textContent = 'Dobbelstenen en Kies-je-worp kun je nog annuleren; de rest werkt meteen.';
+  return new Promise((r) => {
+    const klaar = (item: ItemSoort | null) => {
+      el.remove();
+      r(item);
+    };
+    sp.items.forEach((item) => {
+      const info = itemInfo(item);
+      const kan = kanItemGebruiken(s, item);
+      const pil = werktMeteen(item) ? 'Gebruik · werkt meteen' : 'Gebruik';
+      kaarten.append(kaartKnop(itemIcoon(item, 62), info.naam, info.uitleg, pil, kan, () => klaar(item)));
+    });
+    const terug = knop('Terug', 'knop-wit');
+    terug.addEventListener('click', () => klaar(null), { once: true });
+    voet.append(terug);
   });
 }
 

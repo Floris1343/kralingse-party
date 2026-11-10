@@ -5,7 +5,7 @@ export { nieuwSpel, type NieuwSpelKeuzes, type SpelerKeuze } from './nieuwSpel';
 export { dobbelen, dobbelMax, stap, sterKeuze, splitsingKeuze, winkelKeuze, nachtwinkelKeuze, ratjeKeuze, loopUit } from './beurt';
 export {
   WINKEL_ITEMS, ITEM_SOORTEN, NACHT_ITEMS, NACHT_ITEM_SOORTEN, MAX_ITEMS, ZAKKENROLLER_BUIT, VALSTRIK_MUNTEN,
-  aantalDobbelstenen, gebruikItem, kanItemGebruiken, kanKopen, itemInfo, itemDoelen, heeftDoel, isNachtItem,
+  aantalDobbelstenen, gebruikItem, annuleerItem, kanItemAnnuleren, werktMeteen, kanItemGebruiken, kanKopen, itemInfo, itemDoelen, heeftDoel, isNachtItem,
   type ItemSoort, type ItemInfo, type DoelItem, type NachtItem, type WinkelItem,
 } from './items';
 export { ratjePrijs, ratjeDoelen, kanRatjeDoen, type RatjeKeuze, type RatjeWat } from './ratje';
@@ -19,5 +19,6 @@ export { bonusWinnaars } from './eindtelling';
 export { sterPrijs, kanSterBetalen, zichtbareSterren } from './ster';
 export { plaatsen, spelerAanZet } from './regels';
 export { wachtOpBot, botActie, speelBotsAf } from './bot';
+export { gooiStartworp, startSpel, startwerper, wieGooit } from './startworp';
 export { bewaar, laad, heeftOpgeslagenSpel, wis, type Opslag } from './opslag';
 export { nieuweSeed } from './rng';

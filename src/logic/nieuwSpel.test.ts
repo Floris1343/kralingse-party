@@ -35,16 +35,10 @@ describe('nieuw spel', () => {
     ]);
   });
 
-  it('startworp: iedereen gooit een ander getal en de hoogste begint', () => {
-    for (let seed = 0; seed < 50; seed++) {
-      const s = spel({}, seed);
-      expect(new Set(s.startworpen).size).toBe(4);
-      for (const w of s.startworpen) expect(w).toBeGreaterThanOrEqual(1);
-      for (const w of s.startworpen) expect(w).toBeLessThanOrEqual(10);
-      const worpenInVolgorde = s.volgorde.map((i) => s.startworpen[i]);
-      expect(worpenInVolgorde).toEqual([...worpenInVolgorde].sort((a, b) => b - a));
-      expect([...s.volgorde].sort()).toEqual([0, 1, 2, 3]);
-    }
+  it('een nieuw spel begint met de startworp, in de volgorde van het opstartscherm', () => {
+    const s = nieuwSpel(bord, keuzes(), 1);
+    expect(s.fase).toEqual({ soort: 'startworp', teGooien: [0, 1, 2, 3] });
+    expect(s.startworpen).toEqual([[], [], [], []]);
   });
 
   it('zet één ster op een bestaande sterplek', () => {

@@ -4,14 +4,14 @@
  * 2. getikt: het blok wordt even platgedrukt, met lichtstralen;
  * 3. resultaat: groot getal, bij een hoge worp confetti;
  * 4. terug naar het bord (het scherm vervaagt, het getal staat dan boven het figuur).
- * Links kun je vóór het gooien één item gebruiken (map 4: dubbel, driedubbel, kies-je-worp).
+ * Items kies je in het keuzemenu aan het begin van de beurt; hier zie je het gekozen item
+ * (map 4: twee of drie blokken, of de getallen van Kies-je-worp). Ook voor de startworp (§2).
  * Heeft iemand je de Slakkendobbel gegeven, dan is het blok bruin en gooit het 1–3 (map 4:
  * dobbel-slakkendobbel). Met de Achteruitpet staat er bovenin dat je achteruit loopt.
  */
 import { figuur } from '../data/figuren';
 import {
-  aantalDobbelstenen, dobbelMax, heeftDoel, itemInfo, kanItemGebruiken, MAX_ITEMS, plaatsen,
-  type DoelItem, type GameState, type ItemSoort,
+  aantalDobbelstenen, dobbelMax, itemInfo, plaatsen, werktMeteen, type GameState, type ItemSoort,
 } from '../logic';
 import { dobbelGeluid, worpGeluid } from '../audio/geluid';
 import { asset } from './asset';
@@ -94,43 +94,36 @@ function maakBlok(max = 10): { el: HTMLElement; zetGetal: (n: number) => void } 
 
 /** Wat het dobbelscherm aan het spelscherm vraagt. */
 export interface DobbelActies {
-  /** De spelstand van nu (verandert na het gebruiken van een item). */
+  /** De spelstand van nu. */
   state(): GameState;
-  /** Gebruik een item in de spellogica (`doel` = op wie, bij een gemeen item). */
-  gebruik(item: ItemSoort, doel?: number): void;
-  /** Op wie richt je dit gemene item? null = toch niet. */
-  kiesDoel(item: DoelItem): Promise<number | null>;
   /** Doe de worp in de spellogica; geeft de losse worpen terug. */
   gooi(gekozen?: number): number[];
 }
 
-/** Hoe het dobbelscherm eindigde: gegooid, of de Ratjebel gebruikt (dan komt eerst Ratje). */
-export type DobbelEinde = 'gegooid' | 'ratjebel';
+export interface DobbelOpties {
+  /** Bovenin, bijvoorbeeld "Startworp · wie het hoogst gooit, begint". */
+  titel?: string;
+  /** Een bot: het blok gooit zelf, en na de uitslag wacht het scherm op een tik. */
+  vanzelf?: boolean;
+  /** De tekst in de pil onder de uitslag (standaard: "Je loopt 7 stappen"). */
+  uitslag?: (worp: number) => string;
+}
 
-function itemRij(s: GameState, item: ItemSoort, gebruik: () => void): HTMLElement {
-  const fase = s.fase.soort === 'dobbelen' ? s.fase : null;
-  const actief = fase?.gebruikt === item;
-  const rij = maak('div', `dobbel-item${actief ? ' actief' : ''}`);
+/** Het gekozen item, zoals in map 4: groen en "ACTIEF". */
+function itemRij(item: ItemSoort): HTMLElement {
+  const rij = maak('div', 'dobbel-item actief');
   const rond = maak('div', 'dobbel-item-icoon');
   rond.append(itemIcoon(item, 34));
   const rechts = maak('div', 'dobbel-item-rechts');
   rechts.append(maak('span', 'dobbel-item-naam', itemInfo(item).naam));
-  const b = maak('button', `knop knop-s ${actief ? 'knop-groen' : 'knop-blauw'} dobbel-item-knop`);
-  b.type = 'button';
-  if (actief) {
-    b.innerHTML = `${icoon.vinkje('#FFFFFF', 22)}ACTIEF`;
-    b.disabled = true;
-  } else {
-    b.textContent = 'Gebruik';
-    b.disabled = !kanItemGebruiken(s, item);
-    b.addEventListener('click', gebruik, { once: true });
-  }
+  const b = maak('span', 'knop knop-s knop-groen dobbel-item-knop');
+  b.innerHTML = `${icoon.vinkje('#FFFFFF', 22)}ACTIEF`;
   rechts.append(b);
   rij.append(rond, rechts);
   return rij;
 }
 
-function spelerPaneel(s: GameState, speler: number, gebruik: (item: ItemSoort) => void): HTMLElement {
+function spelerPaneel(s: GameState, speler: number, startworp: boolean): HTMLElement {
   const sp = s.spelers[speler];
   const f = figuur(sp.figuur);
   const plaats = plaatsen(s)[speler];
@@ -155,16 +148,19 @@ function spelerPaneel(s: GameState, speler: number, gebruik: (item: ItemSoort) =
     <span class="dobbel-telling"><img src="${asset('iconen/ster.svg')}" alt="" width="26" height="26">${sp.sterren}</span>
     <span class="dobbel-telling"><img src="${asset('iconen/munt.svg')}" alt="" width="24" height="24">${sp.munten}</span>`;
 
-  const items = maak('div', 'dobbel-items');
-  // Het item dat nu actief is, staat bovenaan (het zit niet meer in de zak).
+  paneel.append(kaart, naam, stand);
+  // Het gekozen item (een dobbelsteen of Kies-je-worp); kiezen doe je in het keuzemenu.
   const fase = s.fase.soort === 'dobbelen' ? s.fase : null;
-  // (Items die meteen werken, zoals de Wisseltruc en de gemene items, zijn dan al weg.)
-  const blijft = (i: ItemSoort) => i === 'dubbel' || i === 'driedubbel' || i === 'kiesWorp';
-  const lijst: ItemSoort[] = [...(fase?.gebruikt && blijft(fase.gebruikt) ? [fase.gebruikt] : []), ...sp.items];
-  for (const item of lijst) items.append(itemRij(s, item, () => gebruik(item)));
-  for (let n = lijst.length; n < MAX_ITEMS; n++) items.append(maak('div', 'dobbel-leeg', 'Leeg vak'));
-
-  paneel.append(kaart, naam, stand, maak('div', 'dobbel-lijn'), maak('span', 'label-hoofdletters', 'ITEMS · VÓÓR HET GOOIEN'), items);
+  if (fase?.gebruikt && !werktMeteen(fase.gebruikt)) {
+    const items = maak('div', 'dobbel-items');
+    items.append(itemRij(fase.gebruikt));
+    paneel.append(maak('div', 'dobbel-lijn'), maak('span', 'label-hoofdletters', 'GEKOZEN ITEM'), items);
+  }
+  if (startworp) {
+    const worpen = s.startworpen[speler];
+    paneel.append(maak('div', 'dobbel-lijn'), maak('span', 'label-hoofdletters', 'STARTWORP'));
+    paneel.append(maak('p', 'dobbel-startuitleg', worpen.length ? `Gelijk gegooid! Eerder gooide je ${worpen.join(', ')}.` : 'Wie het hoogst gooit, mag beginnen.'));
+  }
   return paneel;
 }
 
@@ -196,49 +192,31 @@ function uitslagTekst(worp: number): string {
  * Toont het dobbelscherm in `laag`. Links de speler en zijn items, rechts het blok (of twee of
  * drie blokken, of de getallen van Kies-je-worp). Klaar zodra het scherm weer weg is.
  */
-export async function toonDobbelscherm(laag: HTMLElement, speler: number, acties: DobbelActies): Promise<DobbelEinde> {
+export async function toonDobbelscherm(laag: HTMLElement, speler: number, acties: DobbelActies, opties: DobbelOpties = {}): Promise<void> {
   const scherm = maak('div', 'dobbel');
   const rechts = maak('div', 'dobbel-rechts');
   laag.append(scherm);
 
-  let stop: (() => void) | null = null;
-  let einde: ((e: DobbelEinde) => void) | null = null;
+  let einde: (() => void) | null = null;
 
-  /** Bouwt het scherm opnieuw op (na het gebruiken van een item). */
   const bouw = () => {
-    stop?.();
     const s = acties.state();
+    const startworp = s.fase.soort === 'startworp';
     const fase = s.fase.soort === 'dobbelen' ? s.fase : null;
-    const max = dobbelMax(s, speler);
+    const max = startworp ? 10 : dobbelMax(s, speler);
     scherm.classList.toggle('slak', max < 10);
-    const paneel = spelerPaneel(s, speler, async (item) => {
-      if (heeftDoel(item)) {
-        stop?.();
-        stop = null;
-        const doel = await acties.kiesDoel(item);
-        if (doel === null) return bouw();
-        acties.gebruik(item, doel);
-        return bouw();
-      }
-      acties.gebruik(item);
-      if (item === 'ratjebel') {
-        stop?.();
-        scherm.remove();
-        einde?.('ratjebel');
-        return;
-      }
-      bouw();
-    });
-    scherm.replaceChildren(paneel, rechts);
+    scherm.replaceChildren(spelerPaneel(s, speler, startworp), rechts);
     rechts.replaceChildren();
     const sp = s.spelers[speler];
-    if (sp.slak || sp.achteruit) {
+    if (opties.titel) {
+      const banner = maak('div', 'dobbel-banner', opties.titel);
+      scherm.append(banner);
+    } else if (sp.slak || sp.achteruit) {
       const banner = maak('div', 'dobbel-banner');
       banner.innerHTML = sp.slak ? `${SLAK_SVG(30)}Iemand gaf je de slakkendobbel…` : 'Iemand gaf je de achteruitpet… je loopt achteruit!';
       scherm.append(banner);
     }
     if (fase?.gebruikt === 'kiesWorp') {
-      stop = null;
       void kiesGetal(rechts, max).then((n) => {
         dobbelGeluid();
         return gooiEnToon(acties.gooi(n));
@@ -257,8 +235,8 @@ export async function toonDobbelscherm(laag: HTMLElement, speler: number, acties
     knop.setAttribute('aria-label', 'Tik op het blok om te gooien');
     knop.append(...blokken.map((b) => b.el));
     midden.append(knop);
-    const hint = maak('div', 'dobbel-hint');
-    hint.innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="#FFFFFF"></circle><circle cx="12" cy="12" r="9" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.6"></circle></svg>${aantal > 1 ? 'Tik op de blokken!' : 'Tik op het blok!'}`;
+    const hint = maak('div', `dobbel-hint${opties.vanzelf ? ' vanzelf' : ''}`);
+    hint.innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="#FFFFFF"></circle><circle cx="12" cy="12" r="9" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.6"></circle></svg>${opties.vanzelf ? 'Gooit…' : aantal > 1 ? 'Tik op de blokken!' : 'Tik op het blok!'}`;
     if (max < 10) {
       const onder = maak('div', 'dobbel-hint-rij');
       onder.append(maak('div', 'dobbel-slak-pil', `Alleen 1 t/m ${max}`), hint);
@@ -274,21 +252,16 @@ export async function toonDobbelscherm(laag: HTMLElement, speler: number, acties
     const tik = () => {
       dobbelGeluid();
       clearInterval(wissel);
-      stop = null;
       const worpen = acties.gooi();
       blokken.forEach((b, i) => b.zetGetal(worpen[i]));
       void gooiEnToon(worpen, midden, hint);
     };
-    rechts.addEventListener('pointerdown', tik, { once: true });
-    stop = () => {
-      clearInterval(wissel);
-      rechts.removeEventListener('pointerdown', tik);
-    };
+    // Een bot gooit zelf, na een korte tel; een mens tikt.
+    if (opties.vanzelf) setTimeout(tik, 750);
+    else rechts.addEventListener('pointerdown', tik, { once: true });
   };
 
   const gooiEnToon = async (worpen: number[], midden?: HTMLElement, hint?: HTMLElement) => {
-    // De items kun je nu niet meer gebruiken.
-    scherm.querySelectorAll<HTMLButtonElement>('.dobbel-item-knop').forEach((b) => (b.disabled = true));
     const worp = worpen.reduce((a, b) => a + b, 0);
     if (!midden) {
       midden = maak('div', 'dobbel-midden');
@@ -313,19 +286,25 @@ export async function toonDobbelscherm(laag: HTMLElement, speler: number, acties
     } else {
       midden.append(maak('div', 'dobbel-uitslag', String(worp)));
     }
-    rechts.append(maak('div', 'dobbel-pil', uitslagTekst(worp)));
+    rechts.append(maak('div', 'dobbel-pil', (opties.uitslag ?? uitslagTekst)(worp)));
     midden.insertAdjacentHTML('beforeend', [FONKEL(-60, 40, 46), FONKEL(330, -20, 38), FONKEL(360, 250, 50), FONKEL(-30, 300, 34)].join(''));
     worpGeluid(hoog);
     if (hoog) rechts.append(confetti());
-    await tikOfTijd(scherm, 1100);
+    if (opties.vanzelf) {
+      // Bij een bot blijft de uitslag staan tot iemand tikt.
+      rechts.append(maak('div', 'dobbel-hint dobbel-verder', 'Tik om verder te gaan'));
+      await new Promise<void>((r) => scherm.addEventListener('pointerdown', () => r(), { once: true }));
+    } else {
+      await tikOfTijd(scherm, opties.uitslag ? 1500 : 1100);
+    }
 
     // 4. naar het bord
     await scherm.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, easing: 'ease-in', fill: 'forwards' }).finished;
     scherm.remove();
-    einde?.('gegooid');
+    einde?.();
   };
 
-  return new Promise<DobbelEinde>((r) => {
+  return new Promise<void>((r) => {
     einde = r;
     bouw();
   });

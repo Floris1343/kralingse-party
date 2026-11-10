@@ -18,7 +18,11 @@ Een bordspel in de stijl van Mario Party dat je speelt op een iPad. Het bord is 
 - Standaard: **4 deelnemers = 2 mensen + 2 bots**. In het opstartscherm moet in te stellen zijn wie mens of bot is (1 t/m 4 mensen).
 - Elke bot op de iPad hoort bij een vaste computerspeler op de Switch. Bot 1 op de iPad is dus ook "Bot 1" op de Switch.
 - Iedere deelnemer heeft een **naam** en een **figuur** (eigen PNG, zie `assets/README.md`).
-- Bij de start gooit iedereen één keer. De hoogste worp begint, en die volgorde blijft het hele spel gelijk.
+- **Startworp:** aan het begin van een nieuw spel gooit iedereen één voor één, in het dobbelscherm. Pommie legt het kort uit ("Wie het hoogst gooit, mag beginnen!").
+  - Mensen tikken zelf op het blok. Bots gooien zelf, waarna je tikt om door te gaan.
+  - Gooien spelers hetzelfde, dan gooien alleen die spelers opnieuw, tot alles beslist is.
+  - Daarna zie je de volgorde 1 t/m 4 in beeld en tik je op "Start!".
+  - De hoogste worp begint. De volgorde blijft het hele spel gelijk en wordt opgeslagen.
 
 ---
 
@@ -257,10 +261,13 @@ Daarna maakt de host de winnaar bekend. Tot slot volgt een kort statistiekensche
 
 ## 11. Tempo (heel belangrijk)
 
-- **Botbeurt in ≤ 2 seconden:** dobbelsteen, lopen (ongeveer 80 ms per vakje) en alle keuzes direct. Er hoeft niets bevestigd te worden.
-- Na een botbeurt verschijnt een **korte melding** (ongeveer 1,5 s, niet blokkerend), bijvoorbeeld: "Bot 2 gooide 7 · +3 munten · kocht een ster!"
-- Een **turboknop** (⏩) die altijd zichtbaar is: de bots worden dan **direct** afgehandeld, zonder animatie.
-- **Mensen:** één tik om te dobbelen. Het lopen gaat snel (ongeveer 150 ms per vakje), en met een tik op het scherm gaat het nog sneller. Keuzes maak je met grote knoppen.
+- **Botbeurt in ≤ 2 seconden:** een korte aankondiging ("Beurt van Bot 1", ±0,6 s), dan dobbelsteen, lopen (ongeveer 80 ms per vakje) en alle keuzes direct. Er hoeft niets bevestigd te worden.
+- **Na een botbeurt** blijft de melding met wat er gebeurd is in beeld, bijvoorbeeld "Bot 2 gooide 7 · +3 munten · kocht een ster!", met de hint "Tik om verder te gaan · Volgende: Bot 1". Pas na een tik begint de volgende beurt, ook als dat een mens is. Zo zie je wat de bots deden.
+- Een **turboknop** (⏩) die altijd zichtbaar is: de bots worden dan **direct** afgehandeld, zonder animatie en zonder te wachten op een tik.
+- **Mensen:**
+  - Een beurt begint met een aankondiging: de camera staat op je figuur, je figuur staat groot links in beeld en over het midden loopt een brede, licht schuine band: "Jouw beurt, Floris!". Tik om verder te gaan.
+  - Daarna komt het **keuzemenu** (zie §13): Dobbelen, Items of Bord bekijken.
+  - Het lopen gaat snel (ongeveer 150 ms per vakje), en met een tik op het scherm gaat het nog sneller. Keuzes maak je met grote knoppen.
 - De host en zijn gebrabbel zijn kort, en elke tekstballon kun je wegtikken.
 - Er zijn geen onnodige "Weet je het zeker?"-schermen, behalve bij het invoeren van de uitslag en bij "Nieuw spel" (want dan wordt het oude spel overschreven).
 
@@ -280,6 +287,11 @@ Daarna maakt de host de winnaar bekend. Tot slot volgt een kort statistiekensche
 1. **Hoofdmenu:** Verder spelen (alleen als er een opgeslagen spel is), Nieuw spel, Instellingen.
 2. **Nieuw spel:** het aantal rondes, het seizoen, 4 deelnemers (naam, figuur, mens of bot) en bonussterren aan/uit.
 3. **Bord:** het grootste deel van het scherm. Bovenin staat een balk met de 4 spelers: figuur, sterren, munten, items en de huidige plaats. Verder is er een rondeteller ("Ronde 3/10 · ☀️"), de turboknop en een menuknop.
+   - **Keuzemenu aan het begin van je beurt:** je figuur staat groot linksonder, met je sterren en munten. Ernaast staan drie grote, licht schuine knoppen onder elkaar:
+     - **Dobbelen** staat bovenaan en is opgelicht als standaardkeuze. Je gaat naar het dobbelscherm; een gekozen item zie je daar (bijvoorbeeld twee blokken bij de dubbele dobbelsteen). Items kies je niet meer in het dobbelscherm, alleen in dit menu.
+     - **Items** laat je items als kleine icoontjes zien, ook op de knop zelf, en is grijs als je geen items hebt. Er opent een paneel met je items (hoogstens 3), elk met icoon, naam, korte uitleg en een knop "Gebruik". Daarna ga je terug naar het menu, met het gekozen item op de knop Dobbelen. Zolang je nog niet gedobbeld hebt, kun je het item weer annuleren. Hoogstens één item per beurt.
+     - **Bord bekijken:** het menu schuift weg en je kunt vrij over het bord bewegen (schuiven met één vinger, zoomen met twee vingers). Je ziet waar iedereen staat, waar de ster staat, en waar de winkel, de Nachtwinkel, Ratje en de valstrikken zijn. Bovenin staat hoeveel vakjes de ster van je af ligt (bij ochtendmist niet). "Terug" brengt de camera naar je figuur en opent het menu weer.
+   - Het bord blijft op de achtergrond zichtbaar.
 4. **Minigame-uitslag:** de 4 figuren, die je in volgorde van finish aantikt.
 5. **Eindspel en uitslag.**
 

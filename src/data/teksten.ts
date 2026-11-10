@@ -10,6 +10,16 @@ export const teksten = {
     'Hoi hoi! Pommie hier. Pak je munten, we gaan rond de plas!',
     'Welkom, welkom! Wie haalt vandaag de meeste sterren?',
   ],
+  /** De startworp (§2). */
+  startworp: [
+    'Eerst de startworp! Wie het hoogst gooit, mag beginnen!',
+    'Iedereen gooit één keer. Wie het hoogst gooit, mag beginnen!',
+  ],
+  /** Bij de startworp gooiden spelers hetzelfde. */
+  startworpGelijk: [
+    'Gelijk! {naam} gooien opnieuw.',
+    'Oei, dezelfde worp! {naam} gooien nog een keer.',
+  ],
   minigame: [
     'Speel nu een minigame op de Switch! Kies er een voor 4 spelers.',
     'Minigame! Pak de controllers en kies een spel voor 4 spelers.',

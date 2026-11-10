@@ -1187,3 +1187,195 @@
 .instelling-tekst { flex: 1; display: flex; flex-direction: column; gap: 2px; }
 .instelling-tekst span { font-family: var(--kp-font-kop); font-weight: 600; font-size: 22px; }
 .instelling-tekst small { font-weight: 700; font-size: 14px; color: var(--kp-inkt-2); }
+
+/* ================================================================ na een botbeurt: tik om verder te gaan (§11) */
+.tik-vanger { position: absolute; inset: 0; }
+.bot-melding.wacht { flex-wrap: wrap; justify-content: center; border-radius: 30px; padding: 8px 20px 10px 8px; row-gap: 6px; max-width: calc(100vw - 40px); }
+.bot-melding-hint {
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 16px;
+  color: #FFE27A;
+  animation: hint-knipper 1.4s ease-in-out infinite;
+}
+.bot-melding-tik { width: 12px; height: 12px; border-radius: 50%; background: #FFE27A; box-shadow: 0 0 0 4px rgb(255 226 122 / .35); }
+@keyframes hint-knipper { 50% { opacity: .65; } }
+
+/* ================================================================ beurt-aankondiging en keuzemenu (§11, §13)
+   Niet in de design-map; gebouwd in de Feestvilt-stijl: vilt, witte randen, Fredoka, schuine banners. */
+.beurt-aankondiging, .beurt-menu { position: absolute; inset: 0; animation: overlay-in 180ms ease-out; }
+.beurt-aankondiging { background: rgb(18 14 40 / .25); }
+.beurt-aankondiging.is-bot { pointer-events: none; background: none; }
+.beurt-aankondiging.weg, .beurt-menu.weg { opacity: 0; transition: opacity 160ms ease-in; }
+.beurt-menu { pointer-events: none; }
+.beurt-menu > * { pointer-events: auto; }
+
+.beurt-figuur {
+  position: absolute;
+  left: calc(10px + var(--veilig-links));
+  bottom: calc(8px + var(--veilig-onder));
+  width: 300px;
+  height: min(440px, 62vh);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  animation: figuur-in 280ms cubic-bezier(.2,.9,.3,1.2);
+}
+.is-bot .beurt-figuur { width: 220px; height: min(320px, 46vh); }
+.beurt-figuur-gloed { position: absolute; left: 10%; right: 10%; bottom: 40px; height: 60%; border-radius: 50%; background: radial-gradient(closest-side, var(--kleur-licht), transparent); opacity: .9; }
+.beurt-figuur-plaatje { position: relative; width: 100%; flex: 1; min-height: 0; object-fit: contain; object-position: 50% 100%; }
+.beurt-figuur-plaatje.handgetekend { filter: drop-shadow(0 0 2px #FFFFFF) drop-shadow(0 0 2px #FFFFFF) drop-shadow(0 6px 6px rgb(43 29 20 / .35)); }
+.beurt-figuur-plaatje.pion { width: 70%; }
+@keyframes figuur-in { from { transform: translateX(-120px); opacity: 0; } }
+.beurt-stand {
+  position: relative;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 18px;
+  background-color: var(--kp-vilt);
+  border: 4px solid #FFFFFF;
+  border-radius: var(--kp-r-pil);
+  box-shadow: var(--kp-schaduw-paneel);
+  font-family: var(--kp-font-kop);
+}
+.beurt-stand b { font-weight: 700; font-size: 22px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.beurt-stand span { display: flex; align-items: center; gap: 4px; font-weight: 700; font-size: 24px; }
+
+.beurt-band {
+  position: absolute;
+  left: -40px;
+  right: -40px;
+  top: 50%;
+  translate: 0 -50%;
+  rotate: -4deg;
+  padding: 26px 40px 22px 340px;
+  background-color: var(--kleur, var(--kp-pompoen));
+  border-top: 6px solid #FFFFFF;
+  border-bottom: 6px solid #FFFFFF;
+  box-shadow: 0 10px 0 rgb(43 29 20 / .18), 0 20px 40px rgb(43 29 20 / .25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  animation: band-in 320ms cubic-bezier(.2,.9,.3,1.1);
+}
+.is-bot .beurt-band { padding: 16px 40px 14px 260px; }
+.beurt-band-tekst { font-family: var(--kp-font-kop); font-weight: 700; font-size: 64px; line-height: 1.05; color: #FFFFFF; text-shadow: 0 4px 0 rgb(0 0 0 / .18); white-space: nowrap; }
+.is-bot .beurt-band-tekst { font-size: 44px; }
+.beurt-band-hint { font-family: var(--kp-font-kop); font-weight: 600; font-size: 20px; color: rgb(255 255 255 / .85); }
+@keyframes band-in { from { transform: translateX(110%); } }
+
+.beurt-knoppen {
+  position: absolute;
+  left: calc(320px + var(--veilig-links));
+  bottom: calc(40px + var(--veilig-onder));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: knoppen-in 260ms cubic-bezier(.2,.9,.3,1.1);
+}
+@keyframes knoppen-in { from { transform: translateX(-60px); opacity: 0; } }
+.beurt-knop {
+  --knop-kleur: #FFFFFF;
+  --knop-schaduw: var(--kp-vilt-d);
+  --knop-tekst: var(--kp-inkt);
+  width: 380px;
+  min-height: 96px;
+  padding: 0;
+  border: 4px solid #FFFFFF;
+  border-radius: 26px;
+  background: var(--knop-kleur);
+  box-shadow: 0 7px 0 var(--knop-schaduw), 0 14px 24px rgb(43 29 20 / .22);
+  color: var(--knop-tekst);
+  transform: skewX(-8deg);
+  cursor: pointer;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+}
+.beurt-knop:active { transform: skewX(-8deg) translateY(5px); box-shadow: 0 2px 0 var(--knop-schaduw), 0 6px 12px rgb(43 29 20 / .2); }
+.beurt-knop-binnen { display: flex; align-items: center; gap: 16px; padding: 12px 22px; transform: skewX(8deg); }
+.beurt-knop-icoon { width: 56px; height: 56px; border-radius: 50%; background: rgb(255 255 255 / .9); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.beurt-knop-tekst { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+.beurt-knop-titel { font-family: var(--kp-font-kop); font-weight: 700; font-size: 32px; line-height: 1.05; }
+.beurt-knop-onder { font-family: var(--kp-font-tekst); font-weight: 800; font-size: 15px; opacity: .8; }
+.beurt-dobbelen { --knop-kleur: var(--kp-pompoen); --knop-schaduw: var(--kp-pompoen-d); --knop-tekst: #FFFFFF; width: 420px; min-height: 110px; animation: opgelicht 1.6s ease-in-out infinite; }
+.beurt-dobbelen .beurt-knop-titel { font-size: 40px; }
+@keyframes opgelicht { 0%, 100% { box-shadow: 0 7px 0 var(--kp-pompoen-d), 0 0 0 0 rgb(255 201 40 / .0), 0 14px 24px rgb(43 29 20 / .22); } 50% { box-shadow: 0 7px 0 var(--kp-pompoen-d), 0 0 0 8px rgb(255 201 40 / .55), 0 14px 24px rgb(43 29 20 / .22); } }
+.beurt-items { --knop-kleur: var(--kp-blauw); --knop-schaduw: var(--kp-blauw-d); --knop-tekst: #FFFFFF; }
+.beurt-knop:disabled { --knop-kleur: #E4DCCF; --knop-schaduw: #C9BCA8; --knop-tekst: #8C7B6A; cursor: default; }
+.beurt-knop:disabled:active { transform: skewX(-8deg); }
+.beurt-knop:disabled .beurt-knop-icoon { opacity: .6; }
+.beurt-knop-zak { display: flex; gap: 6px; }
+.beurt-knop-zak .item-icoon { background: #FFFFFF; border-radius: 50%; padding: 3px; box-sizing: content-box; }
+.beurt-knop-item { display: flex; align-items: center; gap: 6px; font-family: var(--kp-font-kop); font-weight: 600; font-size: 17px; background: rgb(255 255 255 / .25); border-radius: var(--kp-r-pil); padding: 2px 12px 2px 3px; }
+.beurt-knop-item .item-icoon { background: #FFFFFF; border-radius: 50%; }
+.beurt-kruis { font-family: var(--kp-font-kop); font-weight: 700; font-size: 40px; line-height: 1; color: var(--kp-blauw-d); }
+
+/* Bord bekijken */
+.bord-bekijken { position: absolute; inset: 0; pointer-events: none !important; }
+.bord-bekijken > * { pointer-events: auto; }
+.bord-bekijken-kop {
+  position: absolute;
+  left: 50%;
+  top: calc(116px + var(--veilig-boven));
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px 10px 14px;
+  background-color: var(--kp-vilt);
+  border: 4px solid #FFFFFF;
+  border-radius: var(--kp-r-pil);
+  box-shadow: var(--kp-schaduw-paneel);
+  font-family: var(--kp-font-kop);
+  font-weight: 700;
+  font-size: 24px;
+  white-space: nowrap;
+}
+.bord-bekijken-hint { position: absolute; left: 50%; bottom: calc(30px + var(--veilig-onder)); translate: -50% 0; pointer-events: none !important; }
+.bord-bekijken-hint { background: rgb(43 29 20 / .78); color: #FFFFFF; font-family: var(--kp-font-kop); font-weight: 600; font-size: 18px; padding: 8px 18px; border-radius: var(--kp-r-pil); white-space: nowrap; }
+.bord-bekijken-terug { position: absolute; right: calc(24px + var(--veilig-rechts)); bottom: calc(24px + var(--veilig-onder)); }
+.bord.vrij { touch-action: none; cursor: grab; }
+.bekijk-label { background: #2B1D14 !important; color: #FFE27A !important; z-index: 1600; }
+
+/* Je items (keuzemenu) */
+.items-overlay .winkel-kaarten.aantal-1 { grid-template-columns: minmax(0, 260px); justify-content: center; }
+.items-overlay .winkel-kaarten.aantal-2 { grid-template-columns: repeat(2, minmax(0, 260px)); justify-content: center; }
+.items-overlay .winkel-kaarten.aantal-3 { grid-template-columns: repeat(3, minmax(0, 280px)); justify-content: center; }
+
+/* Startworp in het dobbelscherm, en de startvolgorde (§2) */
+.dobbel-startuitleg { margin: 0; font-weight: 800; font-size: 16px; color: var(--kp-inkt-2); line-height: 1.35; }
+.dobbel-verder { animation: hint-knipper 1.4s ease-in-out infinite; }
+.startvolgorde-paneel { border: 4px solid #FFFFFF; border-radius: 34px; padding: 26px 30px 28px; display: flex; flex-direction: column; align-items: center; gap: 10px; animation: uitslag-in 200ms ease-out; }
+.startvolgorde-titel { margin: 0; font-family: var(--kp-font-kop); font-weight: 700; font-size: 38px; }
+.startvolgorde-uitleg { margin: 0 0 8px; font-weight: 800; font-size: 17px; color: var(--kp-inkt-2); }
+.startvolgorde-rij { display: flex; gap: 16px; }
+.startvolgorde-kaart {
+  position: relative;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 18px 10px 14px;
+  background: #FFFFFF;
+  border: 4px solid var(--kleur);
+  border-radius: 26px;
+  box-shadow: 0 6px 0 #E3CFAE;
+  font-family: var(--kp-font-kop);
+  animation: uitslag-in 260ms ease-out both;
+}
+.startvolgorde-plaats { position: absolute; left: -12px; top: -12px; width: 50px; height: 50px; font-size: 20px; }
+.startvolgorde-figuur { width: 120px; height: 120px; border-radius: 22px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.startvolgorde-plaatje.handgetekend { width: 108px; height: 108px; object-fit: contain; filter: none; }
+.startvolgorde-plaatje.pion { width: 70px; height: 91px; object-fit: contain; }
+.startvolgorde-naam { font-weight: 700; font-size: 22px; }
+.startvolgorde-worp { font-weight: 600; font-size: 15px; color: var(--kp-inkt-2); }
+.startvolgorde-start { margin-top: 12px; }
+/* Het figuur staat vóór de band, zodat zijn hoofd erbovenuit komt. */
+.beurt-aankondiging .beurt-figuur { z-index: 2; }

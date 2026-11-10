@@ -8,7 +8,7 @@ import type { Bord, VakjeType } from '../logic/bord';
 import { vakje } from '../logic/bord';
 import type { Figuur } from '../data/figuren';
 import { asset, plaatje } from '../ui/asset';
-import { cameraOp, cameraOverzicht, type Afmeting, type CameraStand } from './camera';
+import { cameraOp, cameraOverzicht, vrijeCamera, type Afmeting, type CameraStand } from './camera';
 import { diepteSchaal, vakjeMaat } from './diepte';
 import { vakjesSvg } from './vakjes';
 import { SPRITES, VILT_FILTER } from './vakjeTekeningen';
@@ -362,6 +362,73 @@ export class BordWeergave {
   overzicht(duurMs = 600): void {
     this.doel.punt = null;
     this.zetCamera(cameraOverzicht(this.scherm(), this.bord), duurMs);
+  }
+
+  /**
+   * "Bord bekijken": schuiven met één vinger, zoomen met twee (en met het muiswiel). `labels` zijn
+   * extra bordjes die alleen dan te zien zijn (zoals de Nachtwinkel). Geeft een stop-functie terug.
+   */
+  vrijBekijken(labels: { x: number; y: number; tekst: string }[] = []): () => void {
+    this.doel.punt = null;
+    const vingers = new Map<number, [number, number]>();
+    let vorig: { midden: [number, number]; afstand: number } | null = null;
+    const punt = (e: PointerEvent): [number, number] => {
+      const r = this.el.getBoundingClientRect();
+      return [e.clientX - r.left, e.clientY - r.top];
+    };
+    const stand = () => {
+      const p = [...vingers.values()];
+      const midden: [number, number] = [p.reduce((a, q) => a + q[0], 0) / p.length, p.reduce((a, q) => a + q[1], 0) / p.length];
+      const afstand = p.length > 1 ? Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]) : 0;
+      return { midden, afstand };
+    };
+    const neer = (e: PointerEvent) => {
+      this.el.setPointerCapture(e.pointerId);
+      vingers.set(e.pointerId, punt(e));
+      vorig = stand();
+    };
+    const beweeg = (e: PointerEvent) => {
+      if (!vingers.has(e.pointerId) || !vorig) return;
+      vingers.set(e.pointerId, punt(e));
+      const nu = stand();
+      const factor = nu.afstand && vorig.afstand ? nu.afstand / vorig.afstand : 1;
+      this.zetCamera(vrijeCamera(this.cam, this.scherm(), this.bord, vorig.midden, nu.midden, factor), 0);
+      vorig = nu;
+    };
+    const op = (e: PointerEvent) => {
+      vingers.delete(e.pointerId);
+      vorig = vingers.size ? stand() : null;
+    };
+    const wiel = (e: WheelEvent) => {
+      e.preventDefault();
+      const r = this.el.getBoundingClientRect();
+      const p: [number, number] = [e.clientX - r.left, e.clientY - r.top];
+      this.zetCamera(vrijeCamera(this.cam, this.scherm(), this.bord, p, p, Math.exp(-e.deltaY / 400)), 0);
+    };
+    this.el.classList.add('vrij');
+    this.el.addEventListener('pointerdown', neer);
+    this.el.addEventListener('pointermove', beweeg);
+    this.el.addEventListener('pointerup', op);
+    this.el.addEventListener('pointercancel', op);
+    this.el.addEventListener('wheel', wiel, { passive: false });
+    const bordjes = labels.map((l) => {
+      const el = document.createElement('div');
+      el.className = 'bord-label bekijk-label';
+      el.textContent = l.tekst;
+      el.style.left = `${l.x}px`;
+      el.style.top = `${l.y}px`;
+      this.spriteLaag.append(el);
+      return el;
+    });
+    return () => {
+      this.el.classList.remove('vrij');
+      this.el.removeEventListener('pointerdown', neer);
+      this.el.removeEventListener('pointermove', beweeg);
+      this.el.removeEventListener('pointerup', op);
+      this.el.removeEventListener('pointercancel', op);
+      this.el.removeEventListener('wheel', wiel);
+      bordjes.forEach((b) => b.remove());
+    };
   }
 
   /** Opnieuw uitrekenen na draaien of een ander schermformaat. */

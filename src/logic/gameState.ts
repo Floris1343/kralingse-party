@@ -70,6 +70,10 @@ export type EindspelRegel = 'munten20' | 'extraSter' | 'goedkopeSter' | 'eeuwige
 
 /** Waar het spel op wacht. Het scherm toont de knoppen die bij de fase horen. */
 export type Fase =
+  /** De startworp (§2): `teGooien` = wie er dit rondje nog moet gooien (de eerste is aan de beurt). */
+  | { soort: 'startworp'; teGooien: number[] }
+  /** De volgorde ligt vast; het spel wacht op "Start!". */
+  | { soort: 'startVolgorde' }
   /**
    * De speler die aan zet is, mag eerst één item gebruiken en moet dan dobbelen.
    * `gebruikt` = het item dat deze beurt al gebruikt is (dubbele dobbelsteen enz.).
@@ -111,6 +115,9 @@ export type KansActie = 'geef10' | 'geef20' | 'ruilMunten' | 'geefSter' | 'ruilS
 
 /** Wat er net gebeurd is, voor meldingen als "Bot 2 gooide 7 · +3 munten". */
 export type Gebeurtenis =
+  | { soort: 'startworp'; speler: number; waarde: number }
+  /** Bij de startworp gooiden deze spelers hetzelfde: zij gooien opnieuw. */
+  | { soort: 'startworpGelijk'; spelers: number[] }
   /** `worpen` = de losse worpen (meer dan één met een dubbele dobbelsteen); `gekozen` = Kies-je-worp. */
   | { soort: 'worp'; speler: number; waarde: number; worpen: number[]; gekozen?: boolean }
   | { soort: 'munten'; speler: number; verschil: number; reden: MuntReden }
@@ -157,8 +164,11 @@ export interface GameState {
   instellingen: Instellingen;
   /** In de volgorde van het opstartscherm (Bot 1 blijft dus speler-index 2, enz.). */
   spelers: Speler[];
-  /** De worp van elke speler bij de start (index = speler). */
-  startworpen: number[];
+  /**
+   * De startworpen van elke speler (index = speler): de eerste worp, en bij gelijkspel de worpen
+   * erna (§2).
+   */
+  startworpen: number[][];
   /** Beurtvolgorde: speler-indexen, hoogste startworp eerst. */
   volgorde: number[];
   /** Positie in `volgorde` van wie er aan zet is. */

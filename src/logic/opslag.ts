@@ -1,7 +1,7 @@
 import type { GameState } from './gameState';
 
 /** Verhoog dit als de vorm van GameState verandert. */
-export const OPSLAG_VERSIE = 4;
+export const OPSLAG_VERSIE = 5;
 export const OPSLAG_SLEUTEL = 'kralingse-plas-party/spel';
 
 interface Opgeslagen {
@@ -28,8 +28,9 @@ export function laad(opslag: Opslag): GameState | null {
   try {
     const data = JSON.parse(ruw) as Opgeslagen;
     if (!data?.state || !Array.isArray(data.state.spelers)) return null;
-    if (data.versie === 2) return vanVersie3(vanVersie2(data.state));
-    if (data.versie === 3) return vanVersie3(data.state);
+    if (data.versie === 2) return vanVersie4(vanVersie3(vanVersie2(data.state)));
+    if (data.versie === 3) return vanVersie4(vanVersie3(data.state));
+    if (data.versie === 4) return vanVersie4(data.state);
     if (data.versie !== OPSLAG_VERSIE) return null;
     return data.state;
   } catch {
@@ -55,6 +56,14 @@ function vanVersie3(state: GameState): GameState {
     sp.slak ??= false;
     sp.achteruit ??= false;
   }
+  return s;
+}
+
+/** Een spel uit stap 6/7 (versie 4): de startworp was één getal per speler, nu een lijstje. */
+function vanVersie4(state: GameState): GameState {
+  const s = structuredClone(state);
+  const oud = s.startworpen as unknown as (number | number[])[];
+  s.startworpen = oud.map((w) => (Array.isArray(w) ? w : [w]));
   return s;
 }
 

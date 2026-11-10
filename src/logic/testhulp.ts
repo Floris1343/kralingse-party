@@ -9,6 +9,7 @@ import type { AantalRondes, GameState } from './gameState';
 import { verwerkMinigame, type MinigameUitslag } from './minigame';
 import { nieuwSpel, type NieuwSpelKeuzes } from './nieuwSpel';
 import { metKopie, trek } from './regels';
+import { gooiStartworp, startSpel } from './startworp';
 
 export const bord = maakTestbord();
 
@@ -39,9 +40,16 @@ export function alleBots(): NieuwSpelKeuzes['spelers'] {
   return keuzes().spelers.map((sp) => ({ ...sp, isBot: true }));
 }
 
-/** Een nieuw spel met een vaste seed, eventueel met aanpassingen. */
+/** Gooit de hele startworp en tikt op "Start!". */
+export function naStartworp(state: GameState): GameState {
+  let s = state;
+  while (s.fase.soort === 'startworp') s = gooiStartworp(s);
+  return s.fase.soort === 'startVolgorde' ? startSpel(s) : s;
+}
+
+/** Een nieuw spel met een vaste seed (de startworp is al gegooid), eventueel met aanpassingen. */
 export function spel(over: Partial<NieuwSpelKeuzes> = {}, seed = 1): GameState {
-  return nieuwSpel(bord, keuzes(over), seed);
+  return naStartworp(nieuwSpel(bord, keuzes(over), seed));
 }
 
 /** Past een state aan voor een test (op een kopie). */
@@ -86,6 +94,12 @@ export function speelUit(
   const staten: GameState[] = [s];
   for (let i = 0; i < maxActies && s.fase.soort !== 'einde'; i++) {
     switch (s.fase.soort) {
+      case 'startworp':
+        s = gooiStartworp(s);
+        break;
+      case 'startVolgorde':
+        s = startSpel(s);
+        break;
       case 'minigame': {
         const [uitslag, na] = willekeurigeUitslag(s);
         s = verwerkMinigame(na, uitslag, b);

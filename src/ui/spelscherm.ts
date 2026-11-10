@@ -9,7 +9,7 @@ import { zeg } from '../data/teksten';
 import {
   BOOT_PRIJS, botActie, bewaar, dobbelen, draaiEindspelRad, gebruikItem, nachtTypen, nachtwinkelKeuze, ratjeKeuze,
   spelerAanZet, splitsingKeuze, stap, sterKeuze, sterPrijs, verwerkMinigame, wachtOpBot, winkelKeuze, zichtbareSterren,
-  EINDSPEL_REGELS, plaatsen, type EindspelRegel, type GameState, type Gebeurtenis, type Splitsing,
+  EINDSPEL_REGELS, plaatsen, annuleerItem, gooiStartworp, heeftDoel, startSpel, startwerper, stappenTotSter, type EindspelRegel, type GameState, type Gebeurtenis, type Splitsing,
 } from '../logic';
 import { BordWeergave } from '../render/bordWeergave';
 import { asset } from './asset';
@@ -22,7 +22,9 @@ import { Spelersbalk } from './spelersbalk';
 import { EINDSPEL_VAKKEN, meldingDelen } from './uitkomsten';
 import { muntGeluid, sterGeluid } from '../audio/geluid';
 import { pommieZegt } from './pommie';
-import { vraagItemDoel, vraagNachtwinkel, vraagRatje, vraagWinkel } from './winkelScherm';
+import { vraagItem, vraagItemDoel, vraagNachtwinkel, vraagRatje, vraagWinkel } from './winkelScherm';
+import { toonAankondiging, toonBordBekijken, vraagMenuKeuze } from './beurtMenu';
+import { toonStartvolgorde } from './startvolgorde';
 
 const wacht = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 const TURBO_SLEUTEL = 'kralingse-plas-party/turbo';
@@ -32,6 +34,8 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
   let actief = true;
   let snel = false;
   let turbo = localStorage.getItem(TURBO_SLEUTEL) === 'aan';
+  /** Wacht het spel op een tik na een botbeurt? Dan gaat deze functie door. */
+  let wachtOpTik: (() => void) | null = null;
 
   const scherm = maak('main', 'spelscherm');
   const weergave = new BordWeergave(
@@ -46,6 +50,8 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       turbo = !turbo;
       localStorage.setItem(TURBO_SLEUTEL, turbo ? 'aan' : 'uit');
       balk.zetTurbo(turbo);
+      // Turbo aan terwijl we op een tik wachten: dan meteen door.
+      if (turbo) wachtOpTik?.();
     },
     menu: stop,
   });
@@ -128,8 +134,12 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
   /** Pommie met een tekstballon en gebrabbel; tik om weg te halen. */
   const pommie = (tekst: string) => pommieZegt(laag, tekst);
 
-  /** Korte melding bovenin (niet blokkerend), zoals "Bot 2 gooide 7 · +3 munten · kocht een ster!". */
-  function melding(spelerIdx: number) {
+  /**
+   * De melding bovenin, zoals "Bot 2 gooide 7 · +3 munten · kocht een ster!" (§11). Met
+   * `volgende` blijft hij staan tot iemand tikt, met de hint "Tik om verder te gaan · Volgende: …";
+   * zonder `volgende` verdwijnt hij na ongeveer 1,5 seconde.
+   */
+  function melding(spelerIdx: number, volgende?: string): Promise<void> {
     const f = figuur(s.spelers[spelerIdx].figuur);
     hud.querySelector('.bot-melding')?.remove();
     const el = maak('div', 'bot-melding');
@@ -142,6 +152,27 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       span.append(deel.tekst);
       el.append(span);
     });
+    if (volgende !== undefined) {
+      const hint = maak('div', 'bot-melding-hint');
+      hint.innerHTML = `<span class="bot-melding-tik"></span><span></span>`;
+      hint.lastElementChild!.textContent = `Tik om verder te gaan · Volgende: ${volgende}`;
+      el.classList.add('wacht');
+      el.append(hint);
+      hud.append(el);
+      // Een tik waar dan ook gaat door. De vanger ligt onder de spelersbalk, zodat de turboknop werkt.
+      const vanger = maak('div', 'tik-vanger');
+      hud.prepend(vanger);
+      return new Promise((r) => {
+        const door = () => {
+          wachtOpTik = null;
+          vanger.remove();
+          el.remove();
+          r();
+        };
+        wachtOpTik = door;
+        vanger.addEventListener('pointerdown', door, { once: true });
+      });
+    }
     // Ongeveer 1,5 s; een langere melding blijft iets langer staan.
     const duur = el.querySelectorAll('.bot-melding-deel').length > 3 ? 2200 : 1500;
     const balkje = maak('div', 'bot-melding-balk');
@@ -149,7 +180,12 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
     el.append(balkje);
     hud.append(el);
     setTimeout(() => el.remove(), duur);
+    return Promise.resolve();
   }
+
+  /** Wie er na deze beurt aan de beurt is: een naam, of "Minigame". */
+  const volgendeNaam = () =>
+    s.fase.soort === 'minigame' ? 'Minigame' : s.fase.soort === 'eindspelRad' || s.fase.soort === 'einde' ? 'Minigame' : s.spelers[spelerAanZet(s)].naam;
 
   const posities = () => s.spelers.map((sp) => sp.vakje);
 
@@ -235,16 +271,18 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       weergave.boven(speler, null);
       const verslag = s.verslag;
       if (!turbo) weergave.plaatsFiguren(landingsPosities(), -1, 80);
-      melding(speler);
+      // Met turbo verdwijnt de melding vanzelf; anders blijft hij staan tot iemand tikt.
+      const klaar = melding(speler, turbo ? undefined : volgendeNaam());
       await toonGevolgen(speler, verslag, false);
       weergave.plaatsFiguren(posities(), -1, turbo ? 0 : 80);
+      await klaar;
     };
     if (turbo) {
       while (bezig()) zet(botActie(s, BORD)!);
       return naBeurt();
     }
     weergave.volgSpeler(speler, 300);
-    await wacht(300);
+    await toonAankondiging(laag, s, speler);
     // Eventueel een item, dan dobbelen.
     while (bezig() && s.fase.soort === 'dobbelen') {
       zet(botActie(s, BORD)!);
@@ -262,30 +300,108 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       await toonStap(speler, 80);
     }
     await naBeurt();
-    if (!turbo) await wacht(250);
   }
 
-  /** Het dobbelscherm voor een mens, met items. Na de Ratjebel komt eerst Ratje, daarna weer het dobbelscherm. */
-  async function mensDobbelt(speler: number) {
-    for (;;) {
-      const einde = await toonDobbelscherm(laag, speler, {
-        state: () => s,
-        kiesDoel: (item) => vraagItemDoel(laag, s, speler, item),
-        gebruik: (item, doel) => {
-          zet(gebruikItem(s, item, doel));
-          if (item === 'wisseltruc') {
-            weergave.plaatsFiguren(posities(), speler, 400);
-            weergave.volgSpeler(speler, 400);
-          }
-        },
-        gooi: (gekozen) => {
-          zet(dobbelen(s, gekozen));
-          const w = s.verslag.find((g) => g.soort === 'worp');
-          return w && w.soort === 'worp' ? w.worpen : [];
-        },
-      });
-      if (einde === 'gegooid' || !actief) return;
+  /**
+   * Het begin van een mensenbeurt (§11, §13): "Jouw beurt, Floris!", daarna het keuzemenu.
+   * Items kies je in het menu; Dobbelen gaat naar het dobbelscherm.
+   */
+  async function mensBeurtBegin(speler: number) {
+    await toonAankondiging(laag, s, speler);
+    while (actief && s.fase.soort === 'dobbelen') {
+      const keuze = await vraagMenuKeuze(laag, s, speler);
+      if (!actief) return;
+      if (keuze === 'dobbelen') {
+        await mensDobbelt(speler);
+        return;
+      }
+      if (keuze === 'annuleer') zet(annuleerItem(s));
+      else if (keuze === 'items') await kiesItem(speler);
+      else await bordBekijken(speler);
+    }
+  }
+
+  /** Het itempaneel: een item kiezen (met een speler erbij voor een gemeen item). */
+  async function kiesItem(speler: number) {
+    const item = await vraagItem(laag, s, speler);
+    if (!item || !actief) return;
+    let doel: number | undefined;
+    if (heeftDoel(item)) {
+      const d = await vraagItemDoel(laag, s, speler, item);
+      if (d === null) return;
+      doel = d;
+    }
+    zet(gebruikItem(s, item, doel));
+    if (item === 'wisseltruc') {
+      weergave.plaatsFiguren(posities(), speler, 400);
+      weergave.volgSpeler(speler, 400);
+      await wacht(450);
+    } else if (item === 'ratjebel' && s.fase.soort === 'ratje') {
       zet(ratjeKeuze(s, BORD, await vraagRatje(laag, s, speler)));
+    } else if (heeftDoel(item) || item === 'valstrik') {
+      // Laat even zien wat het gemene item deed.
+      await melding(speler);
+    }
+  }
+
+  /** Bord bekijken: vrij schuiven en zoomen; "Terug" zet de camera weer op je figuur. */
+  async function bordBekijken(speler: number) {
+    weergave.overzicht(400);
+    const p = BORD.plekken;
+    const stopVrij = weergave.vrijBekijken([
+      { x: p.winkel.x, y: p.winkel.y, tekst: s.nacht ? 'Winkel · dicht' : 'Winkel · open' },
+      { x: p.nachtwinkel.x, y: p.nachtwinkel.y, tekst: s.nacht ? 'Nachtwinkel · open' : 'Nachtwinkel · dicht' },
+      { x: p.ratje.x, y: p.ratje.y, tekst: 'Ratje' },
+    ]);
+    const afstand = s.mist ? null : stappenTotSter(s, BORD, s.spelers[speler].vakje);
+    await toonBordBekijken(laag, afstand === null || Number.isFinite(afstand) ? afstand : null);
+    stopVrij();
+    weergave.volgSpeler(speler, 450);
+    await wacht(450);
+  }
+
+  /** Het dobbelscherm voor een mens. Met een gekozen dobbel-item zie je dat daar (twee blokken enz.). */
+  async function mensDobbelt(speler: number) {
+    await toonDobbelscherm(laag, speler, {
+      state: () => s,
+      gooi: (gekozen) => {
+        zet(dobbelen(s, gekozen));
+        const w = s.verslag.find((g) => g.soort === 'worp');
+        return w && w.soort === 'worp' ? w.worpen : [];
+      },
+    });
+  }
+
+  /**
+   * De startworp (§2): Pommie legt het uit, iedereen gooit om de beurt in het dobbelscherm
+   * (bots vanzelf, daarna tik je door), bij gelijk gooien alleen die opnieuw. Daarna de volgorde.
+   */
+  async function startworpen() {
+    weergave.overzicht(0);
+    if (!s.verslag.some((g) => g.soort === 'startworp')) await pommie(zeg('startworp'));
+    while (actief && s.fase.soort === 'startworp') {
+      const speler = startwerper(s);
+      const sp = s.spelers[speler];
+      const opnieuw = s.startworpen[speler].length > 0;
+      await toonDobbelscherm(laag, speler, {
+        state: () => s,
+        gooi: () => {
+          zet(gooiStartworp(s));
+          return [s.startworpen[speler].at(-1)!];
+        },
+      }, {
+        titel: opnieuw ? 'Startworp · opnieuw gooien' : 'Startworp · wie het hoogst gooit, begint',
+        vanzelf: sp.isBot,
+        uitslag: (w) => `${sp.naam} gooide ${w}`,
+      });
+      const gelijk = s.verslag.at(-1);
+      if (actief && gelijk?.soort === 'startworpGelijk') {
+        await pommie(zeg('startworpGelijk', namenLijst(gelijk.spelers.map((i) => s.spelers[i].naam))));
+      }
+    }
+    if (actief && s.fase.soort === 'startVolgorde') {
+      await toonStartvolgorde(laag, s);
+      zet(startSpel(s));
     }
   }
 
@@ -417,6 +533,10 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
     while (actief) {
       const soort = s.fase.soort;
       if (soort === 'einde') return einde(zojuistAfgelopen);
+      if (soort === 'startworp' || soort === 'startVolgorde') {
+        await startworpen();
+        continue;
+      }
       if (soort === 'minigame') {
         await minigame();
         continue;
@@ -435,7 +555,8 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
         weergave.volgSpeler(speler, 400);
         await wacht(400);
         if (!actief) return;
-        await mensDobbelt(speler);
+        await mensBeurtBegin(speler);
+        if (!actief || !beurtBezig()) continue;
         toonTeller(speler, resterend());
         await wacht(250);
       } else {
@@ -451,9 +572,10 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
 
   // ------------------------------------------------------------------ start
   tekenBord(0);
-  weergave.plaatsFiguren(posities(), s.fase.soort === 'minigame' ? -1 : spelerAanZet(s), 0);
+  const geenBeurt = ['minigame', 'startworp', 'startVolgorde', 'einde'].includes(s.fase.soort);
+  weergave.plaatsFiguren(posities(), geenBeurt ? -1 : spelerAanZet(s), 0);
   weergave.overzicht(0);
-  const nieuwSpel = s.ronde === 1 && s.aanZet === 0 && s.fase.soort === 'dobbelen' && s.verslag.length === 0;
+  const nieuwSpel = s.fase.soort === 'startworp' && !s.verslag.some((g) => g.soort === 'startworp');
   (async () => {
     if (nieuwSpel) await pommie(zeg('welkom'));
     else await wacht(300);

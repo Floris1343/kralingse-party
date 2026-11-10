@@ -147,6 +147,31 @@ export function kanItemGebruiken(state: GameState, item: ItemSoort): boolean {
   return true;
 }
 
+/** Items die pas bij het gooien werken. Die kun je annuleren zolang je nog niet gedobbeld hebt. */
+export const DOBBEL_ITEMS: readonly ItemSoort[] = ['dubbel', 'driedubbel', 'kiesWorp'];
+
+/** Werkt dit item meteen (Wisseltruc, Ratjebel, gemene items)? Dan kun je het niet annuleren. */
+export function werktMeteen(item: ItemSoort): boolean {
+  return !DOBBEL_ITEMS.includes(item);
+}
+
+/** Kan het gekozen item nog terug in de zak? Alleen een dobbelsteen of Kies-je-worp, vóór het gooien. */
+export function kanItemAnnuleren(state: GameState): boolean {
+  return state.fase.soort === 'dobbelen' && !!state.fase.gebruikt && DOBBEL_ITEMS.includes(state.fase.gebruikt);
+}
+
+/** Zet het gekozen item terug in de zak; daarna kun je een ander kiezen (of gewoon gooien). */
+export function annuleerItem(state: GameState): GameState {
+  const fase = vereisFase(state, 'dobbelen');
+  if (!kanItemAnnuleren(state)) throw new Error('Dit item kun je niet meer annuleren');
+  return metKopie(state, (s) => {
+    const speler = spelerAanZet(s);
+    s.spelers[speler].items.push(fase.gebruikt!);
+    s.verslag = s.verslag.filter((g) => !(g.soort === 'item' && g.actie === 'gebruikt' && g.speler === speler && g.item === fase.gebruikt));
+    s.fase = { soort: 'dobbelen' };
+  });
+}
+
 /**
  * Gebruikt een item vóór het dobbelen. Dobbelstenen en Kies-je-worp gelden voor de worp hierna.
  * De Wisseltruc ruilt meteen van plek. De Ratjebel zet het spel in de Ratje-fase.
