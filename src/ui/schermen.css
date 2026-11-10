@@ -1494,3 +1494,22 @@
 .bot-ratje .ratje-doel.ratje-wijst { border-color: #FFC928; transform: translateY(-8px); }
 .bot-ratje .ratje-doel.ratje-raak { border-color: #D62839; transform: translateY(-8px) scale(1.08); box-shadow: 0 0 0 6px rgb(214 40 57 / .35), 0 6px 0 #E3CFAE; }
 .bot-ratje .ratje-uitslag { font-family: var(--kp-font-kop); font-weight: 700; font-size: 26px; color: #D62839; }
+
+/* Zeilwedstrijd: "Klaar… Af!" bij de start */
+.zeil-start {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  z-index: 2;
+  padding: 10px 30px;
+  border-radius: var(--kp-r-pil);
+  background: rgb(43 29 20 / .82);
+  color: #FFFFFF;
+  font-family: var(--kp-font-kop);
+  font-weight: 700;
+  font-size: 38px;
+  pointer-events: none;
+  animation: feest-tekst-in 300ms cubic-bezier(.2,.9,.3,1.4) both;
+}
+.zeil-start.af { background: var(--kp-groen); animation: feest-tekst-in 260ms cubic-bezier(.2,.9,.3,1.4) both; }

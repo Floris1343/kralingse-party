@@ -186,3 +186,7 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 - **Bots gooien in het dobbelscherm.** Het blok gooit vanzelf na 1 seconde, en de uitslag ("Bot 1 loopt 6 stappen") blijft 1,5 s staan, zonder tik. Daarna loopt de bot. Met een dubbele dobbelsteen zie je twee blokken. Met Kies-je-worp gooit het blok gewoon het gekozen getal. Met turbo is er geen dobbelscherm.
 - **Een bot die een item koopt, gaat direct door.** Je ziet dan geen "−5" en geen "+1"; het staat alleen in de melding na zijn beurt. Een item dat een bot krijgt (een itemvakje of de herten) zie je wel.
 - **Een bot huurt Ratje in.** Eerst zie je wat hij laat stelen (de gekozen kaart licht op), dan gaat Ratje een paar rondjes langs de spelers die iets te stelen hebben, steeds langzamer, tot hij stopt bij wie het wordt (±2,8 s). Daarna staat de uitslag ±1,8 s in beeld. Heeft maar één speler iets, dan wijst Ratje alleen die aan.
+- **De zeilwedstrijd duurt langer:**
+  - Eerst liggen de bootjes ±1,1 s klaar bij de start ("Klaar…", dan "Af!").
+  - Dan varen ze ±2,8 s (eerst 1,2 s). Elk bootje vaart in een eigen tempo, zodat ze elkaar kunnen inhalen, maar nooit terug. Aan het eind staat elk bootje precies waar zijn worp hoort.
+  - Bij een bot blijft de uitslag ±2,2 s staan (eerst 1,5 s).

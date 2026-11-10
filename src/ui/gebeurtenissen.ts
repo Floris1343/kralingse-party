@@ -9,6 +9,7 @@ import { asset } from './asset';
 import { icoon } from './iconen';
 import { figuurPlaatje, maak } from './onderdelen';
 import { KANS_TEKST, RADEN, type RadVak } from './uitkomsten';
+import { TEMPO } from './tempo';
 
 const wacht = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 const VOLGORDE: Record<RadSoort, readonly string[]> = { hertenkamp: HERTEN_RAD, bok: BOK_RAD, pech: PECH_RAD, vleermuis: VLEERMUIS_RAD };
@@ -206,17 +207,30 @@ export async function toonZeilwedstrijd(
     water.append(baan);
     return { boot, baan, sp };
   });
+  // Eerst liggen de bootjes klaar bij de start: "Klaar… Af!"
+  const start = maak('div', 'zeil-start', 'Klaar…');
+  water.append(start);
+  await wacht(TEMPO.zeilStart * 0.6);
+  start.textContent = 'Af!';
+  start.classList.add('af');
+  await wacht(TEMPO.zeilStart * 0.4);
+  start.remove();
   // De snelste boot haalt precies de finish; de rest naar verhouding van hun worp.
+  // Onderweg varen ze niet allemaal even hard, zodat ze elkaar kunnen inhalen; de uitslag
+  // blijft die van de worpen.
   const breedte = water.clientWidth - 170;
   const hoogste = Math.max(...g.worpen);
   await Promise.all(
-    boten.map(({ boot }, i) =>
-      boot.animate([{ transform: 'translateX(0)' }, { transform: `translateX(${(breedte * g.worpen[i]) / hoogste}px)` }], {
-        duration: 1200,
-        easing: 'cubic-bezier(.3,.1,.3,1)',
-        fill: 'forwards',
-      }).finished.catch(() => {}),
-    ),
+    boten.map(({ boot }, i) => {
+      const eind = (breedte * g.worpen[i]) / hoogste;
+      // Elk bootje heeft zijn eigen tempo (soms eerst snel, soms een eindsprint), maar vaart nooit terug.
+      const vorm = Math.sin(i * 2.1 + 1);
+      const frames: Keyframe[] = [0, 0.2, 0.4, 0.6, 0.8, 1].map((t) => ({
+        transform: `translateX(${(eind * (t + 0.18 * Math.sin(Math.PI * t) * vorm)).toFixed(1)}px)`,
+        offset: t,
+      }));
+      return boot.animate(frames, { duration: TEMPO.zeilRace, easing: 'ease-in-out', fill: 'forwards' }).finished.catch(() => {});
+    }),
   );
   boten.forEach(({ baan }, i) => {
     baan.classList.add('klaar');

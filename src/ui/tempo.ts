@@ -63,6 +63,14 @@ export const TEMPO = {
   naSterPoef: 1050,
   naSterTerug: 675,
 
+  // ---- de zeilwedstrijd (§7.5)
+  /** De bootjes liggen klaar bij de start ("Klaar… Af!"). */
+  zeilStart: 1100,
+  /** De race zelf (eerst 1200). */
+  zeilRace: 2800,
+  /** Bij een bot blijft de uitslag zo lang staan (eerst 1500). */
+  zeilUitslagBot: 2200,
+
   // ---- Ratje bij een bot: de spanning
   /** Hoe lang Ratje langs de kandidaten gaat voor hij stopt. */
   ratjeSpanning: 2800,

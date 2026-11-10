@@ -266,7 +266,7 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       if (!actief) return;
       if (mens && g.soort === 'rad') await toonRad(laag, s, g);
       else if (mens && g.soort === 'kans') await toonKans(laag, s, g);
-      else if (g.soort === 'zeilwedstrijd' && (mens || !turbo)) await toonZeilwedstrijd(laag, s, g, mens ? undefined : 1500);
+      else if (g.soort === 'zeilwedstrijd' && (mens || !turbo)) await toonZeilwedstrijd(laag, s, g, mens ? undefined : TEMPO.zeilUitslagBot);
     }
     if (verslag.some((g) => g.soort === 'verplaatst' && g.reden !== 'wisseltruc')) {
       weergave.plaatsFiguren(posities(), speler, mens ? TEMPO.verplaatsMens : TEMPO.verplaatsBot);
