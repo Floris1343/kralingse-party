@@ -263,26 +263,27 @@ Daarna maakt de host de winnaar bekend. Tot slot volgt een kort statistiekensche
 
 ## 11. Tempo (heel belangrijk)
 
-- **Botbeurt in ≤ 2 seconden:** een korte aankondiging ("Beurt van Bot 1", ±0,6 s), dan dobbelsteen, lopen (ongeveer 80 ms per vakje) en alle keuzes direct. Er hoeft niets bevestigd te worden.
+- **Rustig maar vlot:** lopen, de effecten na een vakje, het dobbelen en de camera hebben de tijd, zodat je kunt zien wat er gebeurt. Alle tijden staan in `src/ui/tempo.ts`.
+- **Botbeurt:** een korte aankondiging ("Beurt van Bot 1", ±0,9 s). Daarna gooit de bot zichtbaar in het dobbelscherm en loopt hij iets vlotter dan een mens (ongeveer 170 ms per vakje). Keuzes maakt hij direct; er hoeft niets bevestigd te worden. Koopt een bot een item, dan gaat hij direct door (alleen in de melding). Huurt een bot Ratje in, dan zie je wat hij laat stelen en gaat Ratje met spanning langs de kandidaten tot hij stopt bij wie het wordt.
 - **Na een botbeurt** blijft de melding met wat er gebeurd is in beeld, bijvoorbeeld "Bot 2 gooide 7 · +3 munten · kocht een ster!", met de hint "Tik om verder te gaan · Volgende: Bot 1". Pas na een tik begint de volgende beurt, ook als dat een mens is. Zo zie je wat de bots deden.
 - Een **turboknop** (⏩) die altijd zichtbaar is: de bots worden dan **direct** afgehandeld, zonder animatie en zonder te wachten op een tik.
 - **Mensen:**
   - Een beurt begint met een aankondiging: de camera staat op je figuur, je figuur staat groot links in beeld en over het midden loopt een brede, licht schuine band: "Jouw beurt, Floris!". Tik om verder te gaan.
   - Daarna komt het **keuzemenu** (zie §13): Dobbelen, Items of Bord bekijken.
-  - Het lopen gaat snel (ongeveer 150 ms per vakje), en met een tik op het scherm gaat het nog sneller. Keuzes maak je met grote knoppen.
+  - Het lopen gaat rustig (ongeveer 225 ms per vakje), en met een tik op het scherm gaat het sneller. Keuzes maak je met grote knoppen.
 - **Aankomen op een vakje:** als je figuur stopt, zoomt de camera een stukje in en licht het vakje op in zijn eigen kleur.
   - Boven het hoofd van je figuur ploft groot en vet wat je krijgt of kwijtraakt, met een icoontje ervoor: "+3" met een munt in een witte rand, "−3" in rood, of het icoon van een item met "+1". Het blijft ongeveer 1 seconde staan en zweeft dan omhoog weg.
   - Tegelijk tellen de munten in de spelersbalk zichtbaar op of af (tik, tik, tik) en wiebelt het vakje van die speler in de balk.
   - Het figuur maakt een sprongetje bij winst en deukt even in bij verlies (het plaatje zelf blijft stilstaan).
   - Munten rinkelen; verlies klinkt lager.
   - Dit geldt voor alles wat munten, sterren of items oplevert of kost: vakjes, de minigame-uitslag, Ratje, de bok, kans, pech, de Zeilwedstrijd, de winkel, enzovoort. Gebeurt er in één beurt meer, dan komen de effecten kort na elkaar.
-  - Bots krijgen hetzelfde, maar korter (±0,6 s); met turbo zonder animatie.
+  - Bots krijgen hetzelfde, maar iets korter (±0,9 s); met turbo zonder animatie.
 - **Een ster kopen is een groot feest:**
   - Het bord wordt donker, achter de ster draaien brede gouden lichtstralen en overal fonkelen sterretjes. De ster zweeft groot in het midden.
   - De ster vliegt in een boog naar je figuur. Bij het raken komt er een uitbarsting van glitters en confetti, en je figuur maakt een sprongetje.
   - Grote tekst: "Floris heeft een ster!". Pommie komt juichend in beeld, met een korte fanfare en zijn gebrabbel. In de spelersbalk springt het aantal sterren met een stuiter op +1.
-  - Duur ±2,5 s, met een tik over te slaan. Daarna zoomt de camera uit, verhuist de ster met een "poef" naar zijn nieuwe plek en gaat de camera terug naar je figuur.
-  - Bots krijgen dezelfde viering, maar korter (±1,5 s); met turbo alleen de korte melding.
+  - Duur ±3,5 s, met een tik over te slaan. Daarna zoomt de camera uit, verhuist de ster met een "poef" naar zijn nieuwe plek en gaat de camera terug naar je figuur.
+  - Bots krijgen dezelfde viering, maar korter (±2 s); met turbo alleen de korte melding.
   - Hetzelfde geldt voor een vallende ster en voor een bonusster aan het eind.
   - **Een ster kwijtraken** (aan Ratje of door kans) is de sippe versie: de ster vliegt van je figuur weg naar de ander, met een dalend geluid.
 - Alles blijft soepel op de iPad: alleen transform en opacity worden geanimeerd, met niet te veel losse deeltjes tegelijk.

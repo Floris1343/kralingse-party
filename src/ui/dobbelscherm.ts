@@ -14,6 +14,7 @@ import {
   aantalDobbelstenen, dobbelMax, itemInfo, plaatsen, werktMeteen, type GameState, type ItemSoort,
 } from '../logic';
 import { dobbelGeluid, worpGeluid } from '../audio/geluid';
+import { TEMPO } from './tempo';
 import { asset } from './asset';
 import { icoon } from './iconen';
 import { itemIcoon, SLAK_SVG } from './itemIcoon';
@@ -103,10 +104,14 @@ export interface DobbelActies {
 export interface DobbelOpties {
   /** Bovenin, bijvoorbeeld "Startworp · wie het hoogst gooit, begint". */
   titel?: string;
-  /** Een bot: het blok gooit zelf, en na de uitslag wacht het scherm op een tik. */
+  /** Een bot: het blok gooit zelf. */
   vanzelf?: boolean;
+  /** Na de uitslag wachten op een tik ("Tik om verder te gaan"), zoals bij de startworp van een bot. */
+  wachtOpTik?: boolean;
   /** De tekst in de pil onder de uitslag (standaard: "Je loopt 7 stappen"). */
   uitslag?: (worp: number) => string;
+  /** Hoe lang de uitslag blijft staan (standaard: TEMPO.worpUitslag, bij een bot TEMPO.botWorpUitslag). */
+  uitslagMs?: number;
 }
 
 /** Het gekozen item, zoals in map 4: groen en "ACTIEF". */
@@ -216,7 +221,7 @@ export async function toonDobbelscherm(laag: HTMLElement, speler: number, acties
       banner.innerHTML = sp.slak ? `${SLAK_SVG(30)}Iemand gaf je de slakkendobbel…` : 'Iemand gaf je de achteruitpet… je loopt achteruit!';
       scherm.append(banner);
     }
-    if (fase?.gebruikt === 'kiesWorp') {
+    if (fase?.gebruikt === 'kiesWorp' && !opties.vanzelf) {
       void kiesGetal(rechts, max).then((n) => {
         dobbelGeluid();
         return gooiEnToon(acties.gooi(n));
@@ -257,7 +262,7 @@ export async function toonDobbelscherm(laag: HTMLElement, speler: number, acties
       void gooiEnToon(worpen, midden, hint);
     };
     // Een bot gooit zelf, na een korte tel; een mens tikt.
-    if (opties.vanzelf) setTimeout(tik, 750);
+    if (opties.vanzelf) setTimeout(tik, TEMPO.botGooit);
     else rechts.addEventListener('pointerdown', tik, { once: true });
   };
 
@@ -290,12 +295,12 @@ export async function toonDobbelscherm(laag: HTMLElement, speler: number, acties
     midden.insertAdjacentHTML('beforeend', [FONKEL(-60, 40, 46), FONKEL(330, -20, 38), FONKEL(360, 250, 50), FONKEL(-30, 300, 34)].join(''));
     worpGeluid(hoog);
     if (hoog) rechts.append(confetti());
-    if (opties.vanzelf) {
-      // Bij een bot blijft de uitslag staan tot iemand tikt.
+    if (opties.wachtOpTik) {
+      // Bij de startworp van een bot blijft de uitslag staan tot iemand tikt.
       rechts.append(maak('div', 'dobbel-hint dobbel-verder', 'Tik om verder te gaan'));
       await new Promise<void>((r) => scherm.addEventListener('pointerdown', () => r(), { once: true }));
     } else {
-      await tikOfTijd(scherm, opties.uitslag ? 1500 : 1100);
+      await tikOfTijd(scherm, opties.uitslagMs ?? (opties.vanzelf ? TEMPO.botWorpUitslag : TEMPO.worpUitslag));
     }
 
     // 4. naar het bord

@@ -177,3 +177,12 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 - **Het logo** van de eigenaar is het app-icoon. Het is bijgesneden tot het roze vierkant en de zwarte hoekjes zijn roze gemaakt, want de iPad rondt de hoeken zelf af. De kleur van de app (statusbalk, achtergrond bij het opstarten) is het roze van het logo.
 - **Niet veranderd, zodat niets kapotgaat:** het adres (`…/kralingse-party/`) en de namen waaronder het spel en de instellingen bewaard worden.
 - **Het oude script `scripts/maak-iconen.mjs`** (dat zelf een icoon met een ster tekende) is weg, zodat het het logo niet per ongeluk overschrijft.
+
+## Stap 11: alles wat rustiger
+
+- **Op verzoek van de eigenaar** zijn het lopen, de effecten na een vakje (ook het sterfeest), het dobbelen en de camera ongeveer 1,5 keer zo rustig als eerst. Pommie, de raderen, de kans-rollen en de zeilwedstrijd zijn even snel gebleven.
+- **Alle tijden staan in `src/ui/tempo.ts`**, met bij elke tijd wat die eerst was. Wil je iets sneller of rustiger, dan pas je het daar aan.
+- **Lopen:** een mens loopt 225 ms per vakje (eerst 150), 90 ms als je tikt om te versnellen (eerst 60). Een bot loopt 170 ms per vakje (eerst 80): rustiger dan eerst, maar iets vlotter dan een mens.
+- **Bots gooien in het dobbelscherm.** Het blok gooit vanzelf na 1 seconde, en de uitslag ("Bot 1 loopt 6 stappen") blijft 1,5 s staan, zonder tik. Daarna loopt de bot. Met een dubbele dobbelsteen zie je twee blokken. Met Kies-je-worp gooit het blok gewoon het gekozen getal. Met turbo is er geen dobbelscherm.
+- **Een bot die een item koopt, gaat direct door.** Je ziet dan geen "−5" en geen "+1"; het staat alleen in de melding na zijn beurt. Een item dat een bot krijgt (een itemvakje of de herten) zie je wel.
+- **Een bot huurt Ratje in.** Eerst zie je wat hij laat stelen (de gekozen kaart licht op), dan gaat Ratje een paar rondjes langs de spelers die iets te stelen hebben, steeds langzamer, tot hij stopt bij wie het wordt (±2,8 s). Daarna staat de uitslag ±1,8 s in beeld. Heeft maar één speler iets, dan wijst Ratje alleen die aan.

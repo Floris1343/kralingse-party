@@ -10,6 +10,7 @@ import { itemInfo, kanItemAnnuleren, type GameState } from '../logic';
 import { asset } from './asset';
 import { itemIcoon } from './itemIcoon';
 import { figuurPlaatje, maak } from './onderdelen';
+import { TEMPO } from './tempo';
 
 const wacht = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -50,7 +51,7 @@ export async function toonAankondiging(laag: HTMLElement, s: GameState, speler: 
   el.append(grootFiguur(s, speler, false), band);
   laag.append(el);
   if (sp.isBot) {
-    await wacht(600);
+    await wacht(TEMPO.botAankondiging);
   } else {
     await new Promise<void>((r) => el.addEventListener('pointerdown', () => r(), { once: true }));
   }

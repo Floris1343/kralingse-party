@@ -5,6 +5,8 @@
  */
 import { figuur } from '../data/figuren';
 import { zeg } from '../data/teksten';
+import { dobbelGeluid, muntTik } from '../audio/geluid';
+import { TEMPO } from './tempo';
 import {
   ITEM_SOORTEN, itemDoelen, itemInfo, kanItemGebruiken, kanKopen, werktMeteen, kanRatjeDoen, NACHT_ITEM_SOORTEN, ratjeDoelen, ratjePrijs,
   ZAKKENROLLER_BUIT, type DoelItem, type GameState, type ItemSoort, type RatjeKeuze, type RatjeWat,
@@ -199,6 +201,71 @@ export function vraagItemDoel(laag: HTMLElement, s: GameState, speler: number, i
     terug.addEventListener('click', () => klaar(null), { once: true });
     voet.replaceChildren(hint, terug);
   });
+}
+
+/**
+ * Een bot huurt Ratje in: je ziet wat hij laat stelen, en dan gaat Ratje langs de kandidaten,
+ * steeds langzamer, tot hij stopt bij wie het wordt. Zo bouwt de spanning op.
+ * `voor` = de stand vóór het stelen (zodat je ziet wie er nog iets had).
+ */
+export async function toonBotRatje(laag: HTMLElement, voor: GameState, g: Extract<GameState['verslag'][number], { soort: 'ratje' }>): Promise<void> {
+  const wacht = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+  const bot = voor.spelers[g.speler];
+  const { el, kaarten, voet, hint } = winkelOverlay(laag, voor, g.speler, {
+    icoon: 'personages/ratje.svg',
+    titel: `${bot.naam} huurt Ratje in`,
+    uitleg: g.wat === 'ster' ? 'Ratje gaat een ster stelen…' : 'Ratje gaat munten stelen…',
+  });
+  el.classList.add('ratje-overlay', 'bot-ratje');
+  voet.replaceChildren(hint);
+
+  // 1. Wat steelt Ratje?
+  hint.textContent = `Wat laat ${bot.naam} stelen?`;
+  kaarten.className = 'winkel-kaarten twee';
+  const opties = (['munten', 'ster'] as const).map((wat) => {
+    const img = document.createElement('img');
+    img.src = asset(wat === 'ster' ? 'iconen/ster.svg' : 'iconen/munt.svg');
+    img.alt = '';
+    img.width = img.height = 62;
+    const k = kaartKnop(img, wat === 'ster' ? 'Ster stelen' : 'Munten stelen', wat === 'ster' ? 'Ratje steelt 1 ster.' : 'Ratje steelt 5 tot 15 munten.', '', true, () => {});
+    k.disabled = true;
+    kaarten.append(k);
+    return { wat, k };
+  });
+  await wacht(500);
+  for (const o of opties) o.k.classList.add(o.wat === g.wat ? 'gekozen' : 'niet-gekozen');
+  muntTik(true);
+  await wacht(1000);
+
+  // 2. Van wie? Ratje gaat langs de kandidaten, steeds langzamer.
+  const doelen = ratjeDoelen(voor, g.speler, g.wat);
+  hint.textContent = g.wat === 'ster' ? 'Van wie steelt Ratje een ster?' : 'Van wie steelt Ratje munten?';
+  kaarten.className = 'winkel-kaarten doelen';
+  const knoppen = doelKnoppen(voor, doelen, () => {});
+  knoppen.forEach((b) => (b.disabled = true));
+  kaarten.replaceChildren(...knoppen);
+  const stops: number[] = [];
+  // Een paar rondjes, en dan precies op het doel uitkomen.
+  const eind = doelen.indexOf(g.doel);
+  const stappen = doelen.length * 3 + eind + 1;
+  for (let i = 0; i < stappen; i++) stops.push(i % doelen.length);
+  // De tussentijden worden steeds langer (samen ±TEMPO.ratjeSpanning).
+  const gewichten = stops.map((_, i) => 1 + (i / stops.length) ** 2 * 6);
+  const totaal = gewichten.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < stops.length; i++) {
+    knoppen.forEach((b, k) => b.classList.toggle('ratje-wijst', k === stops[i]));
+    muntTik(true);
+    await wacht((TEMPO.ratjeSpanning * gewichten[i]) / totaal);
+  }
+  knoppen[eind].classList.add('ratje-raak');
+  dobbelGeluid();
+
+  // 3. De uitslag.
+  const doel = voor.spelers[g.doel].naam;
+  hint.textContent = g.wat === 'ster' ? `Ratje steelt een ster van ${doel}!` : `Ratje steelt ${g.buit} munten van ${doel}!`;
+  hint.classList.add('ratje-uitslag');
+  await wacht(TEMPO.ratjeUitslag);
+  el.remove();
 }
 
 /** Ratje inhuren: eerst wat hij steelt, dan bij wie. */

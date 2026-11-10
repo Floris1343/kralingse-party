@@ -36,8 +36,8 @@ describe('de effecten na een actie (§11)', () => {
       { soort: 'itemsKwijt', speler: 0, items: ['kiesWorp', 'valstrik'] },
     ])).toEqual([
       { soort: 'munten', reden: 'winkel', verschil: { 0: -5 } },
-      { soort: 'item', speler: 0, item: 'dubbel', aantal: 1 },
-      { soort: 'item', speler: 0, item: 'kiesWorp', aantal: -2 },
+      { soort: 'item', speler: 0, item: 'dubbel', aantal: 1, gekocht: true },
+      { soort: 'item', speler: 0, item: 'kiesWorp', aantal: -2, gekocht: false },
     ]);
   });
 

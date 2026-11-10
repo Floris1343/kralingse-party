@@ -10,10 +10,14 @@
 import { brabbel, sterFanfare, sterKwijtGeluid } from '../audio/geluid';
 import { asset } from './asset';
 import { maak } from './onderdelen';
+import { TEMPO } from './tempo';
+
+/** Alle tijden van het feest worden met deze factor vermenigvuldigd (zie tempo.ts). */
+const F = TEMPO.sterFeest;
 
 const wacht = (ms: number, stop: { af: boolean; tik?: () => void }) =>
   new Promise<void>((r) => {
-    const t = setTimeout(r, ms);
+    const t = setTimeout(r, ms * F);
     stop.tik = () => {
       clearTimeout(t);
       r();
@@ -137,7 +141,7 @@ export async function sterFeest(laag: HTMLElement, opties: FeestOpties): Promise
       { transform: `translate(${midden[0]}px, ${midden[1]}px) translate(-50%, -50%) scale(1.15) rotate(8deg)`, offset: 0.7 },
       { transform: `translate(${midden[0]}px, ${midden[1]}px) translate(-50%, -50%) scale(1) rotate(0deg)` },
     ],
-    { duration: 420, easing: 'ease-out', fill: 'forwards' },
+    { duration: 420 * F, easing: 'ease-out', fill: 'forwards' },
   );
   await wacht(kort ? 750 : 1450, stop);
 
@@ -145,7 +149,7 @@ export async function sterFeest(laag: HTMLElement, opties: FeestOpties): Promise
   const doel = opties.doel?.() ?? null;
   if (!stop.af && doel) {
     el.classList.add('vlucht');
-    const vlucht = ster.animate(boog(midden, doel, 1, 0.22, 160), { duration: kort ? 420 : 620, easing: 'ease-in', fill: 'forwards' });
+    const vlucht = ster.animate(boog(midden, doel, 1, 0.22, 160), { duration: (kort ? 420 : 620) * F, easing: 'ease-in', fill: 'forwards' });
     await Promise.race([vlucht.finished.catch(() => {}), wacht(kort ? 450 : 650, stop)]);
     if (!stop.af) {
       ster.style.opacity = '0';
@@ -185,9 +189,9 @@ export async function sterWegAnimatie(
   });
   sterKwijtGeluid();
   opties.bijVertrek?.();
-  const duur = opties.kort ? 700 : 1100;
+  const duur = (opties.kort ? 700 : 1100) * F;
   const vlucht = ster.animate(boog(opties.van, opties.naar, 0.55, 0.4, 120), { duration: duur, easing: 'ease-in-out', fill: 'forwards' });
-  await Promise.race([vlucht.finished.catch(() => {}), wacht(duur + 30, stop)]);
+  await Promise.race([vlucht.finished.catch(() => {}), wacht(duur / F + 30, stop)]);
   opties.bijAankomst?.();
   if (!stop.af) await wacht(opties.kort ? 250 : 500, stop);
   el.classList.add('weg');

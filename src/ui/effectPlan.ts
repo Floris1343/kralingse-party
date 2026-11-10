@@ -10,7 +10,7 @@ import type { Gebeurtenis, ItemSoort, MuntReden } from '../logic';
 
 export type Effect =
   | { soort: 'munten'; reden: MuntReden; verschil: Record<number, number> }
-  | { soort: 'item'; speler: number; item: ItemSoort; aantal: number }
+  | { soort: 'item'; speler: number; item: ItemSoort; aantal: number; gekocht: boolean }
   | { soort: 'ster'; speler: number; vallend: boolean }
   | { soort: 'sterWeg'; van: number; naar: number };
 
@@ -27,10 +27,10 @@ export function effectenUit(verslag: readonly Gebeurtenis[]): Effect[] {
         }
         break;
       case 'item':
-        if (g.actie !== 'gebruikt') uit.push({ soort: 'item', speler: g.speler, item: g.item, aantal: 1 });
+        if (g.actie !== 'gebruikt') uit.push({ soort: 'item', speler: g.speler, item: g.item, aantal: 1, gekocht: g.actie === 'gekocht' });
         break;
       case 'itemsKwijt':
-        if (g.items.length) uit.push({ soort: 'item', speler: g.speler, item: g.items[0], aantal: -g.items.length });
+        if (g.items.length) uit.push({ soort: 'item', speler: g.speler, item: g.items[0], aantal: -g.items.length, gekocht: false });
         break;
       case 'sterGekocht':
         uit.push({ soort: 'ster', speler: g.speler, vallend: g.nieuwePlek === '' });

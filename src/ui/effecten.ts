@@ -14,6 +14,7 @@ import { itemIcoon } from './itemIcoon';
 import { maak } from './onderdelen';
 import type { Spelersbalk } from './spelersbalk';
 import { sterFeest, sterWegAnimatie } from './sterFeest';
+import { TEMPO } from './tempo';
 
 const wacht = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -68,24 +69,26 @@ export class EffectSpeler {
       const naam = (i: number) => s.spelers[i].naam;
       if (this.o.overslaan(bot)) continue;
       const kort = bot;
+      // Een bot die iets koopt in de winkel of Nachtwinkel gaat direct door: dat staat alleen in de melding.
+      if (bot && ((e.soort === 'item' && e.gekocht) || (e.soort === 'munten' && e.reden === 'winkel'))) continue;
       switch (e.soort) {
         case 'munten': {
           const regels = Object.entries(e.verschil).map(([k, v]) => [Number(k), v] as const);
           muntGeluid(regels.some(([, v]) => v > 0));
           for (const [i, v] of regels) {
-            weergave.zweef(i, zweefInhoud('munten', v), kort ? 900 : 1400);
+            weergave.zweef(i, zweefInhoud('munten', v), kort ? TEMPO.zweefBot : TEMPO.zweefMens);
             weergave.reageer(i, v >= 0 ? 'spring' : 'deuk');
-            balk.telMunten(i, balk.getoondVoor(i).munten + v, kort ? 400 : 650, muntTik);
+            balk.telMunten(i, balk.getoondVoor(i).munten + v, kort ? TEMPO.tellenBot : TEMPO.tellenMens, muntTik);
           }
-          await wacht(kort ? 600 : 1000);
+          await wacht(kort ? TEMPO.effectBot : TEMPO.effectMens);
           break;
         }
         case 'item': {
-          weergave.zweef(e.speler, zweefInhoud('item', e.aantal, e.item), kort ? 900 : 1400);
+          weergave.zweef(e.speler, zweefInhoud('item', e.aantal, e.item), kort ? TEMPO.zweefBot : TEMPO.zweefMens);
           weergave.reageer(e.speler, e.aantal > 0 ? 'spring' : 'deuk');
           balk.wiebel(e.speler, e.aantal > 0);
           muntGeluid(e.aantal > 0);
-          await wacht(kort ? 600 : 1000);
+          await wacht(kort ? TEMPO.effectBot : TEMPO.effectMens);
           break;
         }
         case 'ster': {

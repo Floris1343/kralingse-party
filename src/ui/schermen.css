@@ -1483,3 +1483,14 @@
 @media (prefers-reduced-motion: reduce) {
   .feest-stralen, .feest-fonkels i, .feest-pommie img { animation: none; }
 }
+
+/* Een bot huurt Ratje in: de keuze en de spanning (stap 11) */
+.bot-ratje .winkel-pil:empty { display: none; }
+.bot-ratje .winkel-kaart:disabled, .bot-ratje .ratje-doel:disabled { cursor: default; color: var(--kp-inkt); }
+.bot-ratje .winkel-kaart { transition: transform 250ms ease-out, opacity 250ms ease-out, border-color 250ms ease-out; }
+.bot-ratje .winkel-kaart.gekozen { border-color: var(--kp-pompoen); transform: scale(1.06); box-shadow: 0 0 0 5px rgb(244 123 32 / .35), 0 6px 0 #E3CFAE; }
+.bot-ratje .winkel-kaart.niet-gekozen { opacity: .35; }
+.bot-ratje .ratje-doel { transition: transform 120ms ease-out, border-color 120ms ease-out; }
+.bot-ratje .ratje-doel.ratje-wijst { border-color: #FFC928; transform: translateY(-8px); }
+.bot-ratje .ratje-doel.ratje-raak { border-color: #D62839; transform: translateY(-8px) scale(1.08); box-shadow: 0 0 0 6px rgb(214 40 57 / .35), 0 6px 0 #E3CFAE; }
+.bot-ratje .ratje-uitslag { font-family: var(--kp-font-kop); font-weight: 700; font-size: 26px; color: #D62839; }

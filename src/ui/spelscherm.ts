@@ -21,9 +21,11 @@ import { maak, plaatsRondje } from './onderdelen';
 import { Spelersbalk } from './spelersbalk';
 import { EINDSPEL_VAKKEN, meldingDelen } from './uitkomsten';
 import { EffectSpeler } from './effecten';
+import { nieuwInVerslag } from './effectPlan';
+import { TEMPO } from './tempo';
 import { vakjeKleur } from '../render/vakjes';
 import { pommieZegt } from './pommie';
-import { vraagItem, vraagItemDoel, vraagNachtwinkel, vraagRatje, vraagWinkel } from './winkelScherm';
+import { toonBotRatje, vraagItem, vraagItemDoel, vraagNachtwinkel, vraagRatje, vraagWinkel } from './winkelScherm';
 import { toonAankondiging, toonBordBekijken, vraagMenuKeuze } from './beurtMenu';
 import { toonStartvolgorde } from './startvolgorde';
 
@@ -68,12 +70,12 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
     overslaan: (bot) => bot && turbo,
     naSter: async (speler) => {
       // De camera uit, de ster verhuist met een "poef", en de camera weer terug.
-      weergave.overzicht(400);
-      await wacht(420);
+      weergave.overzicht(TEMPO.naSterUit - 20);
+      await wacht(TEMPO.naSterUit);
       tekenBord(1000, true);
-      await wacht(700);
-      weergave.volgSpeler(speler, 450);
-      await wacht(450);
+      await wacht(TEMPO.naSterPoef);
+      weergave.volgSpeler(speler, TEMPO.naSterTerug);
+      await wacht(TEMPO.naSterTerug);
     },
   });
   scherm.append(weergave.el, hud, laag);
@@ -235,7 +237,7 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
         zet(stap(s, BORD));
       }
       if (s.fase.soort === 'splitsing') continue; // geen stap gezet: eerst kiezen
-      await toonStap(speler, snel ? 60 : 150);
+      await toonStap(speler, snel ? TEMPO.mensStapSnel : TEMPO.mensStap);
     }
     weergave.boven(speler, null);
   }
@@ -243,7 +245,7 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
   async function toonStap(speler: number, tempo: number) {
     weergave.plaatsFiguren(landingsPosities(), speler, tempo);
     toonTeller(speler, resterend());
-    weergave.volgSpeler(speler, 350);
+    weergave.volgSpeler(speler, TEMPO.cameraLopen);
     await wacht(tempo);
   }
 
@@ -256,9 +258,9 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
     // Aankomen op het vakje: de camera zoomt iets in en het vakje licht op in zijn eigen kleur.
     if (mens || !turbo) {
       const vakjeId = landingsPosities()[speler];
-      weergave.volgSpeler(speler, mens ? 350 : 220, 1.2);
+      weergave.volgSpeler(speler, mens ? TEMPO.aankomstMens : TEMPO.aankomstBot, 1.2);
       weergave.gloed(vakjeId, vakjeKleur(huidigType(s, vakje(BORD, vakjeId))));
-      await wacht(mens ? 300 : 180);
+      await wacht(mens ? TEMPO.aankomstMensWacht : TEMPO.aankomstBotWacht);
     }
     for (const g of verslag) {
       if (!actief) return;
@@ -267,9 +269,9 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       else if (g.soort === 'zeilwedstrijd' && (mens || !turbo)) await toonZeilwedstrijd(laag, s, g, mens ? undefined : 1500);
     }
     if (verslag.some((g) => g.soort === 'verplaatst' && g.reden !== 'wisseltruc')) {
-      weergave.plaatsFiguren(posities(), speler, mens ? 400 : 150);
-      if (mens) weergave.volgSpeler(speler, 400);
-      await wacht(mens ? 450 : 150);
+      weergave.plaatsFiguren(posities(), speler, mens ? TEMPO.verplaatsMens : TEMPO.verplaatsBot);
+      if (mens) weergave.volgSpeler(speler, TEMPO.verplaatsMens);
+      await wacht((mens ? TEMPO.verplaatsMens : TEMPO.verplaatsBot) + 50);
     }
     // Een mens die in een valstrik trapt, ziet dat in de korte melding.
     if (mens && verslag.some((g) => g.soort === 'valstrik')) melding(speler);
@@ -295,25 +297,54 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       while (bezig()) zet(botActie(s, BORD)!);
       return naBeurt();
     }
-    weergave.volgSpeler(speler, 300);
+    weergave.volgSpeler(speler, TEMPO.cameraBeurt);
     await toonAankondiging(laag, s, speler);
-    // Eventueel een item, dan dobbelen.
-    while (bezig() && s.fase.soort === 'dobbelen') {
-      zet(botActie(s, BORD)!);
+    // Eventueel een item (dat gaat direct), dan gooit de bot in het dobbelscherm.
+    while (bezig() && (s.fase.soort === 'dobbelen' || s.fase.soort === 'ratje')) {
+      const volgende = botActie(s, BORD)!;
+      if (s.fase.soort === 'dobbelen' && volgende.fase.soort === 'lopen' && !turbo) {
+        await toonDobbelscherm(laag, speler, {
+          state: () => s,
+          gooi: () => {
+            zet(volgende);
+            const w = s.verslag.find((g) => g.soort === 'worp');
+            return w && w.soort === 'worp' ? w.worpen : [];
+          },
+        }, { vanzelf: true, uitslag: (w) => `${s.spelers[speler].naam} loopt ${w} ${w === 1 ? 'stap' : 'stappen'}` });
+        break;
+      }
+      await zetBot(volgende);
       if (s.verslag.some((g) => g.soort === 'verplaatst' && g.reden === 'wisseltruc')) {
-        weergave.plaatsFiguren(posities(), speler, 300);
-        weergave.volgSpeler(speler, 300);
-        await wacht(300);
+        weergave.plaatsFiguren(posities(), speler, TEMPO.cameraLopen);
+        weergave.volgSpeler(speler, TEMPO.cameraLopen);
+        await wacht(TEMPO.cameraLopen);
       }
     }
     toonTeller(speler, resterend());
-    await wacht(250);
+    await wacht(TEMPO.naDobbelen);
     while (bezig()) {
-      zet(botActie(s, BORD)!);
+      await zetBot(botActie(s, BORD)!);
       if (turbo) continue; // turbo tijdens de beurt aangezet: rest direct
-      await toonStap(speler, 80);
+      await toonStap(speler, TEMPO.botStap);
     }
     await naBeurt();
+  }
+
+  /**
+   * Een botactie uitvoeren. Huurt de bot Ratje in, dan zie je wie hij kiest, met wat spanning.
+   */
+  async function zetBot(volgende: GameState) {
+    const voor = s;
+    zet(volgende);
+    if (turbo) return;
+    const ratje = nieuwInVerslag(voor.verslag, s.verslag).find((g) => g.soort === 'ratje');
+    if (ratje?.soort === 'ratje') {
+      weergave.boven(spelerAanZet(voor), null);
+      // Tijdens de spanning blijft de balk nog even zoals het was.
+      balk.werkBij(voor);
+      await toonBotRatje(laag, voor, ratje);
+      balk.werkBij(s);
+    }
   }
 
   /**
@@ -407,7 +438,9 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       }, {
         titel: opnieuw ? 'Startworp · opnieuw gooien' : 'Startworp · wie het hoogst gooit, begint',
         vanzelf: sp.isBot,
+        wachtOpTik: sp.isBot,
         uitslag: (w) => `${sp.naam} gooide ${w}`,
+        uitslagMs: TEMPO.startworpUitslag,
       });
       const gelijk = s.verslag.at(-1);
       if (actief && gelijk?.soort === 'startworpGelijk') {
@@ -569,13 +602,13 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       }
       weergave.plaatsFiguren(posities(), speler, 0);
       if (soort === 'dobbelen') {
-        weergave.volgSpeler(speler, 400);
-        await wacht(400);
+        weergave.volgSpeler(speler, TEMPO.cameraBeurt);
+        await wacht(TEMPO.cameraBeurt);
         if (!actief) return;
         await mensBeurtBegin(speler);
         if (!actief || !beurtBezig()) continue;
         toonTeller(speler, resterend());
-        await wacht(250);
+        await wacht(TEMPO.naDobbelen);
       } else {
         // Verder spelen midden in een beurt.
         weergave.volgSpeler(speler, 0);
@@ -583,7 +616,7 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       }
       await loopBeurt(speler);
       if (actief) await toonGevolgen(speler, s.verslag, true);
-      if (actief) await wacht(500);
+      if (actief) await wacht(TEMPO.naMensBeurt);
     }
   }
 
