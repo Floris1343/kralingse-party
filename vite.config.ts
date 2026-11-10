@@ -7,7 +7,9 @@ export default defineConfig({
   base: '/kralingse-party/',
   plugins: [
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'prompt': de app kiest zelf het moment om bij te werken (zie src/ui/bijwerken.ts)
+      registerType: 'prompt',
+      injectRegister: false,
       includeAssets: ['icons/apple-touch-icon.png'],
       manifest: {
         name: 'Kralingse Plas Party',
