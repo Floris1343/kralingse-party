@@ -90,3 +90,10 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 - **In de spelersbalk** staat een slakje of een pijltje terug bij wie een Slakkendobbel of Achteruitpet van een ander heeft.
 - **Pommie** komt in beeld bij de ochtendmist (in plaats van de gewone dag-tekst), als de mist optrekt en bij een vallende ster.
 - **Opslagversie 4.** Een bewaard spel uit stap 5 (versie 3) kan gewoon verder: er ligt dan nog geen valstrik en er hangt geen mist.
+
+## Figuren: de kikker en het konijn
+
+- **Twee nieuwe figuren van de eigenaar** voor de computerspelers: de kikker in een eendenband en het konijn met blauwe strikken. Bij een nieuw spel zijn ze standaard Bot 1 en Bot 2. De pionnetjes kun je nog steeds kiezen door op het figuur te tikken.
+- **De achtergrond is weggehaald** en de tekening is bijgesneden (PNG met een doorzichtige achtergrond, zoals Floris en Speler 2). Het wit binnen de lijnen van het konijn is gebleven.
+- **Kleuren:** de kikker is groen (zoals de groene pion), het konijn paars (de paarse kleur uit het design), zodat het niet botst met het blauw van Floris.
+- **Ze zijn breder dan hoog**, dus op het bord iets minder hoog (88 en 92 tegen 105 voor Floris), zodat ze ongeveer even groot lijken.

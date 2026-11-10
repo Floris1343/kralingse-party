@@ -1,6 +1,7 @@
 /**
- * De vier figuren uit het design (docs/design/.../designsysteem: "Personages").
- * Floris en Speler 2 zijn handgetekend (PNG), Bot 1 en Bot 2 zijn de pionnetjes (SVG).
+ * De figuren. Floris en Speler 2 komen uit het design (docs/design/.../designsysteem: "Personages"),
+ * de kikker en het konijn zijn tekeningen van de eigenaar voor de computerspelers. Allemaal handgetekend
+ * (PNG). De pionnetjes (SVG) uit het design kun je ook nog kiezen.
  */
 
 export interface Figuur {
@@ -31,6 +32,14 @@ export const FIGUREN: Figuur[] = [
     vorm: 'cirkel', verhouding: 727 / 1051, hoogte: 105, handgetekend: true,
   },
   {
+    id: 'kikker', bestand: 'figuren/kikker.png', kleur: '#2FAE5B', kleurDonker: '#1F8344', kleurLicht: '#D3F1DC',
+    vorm: 'vierkant', verhouding: 937 / 924, hoogte: 88, handgetekend: true,
+  },
+  {
+    id: 'konijn', bestand: 'figuren/konijn.png', kleur: '#8E5BD9', kleurDonker: '#6A3FB5', kleurLicht: '#E9DDFB',
+    vorm: 'ruit', verhouding: 978 / 984, hoogte: 92, handgetekend: true,
+  },
+  {
     id: 'pion-groen', bestand: 'figuren/pion-groen.svg', kleur: '#2FAE5B', kleurDonker: '#1F8344', kleurLicht: '#D3F1DC',
     vorm: 'vierkant', verhouding: 100 / 130, hoogte: 93, handgetekend: false,
   },
@@ -40,8 +49,10 @@ export const FIGUREN: Figuur[] = [
   },
 ];
 
-/** Standaardnamen bij een nieuw spel, in de volgorde van FIGUREN. */
+/** Standaardnamen bij een nieuw spel. */
 export const STANDAARD_NAMEN = ['Floris', 'Speler 2', 'Bot 1', 'Bot 2'];
+/** Standaardfiguren bij een nieuw spel: de bots zijn de kikker en het konijn. */
+export const STANDAARD_FIGUREN = ['floris', 'speler2', 'kikker', 'konijn'];
 
 export function figuur(id: string): Figuur {
   return FIGUREN.find((f) => f.id === id) ?? FIGUREN[0];

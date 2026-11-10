@@ -140,6 +140,8 @@ function spelerPaneel(s: GameState, speler: number, gebruik: (item: ItemSoort) =
   kaart.innerHTML = `<div class="dobbel-kaart-schaduw"></div>
     <svg class="dobbel-wiebellijnen" width="230" height="80" viewBox="0 0 230 80" aria-hidden="true"><path d="M14 60 Q4 40 14 20 M30 66 Q18 40 30 14 M216 60 Q226 40 216 20 M200 66 Q212 40 200 14" fill="none" stroke="#F47B20" stroke-width="4" stroke-linecap="round" opacity="0.7"></path></svg>`;
   const wiebel = maak('div', `dobbel-wiebel${f.handgetekend ? '' : ' is-pion'}`);
+  // Elke tekening in zijn eigen verhouding (de kikker en het konijn zijn breder dan Floris).
+  if (f.handgetekend) wiebel.style.aspectRatio = String(f.verhouding);
   wiebel.append(figuurPlaatje(f, sp.naam, 'dobbel-figuur'));
   kaart.append(wiebel, plaatsRondje(plaats, 'dobbel-plaats'));
 

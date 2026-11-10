@@ -8,7 +8,7 @@ Het script `node scripts/bord-uit-design.mjs` kopieert ze letterlijk naar `publi
 
 | Map in `public/assets/` | Wat | Uit het design |
 |---|---|---|
-| `figuren/` | `floris.png` en `speler2.png` (handgetekend), `pion-groen.svg` (Bot 1) en `pion-geel.svg` (Bot 2) | `floris.png`, `speler2.png`, `pawn3.svg`, `pawn4.svg` |
+| `figuren/` | `floris.png` en `speler2.png` (handgetekend), `kikker.png` en `konijn.png` (tekeningen van de eigenaar, standaard voor Bot 1 en Bot 2), `pion-groen.svg` en `pion-geel.svg` | `floris.png`, `speler2.png`, `pawn3.svg`, `pawn4.svg`; de kikker en het konijn zijn los aangeleverd |
 | `personages/` | `pommie.svg` (host) en `ratje.svg` (de kerstrat) | `pommie.svg`, `ratje.svg` |
 | `iconen/` | munt, ster, zon, maan, sneeuw, dobbelsteen, valstrik, vlaggetjes, vilttextuur en de vakje-iconen | gelijknamige SVG's |
 | `bord/` | het bord in lagen: `grond-*.svg`, `decor-*.svg` en `effect-*.svg` voor dag, nacht, winter en mist, plus de losse `ster.svg`, `ratje.svg` en `vraagteken.svg` (ochtendmist) op het bord | `board_dag.svg`, `board_nacht.svg`, enz. |

@@ -3,7 +3,7 @@
  * bonussterren en 4 deelnemers met naam, figuur en mens/bot.
  * De laatste keuzes worden onthouden, zodat je de volgende keer alleen op Start hoeft te tikken.
  */
-import { FIGUREN, figuur, STANDAARD_NAMEN } from '../data/figuren';
+import { FIGUREN, figuur, STANDAARD_FIGUREN, STANDAARD_NAMEN } from '../data/figuren';
 import type { AantalRondes, NieuwSpelKeuzes, Seizoen } from '../logic';
 import { asset } from './asset';
 import { icoon } from './iconen';
@@ -20,7 +20,7 @@ export function standaardKeuzes(): NieuwSpelKeuzes {
     aantalRondes: 10,
     seizoen: 'zomer',
     bonussterren: true,
-    spelers: FIGUREN.map((f, i) => ({ naam: STANDAARD_NAMEN[i], figuur: f.id, isBot: i >= 2 })),
+    spelers: STANDAARD_FIGUREN.map((id, i) => ({ naam: STANDAARD_NAMEN[i], figuur: id, isBot: i >= 2 })),
   };
 }
 
