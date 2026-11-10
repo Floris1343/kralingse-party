@@ -6,7 +6,7 @@ import { nieuwSpel } from './nieuwSpel';
 import { keuzes, alleBots, speelUit } from './testhulp';
 
 const vakjes = (zone: string) => BORD.vakjes.filter((v) => v.zone === zone);
-const zijpaden = ['hertenkamp-pad', 'boot', 'ijspad'];
+const zijpaden = ['boot', 'ijspad'];
 const hoofd = BORD.vakjes.filter((v) => !zijpaden.includes(v.zone));
 const telType = (lijst: typeof hoofd) =>
   lijst.reduce<Record<string, number>>((t, v) => ({ ...t, [v.type]: (t[v.type] ?? 0) + 1 }), {});
@@ -16,12 +16,12 @@ describe('board.json', () => {
     expect(controleerBord(BORD)).toEqual([]);
   });
 
-  it('hoofdroute: 38 vakjes, rond, met de vakjes van §6.5', () => {
+  it('hoofdroute: 39 vakjes, rond, met de vakjes van §6.5', () => {
     const route = hoofdroute(BORD);
-    expect(route).toHaveLength(39); // start ... start
-    expect(new Set(route).size).toBe(38);
-    expect(hoofd).toHaveLength(38);
-    expect(telType(hoofd)).toEqual({ start: 1, blauw: 18, rood: 6, event: 5, item: 3, kans: 2, pech: 2, boot: 1 });
+    expect(route).toHaveLength(40); // start ... start
+    expect(new Set(route).size).toBe(39);
+    expect(hoofd).toHaveLength(39);
+    expect(telType(hoofd)).toEqual({ start: 1, blauw: 16, rood: 6, event: 5, item: 3, kans: 2, pech: 2, boot: 1, hertenkamp: 3 });
   });
 
   it('de zones liggen met de klok mee in de goede volgorde', () => {
@@ -52,11 +52,21 @@ describe('board.json', () => {
     }
   });
 
-  it('hertenkamp: hoofdpad 3 vakjes, hertenkamp-pad 4 met één actievakje', () => {
-    expect(vakjes('hertenkamp')).toHaveLength(3);
-    expect(telType(vakjes('hertenkamp-pad'))).toEqual({ blauw: 3, hertenkamp: 1 });
-    const s = BORD.splitsingen.find((x) => x.soort === 'hertenkamp')!;
-    expect(BORD.vakjes.find((v) => v.id === s.vakje)!.zone).toBe('noordoever');
+  it('hertenkamp: één pad van 4 vakjes, met drie hertenkamp-actievakjes op een rij en geen splitsing', () => {
+    expect(vakjes('hertenkamp').map((v) => v.type)).toEqual(['blauw', 'hertenkamp', 'hertenkamp', 'hertenkamp']);
+    expect(BORD.splitsingen.map((s) => s.soort)).toEqual(['boot', 'ijspad']);
+    // Netjes aangesloten: noord7 → herten1 → … → herten4 → oost1, zonder losse vakjes.
+    let id = 'noord7';
+    const pad: string[] = [];
+    for (let i = 0; i < 5; i++) pad.push((id = BORD.vakjes.find((v) => v.id === id)!.next[0]));
+    expect(pad).toEqual(['herten1', 'herten2', 'herten3', 'herten4', 'oost1']);
+    for (const v of BORD.vakjes) expect(BORD.vakjes.some((w) => w.next.includes(v.id))).toBe(true);
+    expect(BORD.vakjes.some((v) => v.id.startsWith('hoofdpad'))).toBe(false);
+  });
+
+  it('het Pech-vakje van het oude onderste pad staat op de Oostoever; het bordje bij de ingang', () => {
+    expect(BORD.vakjes.find((v) => v.id === 'oost1')!.type).toBe('pech');
+    expect(BORD.plekken.bokBordje?.vakje).toBe('herten1');
   });
 
   it('boot: van de jachthaven via 4 blauwe vakjes naar het restaurant', () => {

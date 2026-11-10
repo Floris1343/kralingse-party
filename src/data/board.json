@@ -139,7 +139,6 @@
       "y": 216.2,
       "type": "blauw",
       "next": [
-        "hoofdpad1",
         "herten1"
       ],
       "zone": "noordoever",
@@ -148,30 +147,40 @@
       ]
     },
     {
-      "id": "hoofdpad1",
-      "x": 782,
-      "y": 222.2,
+      "id": "herten1",
+      "x": 779.2,
+      "y": 187.5,
       "type": "blauw",
       "next": [
-        "hoofdpad2"
+        "herten2"
       ],
       "zone": "hertenkamp"
     },
     {
-      "id": "hoofdpad2",
-      "x": 845.6,
-      "y": 231.8,
-      "type": "pech",
+      "id": "herten2",
+      "x": 847.9,
+      "y": 189.5,
+      "type": "hertenkamp",
       "next": [
-        "hoofdpad3"
+        "herten3"
       ],
       "zone": "hertenkamp"
     },
     {
-      "id": "hoofdpad3",
-      "x": 907.8,
-      "y": 249.7,
-      "type": "blauw",
+      "id": "herten3",
+      "x": 915.1,
+      "y": 205.6,
+      "type": "hertenkamp",
+      "next": [
+        "herten4"
+      ],
+      "zone": "hertenkamp"
+    },
+    {
+      "id": "herten4",
+      "x": 977.7,
+      "y": 236.3,
+      "type": "hertenkamp",
       "next": [
         "oost1"
       ],
@@ -181,7 +190,7 @@
       "id": "oost1",
       "x": 962.5,
       "y": 285.4,
-      "type": "blauw",
+      "type": "pech",
       "next": [
         "oost2"
       ],
@@ -418,46 +427,6 @@
       "zone": "westoever"
     },
     {
-      "id": "herten1",
-      "x": 779.2,
-      "y": 187.5,
-      "type": "blauw",
-      "next": [
-        "herten2"
-      ],
-      "zone": "hertenkamp-pad"
-    },
-    {
-      "id": "herten2",
-      "x": 847.9,
-      "y": 189.5,
-      "type": "blauw",
-      "next": [
-        "herten3"
-      ],
-      "zone": "hertenkamp-pad"
-    },
-    {
-      "id": "herten3",
-      "x": 915.1,
-      "y": 205.6,
-      "type": "hertenkamp",
-      "next": [
-        "herten4"
-      ],
-      "zone": "hertenkamp-pad"
-    },
-    {
-      "id": "herten4",
-      "x": 977.7,
-      "y": 236.3,
-      "type": "blauw",
-      "next": [
-        "oost1"
-      ],
-      "zone": "hertenkamp-pad"
-    },
-    {
       "id": "boot1",
       "x": 403.6,
       "y": 582,
@@ -550,12 +519,6 @@
   ],
   "splitsingen": [
     {
-      "vakje": "noord7",
-      "soort": "hertenkamp",
-      "hoofdpad": "hoofdpad1",
-      "zijpad": "herten1"
-    },
-    {
       "vakje": "haven2",
       "soort": "boot",
       "hoofdpad": "haven3",
@@ -627,6 +590,11 @@
       "vakje": "zuid2",
       "x": 653.9,
       "y": 764.6
+    },
+    "bokBordje": {
+      "vakje": "herten1",
+      "x": 746,
+      "y": 176
     }
   },
   "labels": [

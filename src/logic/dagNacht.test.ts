@@ -8,7 +8,7 @@ import { handelVakjeAf } from './effecten';
 import type { GameState } from './gameState';
 import { verwerkMinigame } from './minigame';
 import { nieuwSpel } from './nieuwSpel';
-import { botKiestZijpad, openSplitsing } from './splitsing';
+import { openSplitsing } from './splitsing';
 import { bord, keuzes, met, metWorp, spel } from './testhulp';
 
 const UITSLAG = [[0], [1], [2], [3]];
@@ -93,12 +93,11 @@ describe("wat er 's nachts verandert", () => {
     expect(na.spelers[0].vakje).toBe('haven3');
   });
 
-  it('het hertenkamp blijft open, maar bots kiezen dan altijd het hoofdpad', () => {
-    const s = opBord('noord7', (x) => ((x.nacht = true), (x.sterren = [{ plek: 'oostoever' }])));
-    const herten = BORD.splitsingen.find((x) => x.soort === 'hertenkamp')!;
-    expect(openSplitsing(s, BORD, 0)).toBe(herten);
-    for (const ster of BORD.sterplekken) {
-      expect(botKiestZijpad(met(s, (x) => (x.sterren = [{ plek: ster.id }])), BORD, herten, 0)).toBe(false);
-    }
+  it("'s nachts is er geen keuze bij het hertenkamp: je loopt er gewoon doorheen, langs de bok", () => {
+    const s = opBord('noord7', (x) => (x.nacht = true));
+    expect(openSplitsing(s, BORD, 0)).toBeUndefined();
+    const na = loopUit(metWorp(s, 2), BORD);
+    expect(na.spelers[0].vakje).toBe('herten2');
+    expect(na.verslag.some((g) => g.soort === 'rad' && g.rad === 'bok')).toBe(true);
   });
 });

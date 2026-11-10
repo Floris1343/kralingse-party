@@ -36,7 +36,7 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
   - Heb je minder dan 3 munten, dan krijg je de bootvraag niet (net als bij de ster).
   - Het **ijspad** blijft dicht tot de winter gebouwd is (fase 8). Tot die tijd doet het seizoen nog niets, en vaart de boot ook als je "Winter" kiest.
   - 's Nachts sluit de boot pas als dag en nacht gebouwd zijn (fase 4). *(Gebouwd in stap 5.)*
-- **Bots kiezen het zijpad alleen als ze daarmee sneller bij de ster zijn.** Voor de boot moeten ze na het betalen ook nog een ster kunnen kopen. Zo nemen ze de boot als de ster bij Plaszoom of Park Rozenburg staat (§6.2), en kiezen ze bij het hertenkamp het kortere hoofdpad.
+- **Bots kiezen het zijpad alleen als ze daarmee sneller bij de ster zijn.** Voor de boot moeten ze na het betalen ook nog een ster kunnen kopen. Zo nemen ze de boot als de ster bij Plaszoom of Park Rozenburg staat (§6.2). *(Bij het hertenkamp is sinds stap 10 geen splitsing meer.)*
 - **De turboknop blijft aan** tot je hem weer uitzet, ook na het herladen. Met turbo zijn de bots in één keer klaar, zonder lopen. Je ziet daarna alleen de korte melding.
 - **Minigame-uitslag:** tik de figuren op volgorde aan. "Gelijk met vorige" zet de volgende die je aantikt op dezelfde plek als de vorige. Heeft iedereen al een plek, dan schuift de laatste een plek op, naar de plek erboven. De laatste krijgt vanzelf de laatste plek. De knop "Bevestigen" is de bevestiging, en met "Opnieuw" begin je opnieuw.
 - **Het opstartscherm onthoudt je laatste keuzes** (namen, figuren, mens/bot, rondes). Tik je op een figuur, dan zie je alle figuren en kies je er één. Bij elk figuur staat wie het nu heeft; kies je dat, dan ruilen jullie. (Eerst kreeg je bij elke tik het volgende figuur; met 6 figuren voelde dat willekeurig.) Er moet minstens één mens meedoen.
@@ -54,7 +54,7 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 - **De winkel verkoopt alle 5 items tegelijk**, in 5 kaarten in de stijl van het winkelscherm uit het design. Muizenval en Gouden sleutel uit het design zitten er niet in (ONTWERP.md is leidend).
 - **Ratje:** eerst kies je wat hij steelt, daarna van wie. Je kunt alleen iemand kiezen die munten (of een ster) heeft. Ratje steelt nooit meer munten dan iemand heeft.
 - **Verplaatst worden** (windvlaag, hertje, bok, aanspoelen) telt niet als langslopen of landen. Je koopt dan dus geen ster en het nieuwe vakje doet niets. Zo blijft één beurt één uitkomst (net als bij de vleermuizen in §8.3).
-- **Achteruit waaien** gaat over het pad op land, nooit terug de boot of het hertenkamp-pad op.
+- **Achteruit waaien** gaat over het pad op land, nooit terug de boot op.
 - **Aanspoelen na de bok** kan op elk vakje, behalve op de bootroute en het ijspad.
 - **Kans:** de rollen kiezen speler A en B uit alle vier de spelers (A en B zijn altijd verschillend). Heeft A te weinig munten, dan geeft A wat hij heeft. Heeft A geen ster, dan gebeurt er niets.
 - **Pech "ruil met de laatste":** sta je zelf (gedeeld) laatste, dan gebeurt er niets. **"Iedereen 3 geven":** zolang je munten hebt.
@@ -63,7 +63,7 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 - **Bots met items:** de Ratjebel als Ratje een ster kan stelen, anders de beste dobbelsteen; Kies-je-worp als de ster binnen 10 vakjes ligt (en dan eindigen ze het liefst op blauw); de Wisseltruc als de ster meer dan 15 vakjes weg is. Kopen doen ze alleen als ze daarna nog een ster kunnen betalen.
 - **Bots en Ratje:** eerst een ster stelen van wie de meeste heeft, anders munten van de rijkste.
 - **Icoontjes:** het design heeft geen tekening voor de Wisseltruc, de Driedubbele dobbelsteen en de Ratjebel. De Driedubbele krijgt het icoon van de dubbele met "×3", de Ratjebel krijgt Ratje zelf en de Wisseltruc een tijdelijke paarse cirkel met een W.
-- **Het waarschuwingsbordje bij het hertenkamp** staat in het design niet als losse tekening. In de plaats daarvan waarschuwt de keuze bij de splitsing 's nachts: "Pas op! 's Nachts is de bok wild."
+- ~~Het waarschuwingsbordje bij het hertenkamp~~ *Vervangen in stap 10: er is nu een bordje bij de ingang.*
 - **Opslagversie 3.** Een bewaard spel uit stap 4 (versie 2) kan gewoon verder: het is dan overdag en niemand heeft items.
 - **Nog niet in deze stap** (komt in fase 5): de Nachtwinkel, de vallende ster, de vleermuizen en de ochtendmist. 's Nachts is de winkel dus dicht en er is nog niets anders open; de vleermuisvakjes zijn nog gewoon blauw.
 
@@ -74,7 +74,7 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 - **Een gratis item** (itemvakje, herten) is altijd een gewoon item, nooit een gemeen item.
 - **Zakkenroller:** heeft iemand minder dan 5 munten, dan steel je wat hij heeft. Iemand zonder munten kun je niet kiezen.
 - **Slakkendobbel en Achteruitpet stapelen niet.** Heeft iemand er al een, dan kun je hem die niet nog eens geven. De slak geldt voor elke dobbelsteen van die worp: met de dubbele dobbelsteen gooi je 2× 1–3, met Kies-je-worp kies je 1–3.
-- **Achteruit lopen** gaat over het pad op land, zonder splitsingen (dus nooit terug de boot, het hertenkamp-pad of het ijs op). Achteruit langs de ster, de winkel of Ratje komen telt gewoon als langslopen.
+- **Achteruit lopen** gaat over het pad op land, zonder splitsingen (dus nooit terug de boot of het ijs op). Achteruit langs de ster, de winkel of Ratje komen telt gewoon als langslopen.
 - **Valstrik:** je legt hem op het vakje waar je staat, en maar één per speler. Op een vakje ligt nooit meer dan één valstrik. Hij gaat af als een ander er zijn beurt **eindigt**: eerst betaalt die 10 munten (of wat hij heeft), daarna telt het vakje gewoon. Langslopen of erheen verplaatst worden (windvlaag, bok, vleermuizen) telt niet. Op je eigen valstrik gebeurt niets.
 - **Bots en de Nachtwinkel:** ze kopen alleen als ze daarna nog een ster kunnen betalen, het liefst de Achteruitpet, dan de Slakkendobbel, de Valstrik en de Zakkenroller. Ze gebruiken een gemeen item meteen en richten het op de speler op de 1e plaats (staan ze zelf eerst, dan op de 2e). Met de Achteruitpet gebruiken ze geen extra dobbelstenen; met Kies-je-worp kiezen ze dan 1.
 - **De vallende ster** kan alleen komen als er daarna nog een vrije sterplek over is, zodat een gekochte gewone ster altijd kan verhuizen. Hij heeft dezelfde tekening als de gewone ster, met een gloed, zodat je het verschil ziet.
@@ -160,3 +160,13 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 - **Overslaan:** met een tik sla je het sterfeest over; de balk en het figuur reageren dan meteen.
 - **Soepel op de iPad:** alleen transform en opacity bewegen. Er zijn hoogstens 16 fonkels en 18 confettistukjes per uitbarsting.
 - **Getallen in de balk:** de munten en sterren in de spelersbalk wachten tot hun effect komt en tellen dan op of af. Na de effecten staan ze altijd weer precies goed.
+
+## Stap 10: één pad door het hertenkamp
+
+- **Geen splitsing meer bij het hertenkamp.** Het pad langs het hek blijft over: noord7 → herten1 (blauw) → herten2, herten3, herten4 (drie hertenkamp-actievakjes op een rij) → oost1. De vakjes van het onderste pad (hoofdpad1 t/m 3) zijn weg.
+- **Het verplaatste vakje:** op het onderste pad lag geen Windvlaag-vakje maar het Pech-vakje (het paarse vakje met het onweerswolkje). Het echte Windvlaag-vakje lag al op de Oostoever. Het Pech-vakje staat nu op oost1, het blauwe vakje direct na het hertenkamp. Zo blijven er 2 Pech-vakjes.
+- **De hoofdroute** heeft nu 39 vakjes: 16 blauw, 6 rood, 5 event, 3 item, 2 kans, 2 pech, 3 hertenkamp, de start en de bootsteiger.
+- **Het zandpad in de tekening:** de grote lus om de plas liep in het design ook onderlangs. Het script `bord-uit-design.mjs` laat dat stuk weg in alle grondlagen (dag, nacht, winter, mist), met de twee pijltjes erop. Er wordt niets nieuw getekend: het gras eronder komt uit het design. Het script maakt het nieuwe bord ook met `--bord`.
+- **Het waarschuwingsbordje** staat bij de ingang (vóór herten1) en is alleen 's nachts te zien. Het design heeft er geen losse tekening voor. Het is samengesteld uit stukken van het design: het paaltje en de ronde plaat van het vraagtekenbordje, in het rood, met het hertenicoon van het hertenkamp-vakje erop. Je kunt het in de bord-editor verschuiven (plek `bokBordje`).
+- **Bots** kiezen geen pad meer bij het hertenkamp; ze lopen er gewoon doorheen.
+- **Opslagversie 6.** Een bewaard spel speelt gewoon verder. Wie op een verdwenen vakje stond, staat nu op het dichtstbijzijnde vakje van het nieuwe pad: hoofdpad1 → herten1, hoofdpad2 → herten2, hoofdpad3 → herten3. Een valstrik verhuist net zo. Stond iemand bij de oude splitsing te kiezen, dan loopt hij gewoon verder.

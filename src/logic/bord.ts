@@ -26,7 +26,7 @@ export interface Vakje {
   flags?: VakjeVlag[];
 }
 
-export type SplitsingSoort = 'hertenkamp' | 'boot' | 'ijspad';
+export type SplitsingSoort = 'boot' | 'ijspad';
 
 export interface Splitsing {
   /** Op dit vakje kies je. */
@@ -34,7 +34,7 @@ export interface Splitsing {
   soort: SplitsingSoort;
   /** Gewoon doorlopen. */
   hoofdpad: string;
-  /** Het hertenkamp-pad, de boot of het ijspad. */
+  /** De boot of het ijspad. */
   zijpad: string;
 }
 
@@ -69,7 +69,8 @@ export interface Bord {
   vakjes: Vakje[];
   splitsingen: Splitsing[];
   sterplekken: Sterplek[];
-  plekken: { winkel: Plek; nachtwinkel: Plek; ratje: Plek };
+  /** `bokBordje`: het waarschuwingsbordje bij de ingang van het hertenkamp ('s nachts). */
+  plekken: { winkel: Plek; nachtwinkel: Plek; ratje: Plek; bokBordje?: Plek };
   labels: BordLabel[];
 }
 
@@ -91,8 +92,8 @@ export function splitsingBij(bord: Bord, id: string): Splitsing | undefined {
 }
 
 /**
- * Het volgende vakje op de route. Bij een splitsing kies je met `zijpad` het hertenkamp-pad,
- * de boot of het ijspad; anders loop je gewoon het hoofdpad.
+ * Het volgende vakje op de route. Bij een splitsing kies je met `zijpad` de boot of het ijspad;
+ * anders loop je gewoon het hoofdpad.
  */
 export function volgendVakje(bord: Bord, id: string, zijpad = false): string {
   const splitsing = splitsingBij(bord, id);

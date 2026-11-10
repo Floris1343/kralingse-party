@@ -45,7 +45,7 @@ const ZIJZONES = new Set(['boot', 'ijspad']);
 export function vorigVakje(bord: Bord, id: string): string {
   const ervoor = bord.vakjes.filter((v) => v.next.includes(id));
   if (ervoor.length === 0) throw new Error(`Vakje ${id} heeft geen voorganger`);
-  const hoofd = ervoor.filter((v) => !ZIJZONES.has(v.zone) && v.zone !== 'hertenkamp-pad');
+  const hoofd = ervoor.filter((v) => !ZIJZONES.has(v.zone));
   return (hoofd[0] ?? ervoor[0]).id;
 }
 

@@ -31,11 +31,11 @@ function uitkomsten(id: string, wijzig: (s: GameState) => void = () => {}): Map<
 }
 
 describe('route terug en vooruit', () => {
-  it('achteruit over land, niet over de boot of het hertenkamp-pad', () => {
+  it('achteruit over land, niet over de boot, en door het hertenkamp', () => {
     expect(vorigVakje(BORD, 'restaurant1')).toBe('oost3');
-    expect(vorigVakje(BORD, 'oost1')).toBe('hoofdpad3');
+    expect(vorigVakje(BORD, 'oost1')).toBe('herten4');
     expect(vorigVakje(BORD, 'strand1')).toBe('west4');
-    expect(verschuif(BORD, 'oost2', -3)).toBe('hoofdpad2');
+    expect(verschuif(BORD, 'oost2', -3)).toBe('herten3');
     expect(verschuif(BORD, 'west3', 3)).toBe('strand2');
   });
 });
@@ -176,7 +176,7 @@ describe('eventvakjes (§7.5)', () => {
   it('Windvlaag: 3 vooruit of 3 achteruit', () => {
     const plekken = new Set<string>();
     for (let seed = 0; seed < 50; seed++) plekken.add(land('oost2', seed).spelers[0].vakje);
-    expect([...plekken].sort()).toEqual(['hoofdpad2', 'plaszoom1']);
+    expect([...plekken].sort()).toEqual(['herten3', 'plaszoom1']);
   });
 
   it('Zeilwedstrijd: de hoogste worp wint 10, de organisator krijgt +2', () => {

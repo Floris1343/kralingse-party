@@ -78,3 +78,33 @@ describe('opslag', () => {
     expect(speelUit(laad(o)!).eind).toEqual(eind);
   });
 });
+
+describe('opslaan versie 6: het onderste pad bij het hertenkamp is weg', () => {
+  it('een speler (en een valstrik) op een verdwenen vakje staat daarna op het dichtstbijzijnde vakje van het nieuwe pad', () => {
+    const o = nepOpslag();
+    const oud = structuredClone(spel());
+    oud.spelers[0].vakje = 'hoofdpad1';
+    oud.spelers[1].vakje = 'hoofdpad2';
+    oud.spelers[2].vakje = 'hoofdpad3';
+    oud.spelers[3].vakje = 'oost2';
+    oud.valstrikken = [{ speler: 3, vakje: 'hoofdpad2' }];
+    o.setItem(OPSLAG_SLEUTEL, JSON.stringify({ versie: 5, state: oud }));
+    const s = laad(o)!;
+    expect(s.spelers.map((sp) => sp.vakje)).toEqual(['herten1', 'herten2', 'herten3', 'oost2']);
+    expect(s.valstrikken).toEqual([{ speler: 3, vakje: 'herten2' }]);
+  });
+
+  it('stond iemand bij de oude splitsing te kiezen, dan loopt hij gewoon verder', () => {
+    const o = nepOpslag();
+    const oud = { ...structuredClone(spel()), fase: { soort: 'splitsing', worp: 5, resterend: 3, vakje: 'noord7' } };
+    o.setItem(OPSLAG_SLEUTEL, JSON.stringify({ versie: 5, state: oud }));
+    expect(laad(o)!.fase).toEqual({ soort: 'lopen', worp: 5, resterend: 3 });
+  });
+
+  it('een gewoon spel van versie 5 verandert verder niet', () => {
+    const o = nepOpslag();
+    const oud = structuredClone(spel());
+    o.setItem(OPSLAG_SLEUTEL, JSON.stringify({ versie: 5, state: oud }));
+    expect(laad(o)).toEqual(oud);
+  });
+});

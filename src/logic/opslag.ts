@@ -1,7 +1,7 @@
 import type { GameState } from './gameState';
 
 /** Verhoog dit als de vorm van GameState verandert. */
-export const OPSLAG_VERSIE = 5;
+export const OPSLAG_VERSIE = 6;
 export const OPSLAG_SLEUTEL = 'kralingse-plas-party/spel';
 
 interface Opgeslagen {
@@ -28,9 +28,10 @@ export function laad(opslag: Opslag): GameState | null {
   try {
     const data = JSON.parse(ruw) as Opgeslagen;
     if (!data?.state || !Array.isArray(data.state.spelers)) return null;
-    if (data.versie === 2) return vanVersie4(vanVersie3(vanVersie2(data.state)));
-    if (data.versie === 3) return vanVersie4(vanVersie3(data.state));
-    if (data.versie === 4) return vanVersie4(data.state);
+    if (data.versie === 2) return vanVersie5(vanVersie4(vanVersie3(vanVersie2(data.state))));
+    if (data.versie === 3) return vanVersie5(vanVersie4(vanVersie3(data.state)));
+    if (data.versie === 4) return vanVersie5(vanVersie4(data.state));
+    if (data.versie === 5) return vanVersie5(data.state);
     if (data.versie !== OPSLAG_VERSIE) return null;
     return data.state;
   } catch {
@@ -64,6 +65,30 @@ function vanVersie4(state: GameState): GameState {
   const s = structuredClone(state);
   const oud = s.startworpen as unknown as (number | number[])[];
   s.startworpen = oud.map((w) => (Array.isArray(w) ? w : [w]));
+  return s;
+}
+
+/**
+ * Het onderste pad bij het hertenkamp is weg (stap 10). Wie op een van die vakjes stond (of daar
+ * een valstrik had), staat nu op het dichtstbijzijnde vakje van het pad langs het hek.
+ */
+export const VERDWENEN_VAKJES: Record<string, string> = {
+  hoofdpad1: 'herten1',
+  hoofdpad2: 'herten2',
+  hoofdpad3: 'herten3',
+};
+
+function vanVersie5(state: GameState): GameState {
+  const s = structuredClone(state);
+  const nieuw = (id: string) => VERDWENEN_VAKJES[id] ?? id;
+  for (const sp of s.spelers) sp.vakje = nieuw(sp.vakje);
+  for (const v of s.valstrikken) v.vakje = nieuw(v.vakje);
+  // Twee valstrikken op één vakje kan niet: de tweede vervalt.
+  s.valstrikken = s.valstrikken.filter((v, i) => s.valstrikken.findIndex((w) => w.vakje === v.vakje) === i);
+  // Stond iemand bij de oude splitsing te kiezen, dan loopt hij gewoon verder.
+  if (s.fase.soort === 'splitsing' && s.fase.vakje === 'noord7') {
+    s.fase = { soort: 'lopen', worp: s.fase.worp, resterend: s.fase.resterend };
+  }
   return s;
 }
 

@@ -70,7 +70,7 @@ export function stap(state: GameState, bord: Bord): GameState {
   });
 }
 
-/** Antwoord van een mens bij een splitsing: `zijpad` = hertenkamp-pad of de boot (kost 3 munten). */
+/** Antwoord van een mens bij een splitsing: `zijpad` = de boot (kost 3 munten) of het ijspad. */
 export function splitsingKeuze(state: GameState, bord: Bord, zijpad: boolean): GameState {
   const fase = vereisFase(state, 'splitsing');
   return metKopie(state, (s) => zetStap(s, bord, fase.worp, fase.resterend, zijpad));

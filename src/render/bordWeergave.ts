@@ -11,7 +11,7 @@ import { asset, plaatje } from '../ui/asset';
 import { cameraOp, cameraOverzicht, vrijeCamera, type Afmeting, type CameraStand } from './camera';
 import { diepteSchaal, vakjeMaat } from './diepte';
 import { vakjesSvg } from './vakjes';
-import { SPRITES, VILT_FILTER } from './vakjeTekeningen';
+import { SPRITES, VAKJE_TEKENINGEN, VILT_FILTER } from './vakjeTekeningen';
 
 export interface WeergaveSpeler {
   naam: string;
@@ -119,6 +119,7 @@ export class BordWeergave {
     this.wereld.append(this.spriteLaag);
 
     this.zetRatje();
+    if (metNacht) this.zetBokBordje();
     for (const l of bord.labels) {
       const el = document.createElement('div');
       el.className = `bord-label${l.onder ? ' onder' : ''}`;
@@ -329,6 +330,34 @@ export class BordWeergave {
   private zetRatje(): void {
     const p = this.bord.plekken.ratje;
     this.sprite('bord/ratje.svg', 'Ratje', SPRITES.ratje, p.x, p.y);
+  }
+
+  /**
+   * Het waarschuwingsbordje bij de ingang van het hertenkamp (§6.3): alleen 's nachts zichtbaar.
+   * Samengesteld uit stukken van het design: het paaltje en de ronde plaat van het
+   * vraagtekenbordje (board_mist.svg) en het hertenicoon van het hertenkamp-vakje, in het rood.
+   */
+  private zetBokBordje(): void {
+    const p = this.bord.plekken.bokBordje;
+    if (!p) return;
+    const hert = VAKJE_TEKENINGEN.hertenkamp.icoon.replaceAll('#A86A35', '#D62839');
+    const el = document.createElement('div');
+    el.className = 'bord-sprite bok-bordje nacht-laag';
+    el.setAttribute('role', 'img');
+    el.setAttribute('aria-label', "Pas op: 's nachts is de bok wild");
+    el.innerHTML = `<svg width="56" height="90" viewBox="-28 -82 56 90" aria-hidden="true">
+      <ellipse cx="0" cy="0" rx="20" ry="6" fill="#000" opacity=".15"/>
+      <rect x="-3" y="-34" width="6" height="34" rx="3" fill="#7E4C22"/>
+      <circle cx="0" cy="-54" r="22" fill="#D62839" stroke="#fff" stroke-width="4"/>
+      <g transform="translate(0 -56) scale(.42)">${hert}</g></svg>`;
+    const s = diepteSchaal(p.y) / diepteSchaal(SPRITES.vraagteken.designY);
+    el.style.width = '56px';
+    el.style.height = '90px';
+    el.style.transformOrigin = '28px 82px';
+    el.style.transform = `translate(${p.x - 28}px, ${p.y - 82}px) scale(${s})`;
+    el.style.zIndex = String(Math.round(p.y));
+    this.spriteLaag.append(el);
+    this.nachtLagen.push(el);
   }
 
   private sprite(pad: string, alt: string, meta: SpriteMeta, x: number, y: number): HTMLElement {

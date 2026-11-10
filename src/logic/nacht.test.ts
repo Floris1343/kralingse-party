@@ -178,9 +178,9 @@ describe('de gemene items', () => {
     expect(s.spelers[0].vakje).toBe('v10');
   });
 
-  it('achteruit op het echte bord: nooit terug het hertenkamp-pad, de boot of het ijs op', async () => {
+  it('achteruit op het echte bord: nooit terug de boot of het ijs op', async () => {
     const { BORD } = await import('../data/bord');
-    const zij = new Set(['hertenkamp-pad', 'boot', 'ijspad']);
+    const zij = new Set(['boot', 'ijspad']);
     for (const start of BORD.vakjes.filter((v) => !zij.has(v.zone))) {
       let s = met(spel(), (x) => {
         x.volgorde = [0, 1, 2, 3];

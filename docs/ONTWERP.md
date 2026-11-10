@@ -72,15 +72,15 @@ Referentie: `referentie/kaart-kralingse-plas.png`. Het noorden is boven. De hoof
 |---|---|---|---|---|
 | 1 | **Strand** | linksboven/west-noordwest (het zandstrand) | 5 (incl. start) | Startvakje, eventvakje "Strandtent" |
 | 2 | **Noordoever** | langs het bos en de grasvelden boven | 7 | Lantaarnpaal (wissel dag/nacht); 's nachts vleermuizen (§8.3) |
-| 3 | **Splitsing hertenkamp** | rechtsboven/noordoost | hoofdpad 3, hertenkamp-pad 4 | Keuze welk pad, zie §6.3 |
-| 4 | **Oostoever** | het lange rechte pad aan de rechterkant | 6 | Eventvakje "Windvlaag" |
+| 3 | **Hertenkamp** | rechtsboven/noordoost | 4 (één pad, langs het hek) | 3 hertenkamp-actievakjes op een rij, zie §6.3 |
+| 4 | **Oostoever** | het lange rechte pad aan de rechterkant | 6 | Eventvakje "Windvlaag", Pech-vakje |
 | 5 | **Restaurant** | Restaurant De Tuin van de Vier Windstreken (oost) | 1 | **Winkel**; aankomst van de boot |
 | 6 | **Plaszoom** | rechtsonder/zuidoost | 4 | Lantaarnpaal (wissel dag/nacht) |
 | 7 | **Zuidoever / Park Rozenburg** | onderkant, richting de stad | 6 | **Ratje** (de kerstrat) woont hier |
 | 8 | **Jachthaven** | linksonder/zuidwest (de bootjes) | 3 | **Bootsplitsing** (§6.2); **Nachtwinkel** (§8.1) |
 | 9 | **Westoever** | links, terug naar het strand | 4 | Eventvakje "Zeilwedstrijd" (§7.5) |
 
-De hoofdroute heeft in totaal ongeveer **38 vakjes**, plus 4 op het hertenkamp-pad en 4 op de bootroute.
+De hoofdroute heeft in totaal ongeveer **39 vakjes** (het hertenkamp hoort er nu bij), plus 4 op de bootroute.
 
 ### 6.2 De boot (kortere route)
 
@@ -91,33 +91,35 @@ De hoofdroute heeft in totaal ongeveer **38 vakjes**, plus 4 op het hertenkamp-p
 
 ### 6.3 Het hertenkamp
 
-- Rechtsboven splitst het pad: het **hoofdpad** (3 vakjes) of het **hertenkamp-pad** (4 vakjes, één daarvan is het **hertenkamp-actievakje**). Daarna komen de paden weer samen.
+- Rechtsboven loopt **één pad** langs het hek en door het hertenkamp. Er is geen splitsing: iedereen komt erlangs.
+- Het pad heeft 4 vakjes: een blauw vakje bij de ingang en daarna **drie hertenkamp-actievakjes op een rij**, allemaal met het hertenicoon uit het design en met dezelfde regels.
 - **Overdag: herten voeren.** Wie op het actievakje eindigt, draait een rad: +5 munten, +10 munten, een gratis item, of een hertje dat je 3 vakjes vooruit duwt.
 - **'s Nachts: het mannetjeshert (de bok) is wild!** Wie 's nachts op het actievakje eindigt, zit in de problemen. Het rad heeft dan alleen nare uitkomsten:
   - de bok rent je omver: **−10 munten**
   - de bok jaagt je terug naar het **Strand** (start)
   - de bok eet je spullen op: **je verliest al je items**
   - de bok gooit je in de plas: **−5 munten**, en je spoelt aan op een **willekeurig vakje**
-- 's Nachts staat bij de splitsing een waarschuwingsbordje (een rood bokkenhoofd). Bots kiezen 's nachts altijd het hoofdpad.
+- 's Nachts staat bij de ingang van het hertenkamp een waarschuwingsbordje (een rood bokkenhoofd), zodat je weet dat het gevaarlijk is.
 - Visueel: overdag rustige herten. 's Nachts staat er een grote bok met gloeiende rode ogen.
 
 ### 6.4 Plekken waar de ster kan staan
 
 Zes kandidaat-plekken, verspreid over het bord: Strand-noord, Noordoever-midden, Oostoever-midden, Plaszoom, Park Rozenburg en Westoever. De ster staat **naast** het pad. Je koopt hem bij het langslopen.
 
-### 6.5 Verdeling van de vakjes (hoofdroute, ±38)
+### 6.5 Verdeling van de vakjes (hoofdroute, ±39)
 
 | Type | Aantal | Effect |
 |---|---|---|
 | Start | 1 | – |
-| Blauw | 19 | +3 munten (laatste 5 rondes: +6). Op 3 ervan staat de vlag `nachtRood`, op 2 andere de vlag `nachtVleermuis` (§8). |
+| Blauw | 16 | +3 munten (laatste 5 rondes: +6). Op 3 ervan staat de vlag `nachtRood`, op 2 andere de vlag `nachtVleermuis` (§8). |
 | Rood | 6 | −3 munten (laatste 5 rondes: −6), nooit onder 0 |
 | Event | 5 | Effect hangt af van de plek: 2 lantaarnpalen (wissel dag/nacht), Strandtent, Windvlaag, Zeilwedstrijd |
 | Item | 3 | Je krijgt een gratis willekeurig item (heb je er al 3, dan krijg je 5 munten) |
 | Kans | 2 | Kans-rad, zie §7.3 |
-| Pech | 2 | Pech-rad, zie §7.4 (vervangt het Bowser-vakje; het thema volgt later) |
+| Pech | 2 | Pech-rad, zie §7.4 (vervangt het Bowser-vakje; het thema volgt later). Eén ligt op de Oostoever, één aan de Zuidoever. |
+| Hertenkamp | 3 | Drie op een rij in het hertenkamp: overdag het rad met beloningen, 's nachts de wilde bok (§6.3) |
 
-Op het hertenkamp-pad: 3 blauwe vakjes en het hertenkamp-actievakje. Op de bootroute: 4 blauwe vakjes.
+Op de bootroute: 4 blauwe vakjes.
 
 ---
 

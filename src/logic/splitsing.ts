@@ -1,5 +1,5 @@
 /**
- * Splitsingen (§6.2, §6.3): het hertenkamp-pad en de boot.
+ * Splitsingen (§6.2): de boot. Bij het hertenkamp is geen splitsing meer (§6.3).
  * 's Nachts vaart de boot niet. Het ijspad (§8.5) gaat pas open als de winter gebouwd is.
  */
 import { splitsingBij, volgendVakje, type Bord, type Splitsing } from './bord';
@@ -10,8 +10,6 @@ import { sterPrijs, zichtbareSterren } from './ster';
 /** Kan deze speler hier het zijpad nemen? Zo niet, dan loopt hij vanzelf door. */
 export function zijpadOpen(state: GameState, splitsing: Splitsing, speler: number): boolean {
   switch (splitsing.soort) {
-    case 'hertenkamp':
-      return true;
     case 'boot':
       // 's Nachts vaart de boot niet. Te weinig munten? Dan krijg je de vraag niet (net als bij de ster).
       return !state.nacht && state.spelers[speler].munten >= BOOT_PRIJS;
@@ -47,8 +45,6 @@ export function stappenTotSter(state: GameState, bord: Bord, start: string): num
  * Voor de boot moeten ze na het betalen ook nog een ster kunnen kopen.
  */
 export function botKiestZijpad(state: GameState, bord: Bord, splitsing: Splitsing, speler: number): boolean {
-  // 's Nachts is de bok wild: bots nemen dan altijd het hoofdpad (§6.3).
-  if (splitsing.soort === 'hertenkamp' && state.nacht) return false;
   if (splitsing.soort === 'boot' && state.spelers[speler].munten - BOOT_PRIJS < sterPrijs(state)) return false;
   const viaZijpad = 1 + stappenTotSter(state, bord, splitsing.zijpad);
   const viaHoofdpad = 1 + stappenTotSter(state, bord, splitsing.hoofdpad);

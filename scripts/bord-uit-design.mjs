@@ -91,6 +91,34 @@ function leesBord(naam) {
   return { kop, defs, grond: lagen[0], vakjes: lagen[1], decor: lagen[2], effecten: lagen.slice(3) };
 }
 
+/**
+ * Bij het hertenkamp is er nog maar één pad: dat langs het hek (ONTWERP §6.3). In het design loopt
+ * de grote lus om de plas daar ook nog onderlangs. Dat stuk (tussen noord7 en oost1) laten we weg,
+ * met de pijltjes erop; het gras uit het design is er gewoon onder getekend.
+ */
+const SPLITS = [718.2, 216.2];
+const SAMEN = [962.5, 285.4];
+function zonderOnderstePad(grond) {
+  const afst = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  let weg = [];
+  const uit = grond.replace(/<path d="(M192\.1 295\.0[^"]*)"([^>]*)>/g, (_, d, rest) => {
+    const p = [...d.matchAll(/([-\d.]+) ([-\d.]+)/g)].map((m) => [Number(m[1]), Number(m[2])]);
+    const dicht = (q) => p.reduce((best, r, i) => (afst(r, q) < afst(p[best], q) ? i : best), 0);
+    const a = dicht(SPLITS);
+    const b = dicht(SAMEN);
+    weg = p.slice(a + 1, b);
+    const open = [...p.slice(b), ...p.slice(0, a + 1)];
+    const nieuw = `M${open.map((q) => `${q[0]} ${q[1]}`).join(' L')}`;
+    const cap = rest.includes('stroke-linecap') ? rest : rest.replace(/\/$/, ' stroke-linecap="round"/');
+    return `<path d="${nieuw}"${cap}>`;
+  });
+  if (!weg.length) throw new Error('De lus om de plas is niet gevonden in de grondlaag');
+  // De pijltjes die op het weggehaalde stuk stonden.
+  return uit.replace(/<path d="M-4 -5 L3 0 L-4 5" transform="translate\(([-\d.]+) ([-\d.]+)\)[^>]*>/g, (heel, x, y) =>
+    weg.some((q) => afst(q, [Number(x), Number(y)]) < 6) ? '' : heel,
+  );
+}
+
 const isSter = (g) => g.includes('#8E5BD9') && g.includes('#B48AF0');
 const isRatje = (g) => g.includes('#FBF6EC') && g.length > 3000;
 /** Het paarse vraagtekenbordje op de sterplekken bij ochtendmist (board_mist.svg). */
@@ -99,7 +127,7 @@ const isVraagteken = (g) => g.includes('#8E5BD9') && g.includes('M-7 -60') && g.
 const sprites = {};
 for (const naam of ['dag', 'nacht', 'winter', 'mist']) {
   const b = leesBord(naam);
-  schrijf(join(PUBLIC, `bord/grond-${naam}.svg`), `${b.kop}${b.defs}${b.grond}</svg>`);
+  schrijf(join(PUBLIC, `bord/grond-${naam}.svg`), `${b.kop}${b.defs}${zonderOnderstePad(b.grond)}</svg>`);
   const d = kinderen(b.decor);
   const rest = d.lijst.filter((g) => {
     if (isSter(g)) return (sprites[`ster-${naam}`] = g), false;
@@ -303,26 +331,30 @@ function maakBordJson() {
   const zones = [
     { zone: 'strand', soorten: ['start', B, B, [E, 'strandtent'], I] },
     { zone: 'noordoever', soorten: [[B, 'nachtRood'], [B, 'nachtVleermuis'], R, [E, 'lantaarnpaal'], [B, 'nachtRood'], [B, 'nachtVleermuis'], [B, 'nachtRood']] },
-    { zone: 'hertenkamp', soorten: [B, P, B] },
-    { zone: 'oostoever', soorten: [B, [E, 'windvlaag'], R] },
+    // Het hertenkamp (§6.3): één pad langs het hek, met drie hertenkamp-actievakjes op een rij.
+    { zone: 'hertenkamp', soorten: [B, 'hertenkamp', 'hertenkamp', 'hertenkamp'] },
+    // Het Pech-vakje van het oude onderste pad staat nu op de Oostoever.
+    { zone: 'oostoever', soorten: [P, [E, 'windvlaag'], R] },
     { zone: 'restaurant', soorten: [B] },
     { zone: 'plaszoom', soorten: [B, [E, 'lantaarnpaal'], K, R, B] },
     { zone: 'zuidoever', soorten: [B, R, I, B, P, B, I] },
     { zone: 'jachthaven', soorten: [R, 'boot', B] },
     { zone: 'westoever', soorten: [B, [E, 'zeilwedstrijd'], R, K] },
   ];
-  const ids = { strand: 'strand', noordoever: 'noord', hertenkamp: 'hoofdpad', oostoever: 'oost', restaurant: 'restaurant', plaszoom: 'plaszoom', zuidoever: 'zuid', jachthaven: 'haven', westoever: 'west' };
+  const ids = { strand: 'strand', noordoever: 'noord', hertenkamp: 'herten', oostoever: 'oost', restaurant: 'restaurant', plaszoom: 'plaszoom', zuidoever: 'zuid', jachthaven: 'haven', westoever: 'west' };
 
-  // Plaatsen: strand+noord van start tot splitsing (12 vakjes, laatste óp de splitsing),
-  // 3 op het hoofdpad, oost begint óp het samenkomen, restaurant (naast het gebouw) en steiger vast.
+  // Plaatsen: strand+noord van start tot de ingang van het hertenkamp (12 vakjes),
+  // 4 op het pad langs het hek, oost begint waar dat pad weer op de lus komt,
+  // restaurant (naast het gebouw) en steiger vast.
   const strandNoord = [lus[0], ...tussen(lus, s, 0, A.split, 10), puntOp(lus, s, A.split)];
-  const hoofdpad = tussen(lus, s, A.split, A.samen, 3);
+  const hs = metLengte(herten);
+  const hertenPad = tussen(herten, hs, 0, hs[hs.length - 1], 4);
   const oost = [puntOp(lus, s, A.samen), ...tussen(lus, s, A.samen, A.rest, 2)];
   const rest = [puntOp(lus, s, A.rest)];
   const naRest = tussen(lus, s, A.rest, A.steiger, 13); // plaszoom 5, zuid 7, haven 1
   const steiger = [puntOp(lus, s, A.steiger)];
   const terug = tussen(lus, s, A.steiger, totaal, 5); // haven 1, west 4
-  const reeks = [...strandNoord, ...hoofdpad, ...oost, ...rest, ...naRest, ...steiger, ...terug];
+  const reeks = [...strandNoord, ...hertenPad, ...oost, ...rest, ...naRest, ...steiger, ...terug];
 
   const vakjes = [];
   let i = 0;
@@ -339,11 +371,6 @@ function maakBordJson() {
   vakjes.forEach((v, k) => v.next.push(vakjes[(k + 1) % vakjes.length].id));
   const vind = (id) => vakjes.find((v) => v.id === id);
 
-  // Hertenkamp-pad: 4 vakjes tussen de splitsing (noord7) en het samenkomen (oost1).
-  const hs = metLengte(herten);
-  const hertPos = tussen(herten, hs, 0, hs[hs.length - 1], 4);
-  const hertSoorten = [B, B, 'hertenkamp', B];
-  const hertVakjes = hertPos.map((p, k) => ({ id: `herten${k + 1}`, ...xy(p), type: hertSoorten[k], next: [], zone: 'hertenkamp-pad' }));
   // Bootroute: 4 blauwe vakjes op het water, van de steiger naar het restaurant.
   const bs = metLengte(boot);
   const bootVakjes = tussen(boot, bs, 0, bs[bs.length - 1], 4).map((p, k) => ({ id: `boot${k + 1}`, ...xy(p), type: B, next: [], zone: 'boot' }));
@@ -358,10 +385,9 @@ function maakBordJson() {
     vind(van).next.push(lijst[0].id);
     lijst.forEach((v, k) => v.next.push(k + 1 < lijst.length ? lijst[k + 1].id : naar));
   };
-  keten(hertVakjes, 'noord7', 'oost1');
   keten(bootVakjes, 'haven2', 'restaurant1');
   keten(ijsVakjes, 'strand3', 'plaszoom2');
-  vakjes.push(...hertVakjes, ...bootVakjes, ...ijsVakjes);
+  vakjes.push(...bootVakjes, ...ijsVakjes);
 
   // Sterplekken (§6.4): in de plas naast het pad, zo dat de ster geen vakjes bedekt.
   // Plaszoom staat precies waar het design de ster heeft.
@@ -383,7 +409,6 @@ function maakBordJson() {
     start: 'strand1',
     vakjes,
     splitsingen: [
-      { vakje: 'noord7', soort: 'hertenkamp', hoofdpad: 'hoofdpad1', zijpad: 'herten1' },
       { vakje: 'haven2', soort: 'boot', hoofdpad: 'haven3', zijpad: 'boot1' },
       { vakje: 'strand3', soort: 'ijspad', hoofdpad: 'strand4', zijpad: 'ijs1' },
     ],
@@ -392,6 +417,8 @@ function maakBordJson() {
       winkel: { vakje: 'restaurant1', x: 1074.8, y: 490.2 },
       nachtwinkel: { vakje: 'haven2', x: 165.7, y: 677.4 },
       ratje: { vakje: dichtsteVakje([653.9, 764.6], 'zuidoever'), x: 653.9, y: 764.6 },
+      // Het waarschuwingsbordje (een rood bokkenhoofd) bij de ingang van het hertenkamp, alleen 's nachts.
+      bokBordje: { vakje: 'herten1', x: 746, y: 176 },
     },
     labels: [
       { tekst: 'Start · Strand', x: 192, y: 207, onder: false },

@@ -20,23 +20,11 @@ function bij(vakje: string, ster: string, wijzig: (s: GameState) => void = () =>
 }
 
 describe('splitsingen op het echte bord', () => {
-  it('een mens bij het hertenkamp krijgt de keuze, zonder al te lopen', () => {
+  it('bij het hertenkamp is geen keuze: je loopt het pad langs het hek', () => {
     const s = stap(metWorp(bij('noord7', 'westoever'), 4), BORD);
-    expect(s.fase).toEqual({ soort: 'splitsing', worp: 4, resterend: 4, vakje: 'noord7' });
-    expect(s.spelers[0].vakje).toBe('noord7');
-  });
-
-  it('hertenkamp-pad kiezen: de speler gaat het zijpad op', () => {
-    let s = stap(metWorp(bij('noord7', 'westoever'), 2), BORD);
-    s = loopUit(splitsingKeuze(s, BORD, true), BORD);
-    expect(s.spelers[0].vakje).toBe('herten2');
-    expect(s.spelers[0].munten).toBe(13); // herten2 is blauw
-  });
-
-  it('hoofdpad kiezen: de speler loopt gewoon door', () => {
-    let s = stap(metWorp(bij('noord7', 'westoever'), 1), BORD);
-    s = loopUit(splitsingKeuze(s, BORD, false), BORD);
-    expect(s.spelers[0].vakje).toBe('hoofdpad1');
+    expect(s.fase).toEqual({ soort: 'lopen', worp: 4, resterend: 3 });
+    expect(s.spelers[0].vakje).toBe('herten1');
+    expect(loopUit(metWorp(bij('noord7', 'westoever'), 5), BORD).spelers[0].vakje).toBe('oost1');
   });
 
   it('de boot kost 3 munten en vaart naar het restaurant', () => {
@@ -61,8 +49,8 @@ describe('splitsingen op het echte bord', () => {
   });
 
   it('eindig je op een splitsing, dan kies je aan het begin van je volgende beurt', () => {
-    let s = loopUit(metWorp(bij('noord6', 'westoever'), 1), BORD);
-    expect(s.spelers[0].vakje).toBe('noord7');
+    let s = loopUit(metWorp(bij('haven1', 'westoever', (x) => (x.spelers[0].munten = 30)), 1), BORD);
+    expect(s.spelers[0].vakje).toBe('haven2');
     s = met(s, (x) => (x.aanZet = 0));
     expect(stap(metWorp(s, 3), BORD).fase.soort).toBe('splitsing');
   });
@@ -84,10 +72,6 @@ describe('bots bij een splitsing', () => {
     expect(botKiestZijpad(westen, BORD, splitsing('boot'), 0)).toBe(false);
   });
 
-  it('nemen bij het hertenkamp het kortere hoofdpad', () => {
-    expect(botKiestZijpad(bij('noord7', 'oostoever'), BORD, splitsing('hertenkamp'), 0)).toBe(false);
-  });
-
   it('kiezen meteen, zonder te wachten', () => {
     const s = bij('haven2', 'plaszoom', (x) => {
       x.spelers[0].isBot = true;
@@ -101,14 +85,14 @@ describe('bots bij een splitsing', () => {
 });
 
 describe('een heel spel op het echte bord', () => {
-  it('loopt tot het einde, met mensen die soms het zijpad kiezen', () => {
+  it('loopt tot het einde, met mensen die soms de boot nemen', () => {
     let zijpaden = 0;
-    for (let seed = 0; seed < 5; seed++) {
+    for (let seed = 0; seed < 20; seed++) {
       const { eind, staten } = speelUit(nieuwSpel(BORD, keuzes(), seed), (s) => s, 20_000, BORD);
       expect(eind.fase).toEqual({ soort: 'einde' });
       zijpaden += staten.flatMap((s) => s.verslag).filter((g) => g.soort === 'splitsing' && g.zijpad).length;
     }
-    // 's Nachts vaart de boot niet, dus in één spel kan het toevallig nul keer zijn; samen niet.
+    // 's Nachts vaart de boot niet, dus in één spel kan het toevallig nul keer zijn; in twintig niet.
     expect(zijpaden).toBeGreaterThan(0);
   });
 

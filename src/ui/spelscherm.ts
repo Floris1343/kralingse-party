@@ -441,9 +441,7 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
     const boot = splitsing.soort === 'boot';
     const tekst = boot
       ? { icoon: 'iconen/vakje-boot.svg', kop: 'Boot nemen?', uitleg: 'Vaar in één keer naar het restaurant.', ja: 'Ja, varen!', nee: 'Nee, lopen' }
-      : s.nacht
-        ? { icoon: 'iconen/vakje-hert.svg', kop: 'Door het hertenkamp?', uitleg: "Pas op! 's Nachts is de bok wild.", ja: 'Ja, ik durf!', nee: 'Nee, hoofdpad' }
-        : { icoon: 'iconen/vakje-hert.svg', kop: 'Door het hertenkamp?', uitleg: 'Een vakje langer, langs de herten.', ja: 'Ja, herten!', nee: 'Nee, hoofdpad' };
+      : { icoon: 'iconen/vakje-ijs.svg', kop: 'Over het ijs?', uitleg: 'Een kortere weg, maar het is glad!', ja: 'Ja, over het ijs!', nee: 'Nee, lopen' };
     const el = maak('div', 'overlay splitsing-overlay');
     el.innerHTML = `
       <div class="splitsing-paneel vilt paneel" role="dialog">
