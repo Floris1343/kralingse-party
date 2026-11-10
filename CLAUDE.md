@@ -1,4 +1,6 @@
-# Kralingse Plas Party
+# Muppel Party
+
+De app heet **Muppel Party** (eerder: Kralingse Plas Party). Het bord blijft de Kralingse Plas.
 
 Een bordspel in Mario Party-stijl voor de iPad: een webapp die je op het beginscherm zet. De minigames worden op de Nintendo Switch gespeeld; de iPad doet de rest.
 

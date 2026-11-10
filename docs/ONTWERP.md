@@ -1,6 +1,6 @@
-# Kralingse Plas Party – ontwerpdocument
+# Muppel Party – ontwerpdocument
 
-Werktitel, mag later anders. Dit document beschrijft **wat** het spel is. `CLAUDE.md` beschrijft **hoe** het gebouwd wordt.
+De app heet **Muppel Party** (eerst: Kralingse Plas Party). Dit document beschrijft **wat** het spel is. `CLAUDE.md` beschrijft **hoe** het gebouwd wordt.
 
 ---
 

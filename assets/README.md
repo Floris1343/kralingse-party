@@ -4,6 +4,10 @@ Alle tekeningen komen uit het design (`docs/design/`, gemaakt in Claude Design).
 
 Het script `node scripts/bord-uit-design.mjs` kopieert ze letterlijk naar `public/assets/`. Draai het opnieuw als het design verandert. Met `--bord` maakt het ook `src/data/board.json` opnieuw, maar dan gaat wat je in de bord-editor hebt bijgeschaafd verloren.
 
+## Het logo
+
+`logo-muppel-party.png` is het logo van de eigenaar (1024 × 1024, bijgesneden, de zwarte hoekjes roze gemaakt). Daaruit zijn de app-iconen in `public/icons/` en `public/favicon.png` gemaakt: 512, 192, 180 (iPad-beginscherm) en een "maskable" versie met wat ruimte eromheen voor Android.
+
 ## Wat waar staat
 
 | Map in `public/assets/` | Wat | Uit het design |

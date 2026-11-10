@@ -170,3 +170,10 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 - **Het waarschuwingsbordje** staat bij de ingang (vóór herten1) en is alleen 's nachts te zien. Het design heeft er geen losse tekening voor. Het is samengesteld uit stukken van het design: het paaltje en de ronde plaat van het vraagtekenbordje, in het rood, met het hertenicoon van het hertenkamp-vakje erop. Je kunt het in de bord-editor verschuiven (plek `bokBordje`).
 - **Bots** kiezen geen pad meer bij het hertenkamp; ze lopen er gewoon doorheen.
 - **Opslagversie 6.** Een bewaard spel speelt gewoon verder. Wie op een verdwenen vakje stond, staat nu op het dichtstbijzijnde vakje van het nieuwe pad: hoofdpad1 → herten1, hoofdpad2 → herten2, hoofdpad3 → herten3. Een valstrik verhuist net zo. Stond iemand bij de oude splitsing te kiezen, dan loopt hij gewoon verder.
+
+## De naam en het logo
+
+- **De app heet Muppel Party.** De naam staat in de titel van de pagina, in het manifest (naam en korte naam onder het icoon) en in het hoofdmenu ("Muppel" boven "PARTY"). Het bord blijft de Kralingse Plas, en Pommie zegt dus nog steeds "Welkom bij de Kralingse Plas!".
+- **Het logo** van de eigenaar is het app-icoon. Het is bijgesneden tot het roze vierkant en de zwarte hoekjes zijn roze gemaakt, want de iPad rondt de hoeken zelf af. De kleur van de app (statusbalk, achtergrond bij het opstarten) is het roze van het logo.
+- **Niet veranderd, zodat niets kapotgaat:** het adres (`…/kralingse-party/`) en de namen waaronder het spel en de instellingen bewaard worden.
+- **Het oude script `scripts/maak-iconen.mjs`** (dat zelf een icoon met een ster tekende) is weg, zodat het het logo niet per ongeluk overschrijft.

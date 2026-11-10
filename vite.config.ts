@@ -12,18 +12,18 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ['icons/apple-touch-icon.png'],
       manifest: {
-        name: 'Kralingse Plas Party',
-        short_name: 'Plas Party',
+        name: 'Muppel Party',
+        short_name: 'Muppel Party',
         description: 'Een bordspel rond de Kralingse Plas',
         lang: 'nl',
         orientation: 'landscape',
         display: 'standalone',
-        background_color: '#1e5a8a',
-        theme_color: '#1e5a8a',
+        background_color: '#FFB7E5',
+        theme_color: '#FFB7E5',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'icons/icon-512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {

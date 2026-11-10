@@ -18,7 +18,7 @@ export function toonHoofdmenu(root: HTMLElement, acties: HoofdmenuActies): void 
       <div class="hoofdmenu-waas"></div>
       <img class="hoofdmenu-vlaggetjes" src="${asset('iconen/vlaggetjes.svg')}" alt="">
       <h1 class="titel">
-        <span class="titel-boven">Kralingse Plas</span>
+        <span class="titel-boven">Muppel</span>
         <span class="titel-onder"><span>PARTY</span><img src="${asset('iconen/ster.svg')}" alt=""></span>
       </h1>
       <nav class="hoofdmenu-knoppen vilt paneel">
