@@ -191,3 +191,11 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
   - Dan varen ze ±2,8 s (eerst 1,2 s). Elk bootje vaart in een eigen tempo, zodat ze elkaar kunnen inhalen, maar nooit terug. Aan het eind staat elk bootje precies waar zijn worp hoort.
   - Bij een bot blijft de uitslag ±2,2 s staan (eerst 1,5 s).
 - **Het Kans-rad duurt langer:** alle drie de rollen draaien tegelijk. Elke rol loopt steeds langzamer (van 70 ms tot ±320 ms per stap, met een tikje), en stopt met een bonk. Eerst speler A na ±1,7 s, dan de actie na ±3 s, dan speler B na ±4,3 s (eerst stonden ze na 0,6, 1 en 1,4 s stil). De tijden staan in `src/ui/tempo.ts`.
+
+## De sterren staan op het land
+
+- **Eerder stonden vier sterren in de plas** (Strand-noord, Noordoever, Oostoever en Westoever). Nu staan alle zes de sterplekken op het land, direct naast het pad. Ze bedekken geen vakjes, gebouwen of naambordjes.
+- **De plekken komen uit het design:** dat zijn de vraagtekenbordjes bij ochtendmist (`board_mist.svg`). Strand-noord, Oostoever en Westoever staan buiten het pad op het gras. Plaszoom en Park Rozenburg staan op de smalle oever tussen het pad en de plas, met het voetstuk op de oever (zoals in het design).
+- **Noordoever:** op de plek uit het design viel de ster onder de spelersbalk, want daar ligt bijna geen land boven het pad. Daarom staat hij waar het pad aan de Noordoever het laagst loopt, tussen noord6 en noord7.
+- **Bij elke ster hoort nu het vakje waar hij naast staat** (daar koop je hem bij het langslopen): Strand-noord bij strand3, Noordoever bij noord6, Oostoever bij oost3, Plaszoom bij plaszoom4, Park Rozenburg bij zuid4 en Westoever bij west2.
+- Het script `bord-uit-design.mjs --bord` maakt de sterplekken op dezelfde plekken. In de bord-editor kun je ze nog verschuiven.

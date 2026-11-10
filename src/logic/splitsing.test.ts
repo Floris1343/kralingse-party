@@ -59,8 +59,8 @@ describe('splitsingen op het echte bord', () => {
 describe('bots bij een splitsing', () => {
   it('rekenen hoe ver de ster is', () => {
     const s = bij('noord7', 'oostoever');
-    expect(stappenTotSter(s, BORD, 'oost1')).toBe(1);
-    expect(stappenTotSter(s, BORD, 'oost2')).toBe(0);
+    expect(stappenTotSter(s, BORD, 'oost2')).toBe(1);
+    expect(stappenTotSter(s, BORD, 'oost3')).toBe(0);
   });
 
   it('nemen de boot als de ster in het zuidoosten ligt en ze genoeg munten hebben', () => {

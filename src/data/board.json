@@ -535,23 +535,23 @@
     {
       "id": "strand-noord",
       "naam": "Strand-noord",
-      "vakje": "strand4",
-      "x": 310,
-      "y": 340
+      "vakje": "strand3",
+      "x": 245.8,
+      "y": 202.7
     },
     {
       "id": "noordoever",
       "naam": "Noordoever",
-      "vakje": "noord4",
-      "x": 575,
-      "y": 320
+      "vakje": "noord6",
+      "x": 693,
+      "y": 193
     },
     {
       "id": "oostoever",
       "naam": "Oostoever",
-      "vakje": "oost2",
-      "x": 895,
-      "y": 410
+      "vakje": "oost3",
+      "x": 1052.6,
+      "y": 372.5
     },
     {
       "id": "plaszoom",
@@ -571,8 +571,8 @@
       "id": "westoever",
       "naam": "Westoever",
       "vakje": "west2",
-      "x": 250,
-      "y": 440
+      "x": 79.3,
+      "y": 441
     }
   ],
   "plekken": {

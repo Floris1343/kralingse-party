@@ -389,15 +389,17 @@ function maakBordJson() {
   keten(ijsVakjes, 'strand3', 'plaszoom2');
   vakjes.push(...bootVakjes, ...ijsVakjes);
 
-  // Sterplekken (§6.4): in de plas naast het pad, zo dat de ster geen vakjes bedekt.
-  // Plaszoom staat precies waar het design de ster heeft.
+  // Sterplekken (§6.4): op het land naast het pad, op de plekken van de vraagtekenbordjes uit
+  // board_mist.svg (de Noordoever staat waar het pad het laagst loopt, zodat de ster niet onder de spelersbalk valt).
+  // Plaszoom staat precies waar het design de ster heeft; Park Rozenburg op de
+  // oever tussen het pad en de plas. Het vakje is het vakje waar de ster naast staat.
   const sterplekken = [
-    { id: 'strand-noord', naam: 'Strand-noord', vakje: 'strand4', x: 310, y: 340 },
-    { id: 'noordoever', naam: 'Noordoever', vakje: 'noord4', x: 575, y: 320 },
-    { id: 'oostoever', naam: 'Oostoever', vakje: 'oost2', x: 895, y: 410 },
+    { id: 'strand-noord', naam: 'Strand-noord', vakje: 'strand3', x: 245.8, y: 202.7 },
+    { id: 'noordoever', naam: 'Noordoever', vakje: 'noord6', x: 693, y: 193 },
+    { id: 'oostoever', naam: 'Oostoever', vakje: 'oost3', x: 1052.6, y: 372.5 },
     { id: 'plaszoom', naam: 'Plaszoom', vakje: 'plaszoom4', x: 910.5, y: 619.3 },
     { id: 'park-rozenburg', naam: 'Park Rozenburg', vakje: 'zuid4', x: 602, y: 648 },
-    { id: 'westoever', naam: 'Westoever', vakje: 'west2', x: 250, y: 440 },
+    { id: 'westoever', naam: 'Westoever', vakje: 'west2', x: 79.3, y: 441 },
   ];
 
   const dichtsteVakje = (p, zone) =>
@@ -434,4 +436,3 @@ function maakBordJson() {
 }
 
 console.log('Klaar. Vakjesoorten:', Object.keys(iconen).join(', '));
-if (!existsSync(join(ROOT, 'src/data/board.json'))) console.log('Let op: nog geen board.json; draai met --bord.');
