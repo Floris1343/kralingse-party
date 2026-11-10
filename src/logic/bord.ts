@@ -130,7 +130,9 @@ export function maakTestbord(): Bord {
       { id: 'oost', naam: 'Oost', vakje: 'v6', x: 850, y: 500 },
       { id: 'west', naam: 'West', vakje: 'v10', x: 150, y: 500 },
     ],
-    plekken: { winkel: plek('v4'), nachtwinkel: plek('v8'), ratje: plek('v9') },
+    // Winkel en Ratje staan standaard niet op het testbord, zodat lopen-tests er niet langs komen.
+    // Tests voor de winkel en Ratje zetten ze zelf neer (zie testhulp.ts).
+    plekken: { winkel: plek('geen'), nachtwinkel: plek('geen'), ratje: plek('geen') },
     labels: [],
   };
 }

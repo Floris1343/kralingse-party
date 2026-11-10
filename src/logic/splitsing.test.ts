@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BORD } from '../data/bord';
-import { loopUit, splitsingKeuze, stap } from './beurt';
+import { winkelKeuze, loopUit, splitsingKeuze, stap } from './beurt';
 import { speelBotsAf } from './bot';
 import type { GameState } from './gameState';
 import { nieuwSpel } from './nieuwSpel';
@@ -44,6 +44,8 @@ describe('splitsingen op het echte bord', () => {
     expect(s.fase.soort).toBe('splitsing');
     s = loopUit(splitsingKeuze(s, BORD, true), BORD);
     expect(s.spelers[0].vakje).toBe('restaurant1');
+    expect(s.fase.soort).toBe('winkel'); // bij het restaurant staat de winkel
+    s = winkelKeuze(s, BORD, null);
     expect(s.spelers[0].munten).toBe(10 - 3 + 3); // restaurant1 is blauw
     expect(s.verslag).toContainEqual({ soort: 'munten', speler: 0, verschil: -3, reden: 'boot' });
   });
@@ -100,12 +102,14 @@ describe('bots bij een splitsing', () => {
 
 describe('een heel spel op het echte bord', () => {
   it('loopt tot het einde, met mensen die soms het zijpad kiezen', () => {
+    let zijpaden = 0;
     for (let seed = 0; seed < 5; seed++) {
       const { eind, staten } = speelUit(nieuwSpel(BORD, keuzes(), seed), (s) => s, 20_000, BORD);
       expect(eind.fase).toEqual({ soort: 'einde' });
-      const zijpaden = staten.flatMap((s) => s.verslag).filter((g) => g.soort === 'splitsing' && g.zijpad);
-      expect(zijpaden.length).toBeGreaterThan(0);
+      zijpaden += staten.flatMap((s) => s.verslag).filter((g) => g.soort === 'splitsing' && g.zijpad).length;
     }
+    // 's Nachts vaart de boot niet, dus in één spel kan het toevallig nul keer zijn; samen niet.
+    expect(zijpaden).toBeGreaterThan(0);
   });
 
   it('ook met alleen bots', () => {

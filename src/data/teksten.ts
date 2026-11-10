@@ -22,6 +22,16 @@ export const teksten = {
     '{naam} staat laatste en mag aan het rad draaien!',
     'Even wat hulp voor {naam}: draai aan het rad!',
   ],
+  nacht: [
+    'Het is donker in het bos… Wie durft langs het hertenkamp?',
+    'De nacht valt over de plas! De boot vaart niet meer en de bok is wild.',
+    'Lantaarns aan! Het restaurant is dicht, maar Ratje is goedkoper.',
+  ],
+  dag: [
+    'Goedemorgen! De zon is op en de boot vaart weer.',
+    'Het wordt dag! De winkel bij het restaurant is weer open.',
+    'Daar is de zon weer! De herten zijn weer lief.',
+  ],
   winnaar: [
     '{naam} wint! Wat een feest!',
     'En de winnaar is... {naam}!',

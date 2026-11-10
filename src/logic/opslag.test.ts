@@ -28,6 +28,17 @@ describe('opslag', () => {
     expect(laad(o)).toBeNull();
   });
 
+  it('een spel uit de vorige versie (2) speelt gewoon verder, overdag en zonder items', () => {
+    const o = nepOpslag();
+    const oud = structuredClone(voorbeeld) as Partial<typeof voorbeeld>;
+    delete oud.nacht;
+    o.setItem(OPSLAG_SLEUTEL, JSON.stringify({ versie: 2, state: oud }));
+    const geladen = laad(o)!;
+    expect(geladen.nacht).toBe(false);
+    expect(geladen).toEqual(voorbeeld);
+    expect(speelUit(geladen).eind.fase).toEqual({ soort: 'einde' });
+  });
+
   it('crasht niet op kapotte data', () => {
     const o = nepOpslag();
     o.setItem(OPSLAG_SLEUTEL, '{kapot');

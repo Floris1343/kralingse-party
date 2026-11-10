@@ -49,6 +49,9 @@ export function pasRegelToe(s: GameState, bord: Bord, regel: EindspelRegel, laat
   } else if (regel === 'extraSter') {
     s.sterren.push({ plek: kiesVrijeSterplek(s, bord) });
   }
-  // goedkopeSter werkt via sterPrijs(); eeuwigeNacht en ratjeGratis gaan werken
-  // zodra dag/nacht en Ratje er zijn.
+  if (regel === 'eeuwigeNacht' && !s.nacht) {
+    s.nacht = true;
+    s.verslag.push({ soort: 'dagNacht', nacht: true, reden: 'eindspel' });
+  }
+  // goedkopeSter werkt via sterPrijs(), ratjeGratis via ratjePrijs().
 }

@@ -1,4 +1,5 @@
 import type { SplitsingSoort } from './bord';
+import type { ItemSoort } from './items';
 
 /**
  * De volledige spelstand. Alles hierin is gewone JSON (geen klassen, geen functies),
@@ -24,7 +25,7 @@ export interface SpelerStats {
   avontuurVakjes: number;
   /** Aantal keer op een rood vakje beland. */
   roodVakjes: number;
-  /** Aantal keer de wilde bok tegengekomen (komt in een latere stap). */
+  /** Aantal keer de wilde bok tegengekomen. */
   bokOntmoetingen: number;
   /** Aantal gekochte sterren. */
   sterrenGekocht: number;
@@ -40,8 +41,8 @@ export interface Speler {
   sterren: number;
   /** Id van het vakje waar de speler staat. */
   vakje: string;
-  /** Items komen in een latere stap. */
-  items: string[];
+  /** Hoogstens 3 items (§7.1). */
+  items: ItemSoort[];
   stats: SpelerStats;
 }
 
@@ -55,14 +56,24 @@ export type EindspelRegel = 'munten20' | 'extraSter' | 'goedkopeSter' | 'eeuwige
 
 /** Waar het spel op wacht. Het scherm toont de knoppen die bij de fase horen. */
 export type Fase =
-  /** De speler die aan zet is, moet dobbelen. */
-  | { soort: 'dobbelen' }
+  /**
+   * De speler die aan zet is, mag eerst één item gebruiken en moet dan dobbelen.
+   * `gebruikt` = het item dat deze beurt al gebruikt is (dubbele dobbelsteen enz.).
+   */
+  | { soort: 'dobbelen'; gebruikt?: ItemSoort }
   /** De speler loopt; `resterend` = nog te lopen vakjes. */
   | { soort: 'lopen'; worp: number; resterend: number }
   /** Een mens staat bij een splitsing en kiest: gewoon doorlopen of het zijpad (hertenkamp, boot). */
   | { soort: 'splitsing'; worp: number; resterend: number; vakje: string }
   /** Een mens loopt langs een ster en heeft genoeg munten: kopen of niet? */
   | { soort: 'sterKopen'; worp: number; resterend: number; plek: string }
+  /** Een mens loopt langs de winkel (overdag): één item kopen of niets. */
+  | { soort: 'winkel'; worp: number; resterend: number }
+  /**
+   * Een mens kan Ratje inhuren: bij het langslopen, of met de Ratjebel vóór het dobbelen
+   * (`voorDobbelen`; daarna wordt er gewoon gedobbeld).
+   */
+  | { soort: 'ratje'; worp: number; resterend: number; voorDobbelen?: boolean }
   /** Alle spelers zijn geweest: minigame op de Switch, wacht op de uitslag. */
   | { soort: 'minigame' }
   /** Begin van het eindspel: de laatste speler draait het rad. */
@@ -70,15 +81,36 @@ export type Fase =
   /** Het spel is afgelopen; zie `eindtelling`. */
   | { soort: 'einde' };
 
-export type MuntReden = 'blauw' | 'rood' | 'ster' | 'minigame' | 'eindspel' | 'boot';
+export type MuntReden =
+  | 'blauw' | 'rood' | 'ster' | 'minigame' | 'eindspel' | 'boot'
+  | 'winkel' | 'ratje' | 'item' | 'hertenkamp' | 'kans' | 'pech' | 'event';
+
+/** De raderen die op het scherm draaien. */
+export type RadSoort = 'hertenkamp' | 'bok' | 'pech';
+
+export type VerplaatsReden = 'windvlaag' | 'hertje' | 'bok' | 'plas' | 'wisseltruc';
+
+/** De acties van het Kans-vakje (§7.3). */
+export type KansActie = 'geef10' | 'geef20' | 'ruilMunten' | 'geefSter' | 'ruilSterren';
 
 /** Wat er net gebeurd is, voor meldingen als "Bot 2 gooide 7 · +3 munten". */
 export type Gebeurtenis =
-  | { soort: 'worp'; speler: number; waarde: number }
+  /** `worpen` = de losse worpen (meer dan één met een dubbele dobbelsteen); `gekozen` = Kies-je-worp. */
+  | { soort: 'worp'; speler: number; waarde: number; worpen: number[]; gekozen?: boolean }
   | { soort: 'munten'; speler: number; verschil: number; reden: MuntReden }
   | { soort: 'sterGekocht'; speler: number; plek: string; nieuwePlek: string }
   | { soort: 'splitsing'; speler: number; splitsing: SplitsingSoort; zijpad: boolean }
-  | { soort: 'eindspelRegel'; speler: number; regel: EindspelRegel };
+  | { soort: 'eindspelRegel'; speler: number; regel: EindspelRegel }
+  | { soort: 'dagNacht'; nacht: boolean; reden: 'ronde' | 'lantaarnpaal' | 'eindspel' }
+  | { soort: 'item'; speler: number; item: ItemSoort; actie: 'gekocht' | 'gekregen' | 'gebruikt' }
+  | { soort: 'itemsKwijt'; speler: number; items: ItemSoort[] }
+  | { soort: 'verplaatst'; speler: number; van: string; naar: string; reden: VerplaatsReden }
+  | { soort: 'rad'; speler: number; rad: RadSoort; uitkomst: string }
+  | { soort: 'kans'; speler: number; a: number; b: number; actie: KansActie; gelukt: boolean }
+  | { soort: 'strandtent'; speler: number; kampvuur: boolean }
+  | { soort: 'windvlaag'; speler: number; stappen: number }
+  | { soort: 'zeilwedstrijd'; speler: number; worpen: number[]; winnaars: number[]; prijs: number; lampionnen: boolean }
+  | { soort: 'ratje'; speler: number; doel: number; wat: 'munten' | 'ster'; buit: number };
 
 export type BonusSoort = 'minigame' | 'rijkaard' | 'avonturier';
 
@@ -108,6 +140,8 @@ export interface GameState {
   ronde: number;
   fase: Fase;
   sterren: Ster[];
+  /** Nacht (§8). Het spel begint overdag. */
+  nacht: boolean;
   eindspelRegel: EindspelRegel | null;
   /** Gebeurtenissen sinds de laatste beurt/uitslag begon. */
   verslag: Gebeurtenis[];

@@ -1,29 +1,43 @@
 /**
- * Een beurt: dobbelen, stap voor stap lopen, langs de ster komen en het vakje afhandelen.
+ * Een beurt: eventueel een item gebruiken, dobbelen, stap voor stap lopen, langs de ster,
+ * de winkel en Ratje komen en het vakje afhandelen.
  * Het scherm roept `stap` per vakje aan, zodat het figuurtje kan lopen en er tussendoor
  * bewaard kan worden. `loopUit` doet alle stappen in één keer, tot er een keuze nodig is.
  */
-import { splitsingBij, vakje, volgendVakje, type Bord } from './bord';
-import { isEindspel } from './eindspel';
+import { splitsingBij, volgendVakje, type Bord } from './bord';
+import { botItemKoop } from './botKeuzes';
+import { handelVakjeAf } from './effecten';
 import type { GameState } from './gameState';
-import { BLAUW_MUNTEN, BOOT_PRIJS, metKopie, ROOD_MUNTEN, spelerAanZet, trek, vereisFase, wijzigMunten } from './regels';
+import { aantalDobbelstenen, kanIetsKopen, koopItem, winkelOpen, type ItemSoort } from './items';
+import { botRatjeKeuze, huurRatje, kanRatjeInhuren, type RatjeKeuze } from './ratje';
+import { BOOT_PRIJS, metKopie, spelerAanZet, trek, vereisFase, wijzigMunten } from './regels';
 import { botKiestZijpad, openSplitsing } from './splitsing';
 import { kanSterBetalen, koopSter, sterBijVakje } from './ster';
 
-/** Gooit de dobbelsteen (1–10) voor de speler die aan zet is. */
-export function dobbelen(state: GameState): GameState {
-  vereisFase(state, 'dobbelen');
+/**
+ * Gooit de dobbelsteen (1–10) voor de speler die aan zet is. Met een dubbele of driedubbele
+ * dobbelsteen worden de worpen opgeteld. Met Kies-je-worp geef je `gekozen` mee (1–10).
+ */
+export function dobbelen(state: GameState, gekozen?: number): GameState {
+  const fase = vereisFase(state, 'dobbelen');
+  const kiest = fase.gebruikt === 'kiesWorp';
+  if (kiest && !(Number.isInteger(gekozen) && gekozen! >= 1 && gekozen! <= 10)) {
+    throw new Error('Kies een getal van 1 tot 10');
+  }
   return metKopie(state, (s) => {
     const speler = spelerAanZet(s);
-    const worp = trek(s, 1, 10);
-    s.verslag = [{ soort: 'worp', speler, waarde: worp }];
+    // Een nieuwe beurt begint met een leeg verslag. Is er al een item gebruikt, dan blijft dat erin staan.
+    if (!fase.gebruikt) s.verslag = [];
+    const worpen = kiest ? [gekozen!] : Array.from({ length: aantalDobbelstenen(fase.gebruikt) }, () => trek(s, 1, 10));
+    const worp = worpen.reduce((a, b) => a + b, 0);
+    s.verslag.push({ soort: 'worp', speler, waarde: worp, worpen, ...(kiest ? { gekozen: true } : {}) });
     s.fase = { soort: 'lopen', worp, resterend: worp };
   });
 }
 
 /**
  * Zet één stap. Staat de speler bij een open splitsing, dan kiest een bot meteen en wacht het
- * spel bij een mens op `splitsingKeuze`. Kan ook stoppen bij een ster of de beurt afronden.
+ * spel bij een mens op `splitsingKeuze`. Kan ook stoppen bij een ster, de winkel of Ratje.
  */
 export function stap(state: GameState, bord: Bord): GameState {
   const fase = vereisFase(state, 'lopen');
@@ -45,7 +59,7 @@ export function splitsingKeuze(state: GameState, bord: Bord, zijpad: boolean): G
   return metKopie(state, (s) => zetStap(s, bord, fase.worp, fase.resterend, zijpad));
 }
 
-/** Eén vakje verder (eventueel het zijpad op), dan de ster en het einde van de beurt. */
+/** Eén vakje verder (eventueel het zijpad op), daarna langs de ster, de winkel en Ratje. */
 function zetStap(s: GameState, bord: Bord, worp: number, resterendVoor: number, zijpad: boolean): void {
   const speler = spelerAanZet(s);
   const sp = s.spelers[speler];
@@ -55,16 +69,38 @@ function zetStap(s: GameState, bord: Bord, worp: number, resterendVoor: number, 
     if (zijpad && splitsing.soort === 'boot') wijzigMunten(s, speler, -BOOT_PRIJS, 'boot');
   }
   sp.vakje = volgendVakje(bord, sp.vakje, zijpad);
-  const resterend = resterendVoor - 1;
+  langs(s, bord, worp, resterendVoor - 1, 'ster');
+}
 
-  const plek = sterBijVakje(s, bord, sp.vakje);
-  if (plek && kanSterBetalen(s, speler)) {
-    if (!sp.isBot) {
-      s.fase = { soort: 'sterKopen', worp, resterend, plek };
-      return;
+type Halte = 'ster' | 'winkel' | 'ratje';
+const HALTES: Halte[] = ['ster', 'winkel', 'ratje'];
+
+/**
+ * Wat je tegenkomt op het vakje waar je net bent: de ster, de winkel en Ratje, in die volgorde.
+ * Een mens krijgt een vraag (de fase wacht); een bot beslist meteen. `vanaf` = waar we verdergaan
+ * nadat een mens geantwoord heeft.
+ */
+function langs(s: GameState, bord: Bord, worp: number, resterend: number, vanaf: Halte): void {
+  const speler = spelerAanZet(s);
+  const sp = s.spelers[speler];
+  for (const halte of HALTES.slice(HALTES.indexOf(vanaf))) {
+    if (halte === 'ster') {
+      const plek = sterBijVakje(s, bord, sp.vakje);
+      if (!plek || !kanSterBetalen(s, speler)) continue;
+      if (!sp.isBot) return void (s.fase = { soort: 'sterKopen', worp, resterend, plek });
+      // Bots kopen een ster altijd als het kan.
+      koopSter(s, bord, speler, plek);
+    } else if (halte === 'winkel') {
+      if (sp.vakje !== bord.plekken.winkel.vakje || !winkelOpen(s) || !kanIetsKopen(s, speler)) continue;
+      if (!sp.isBot) return void (s.fase = { soort: 'winkel', worp, resterend });
+      const item = botItemKoop(s, bord, speler);
+      if (item) koopItem(s, speler, item);
+    } else {
+      if (sp.vakje !== bord.plekken.ratje.vakje || !kanRatjeInhuren(s, speler)) continue;
+      if (!sp.isBot) return void (s.fase = { soort: 'ratje', worp, resterend });
+      const keuze = botRatjeKeuze(s, speler);
+      if (keuze) huurRatje(s, speler, keuze);
     }
-    // Bots kopen een ster altijd als het kan.
-    koopSter(s, bord, speler, plek);
   }
   gaVerder(s, bord, worp, resterend);
 }
@@ -74,7 +110,26 @@ export function sterKeuze(state: GameState, bord: Bord, kopen: boolean): GameSta
   const fase = vereisFase(state, 'sterKopen');
   return metKopie(state, (s) => {
     if (kopen) koopSter(s, bord, spelerAanZet(s), fase.plek);
-    gaVerder(s, bord, fase.worp, fase.resterend);
+    langs(s, bord, fase.worp, fase.resterend, 'winkel');
+  });
+}
+
+/** Antwoord van een mens in de winkel: een item, of null voor "Niks kopen". */
+export function winkelKeuze(state: GameState, bord: Bord, item: ItemSoort | null): GameState {
+  const fase = vereisFase(state, 'winkel');
+  return metKopie(state, (s) => {
+    if (item) koopItem(s, spelerAanZet(s), item);
+    langs(s, bord, fase.worp, fase.resterend, 'ratje');
+  });
+}
+
+/** Antwoord van een mens bij Ratje: wat hij steelt en bij wie, of null voor "Niets". */
+export function ratjeKeuze(state: GameState, bord: Bord, keuze: RatjeKeuze | null): GameState {
+  const fase = vereisFase(state, 'ratje');
+  return metKopie(state, (s) => {
+    if (keuze) huurRatje(s, spelerAanZet(s), keuze);
+    if (fase.voorDobbelen) s.fase = { soort: 'dobbelen', gebruikt: 'ratjebel' };
+    else gaVerder(s, bord, fase.worp, fase.resterend);
   });
 }
 
@@ -90,32 +145,8 @@ function gaVerder(s: GameState, bord: Bord, worp: number, resterend: number): vo
     s.fase = { soort: 'lopen', worp, resterend };
     return;
   }
-  handelVakjeAf(s, bord);
+  handelVakjeAf(s, bord, spelerAanZet(s));
   volgendeBeurt(s);
-}
-
-/** Het effect van het vakje waarop de speler eindigt. */
-function handelVakjeAf(s: GameState, bord: Bord): void {
-  const speler = spelerAanZet(s);
-  const sp = s.spelers[speler];
-  const factor = isEindspel(s) ? 2 : 1;
-  switch (vakje(bord, sp.vakje).type) {
-    case 'blauw':
-      wijzigMunten(s, speler, BLAUW_MUNTEN * factor, 'blauw');
-      break;
-    case 'rood':
-      sp.stats.roodVakjes += 1;
-      wijzigMunten(s, speler, -ROOD_MUNTEN * factor, 'rood');
-      break;
-    case 'event':
-    case 'hertenkamp':
-      // De effecten komen in een latere stap; de Avonturier-teller telt al mee.
-      sp.stats.avontuurVakjes += 1;
-      break;
-    default:
-      // start, item, kans, pech: komen in een latere stap.
-      break;
-  }
 }
 
 function volgendeBeurt(s: GameState): void {

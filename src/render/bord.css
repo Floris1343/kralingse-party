@@ -143,3 +143,9 @@
   font-size: 32px;
   border-radius: 50%;
 }
+
+/* Nacht (§8): de nachtlagen liggen klaar en vloeien in met opacity */
+.nacht-laag { opacity: 0; will-change: opacity; }
+.bord.is-nacht { background: #1B2A4A; }
+.bord-label { transition: background-color 1s ease-in-out, color 1s ease-in-out; }
+.bord.is-nacht .bord-label { background: rgb(47 35 71 / .9); color: #FFF3B0; }

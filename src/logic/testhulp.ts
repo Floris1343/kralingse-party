@@ -1,6 +1,8 @@
 /** Hulpjes voor de tests (wordt niet in het spel gebruikt). */
-import { loopUit, dobbelen, splitsingKeuze, sterKeuze } from './beurt';
+import { loopUit, dobbelen, ratjeKeuze, splitsingKeuze, sterKeuze, winkelKeuze } from './beurt';
 import { maakTestbord, type Bord } from './bord';
+import { ITEM_SOORTEN, gebruikItem, kanItemGebruiken, kanKopen } from './items';
+import { botRatjeKeuze } from './ratje';
 import { speelBotsAf } from './bot';
 import { draaiEindspelRad } from './eindspel';
 import type { AantalRondes, GameState } from './gameState';
@@ -9,6 +11,14 @@ import { nieuwSpel, type NieuwSpelKeuzes } from './nieuwSpel';
 import { metKopie, trek } from './regels';
 
 export const bord = maakTestbord();
+
+/** Het testbord met de winkel op v4 en Ratje op v9. */
+export function bordMetPlekken(): Bord {
+  const b = maakTestbord();
+  b.plekken.winkel = { vakje: 'v4', x: 0, y: 0 };
+  b.plekken.ratje = { vakje: 'v9', x: 0, y: 0 };
+  return b;
+}
 
 export function keuzes(over: Partial<NieuwSpelKeuzes> = {}): NieuwSpelKeuzes {
   return {
@@ -62,8 +72,8 @@ export function willekeurigeUitslag(state: GameState): [MinigameUitslag, GameSta
 }
 
 /**
- * Speelt een heel spel uit. Mensen dobbelen, lopen uit, kopen altijd een ster, kiezen bij een
- * splitsing wisselend en draaien het rad.
+ * Speelt een heel spel uit. Mensen gebruiken items, dobbelen, lopen uit, kopen altijd een ster,
+ * kopen in de winkel, huren Ratje, kiezen bij een splitsing wisselend en draaien het rad.
  * `naElkeActie` kan de state vervangen (bijv. opslaan en weer laden).
  */
 export function speelUit(
@@ -81,8 +91,26 @@ export function speelUit(
         s = verwerkMinigame(na, uitslag);
         break;
       }
-      case 'dobbelen':
-        s = s.spelers[s.volgorde[s.aanZet]].isBot ? speelBotsAf(s, b) : dobbelen(s);
+      case 'dobbelen': {
+        if (s.spelers[s.volgorde[s.aanZet]].isBot) {
+          s = speelBotsAf(s, b);
+          break;
+        }
+        // Mensen gebruiken hun eerste bruikbare item, en kiezen 7 met Kies-je-worp.
+        const item = !s.fase.gebruikt && s.spelers[s.volgorde[s.aanZet]].items.find((i) => kanItemGebruiken(s, i));
+        if (item) s = gebruikItem(s, item);
+        else s = dobbelen(s, s.fase.gebruikt === 'kiesWorp' ? 7 : undefined);
+        break;
+      }
+      case 'winkel': {
+        // Mensen kopen het eerste item dat ze kunnen betalen (wisselend per ronde).
+        const sp = s.volgorde[s.aanZet];
+        const opties = ITEM_SOORTEN.filter((i) => kanKopen(s, sp, i));
+        s = winkelKeuze(s, b, opties.length ? opties[s.ronde % opties.length] : null);
+        break;
+      }
+      case 'ratje':
+        s = ratjeKeuze(s, b, botRatjeKeuze(structuredClone(s), s.volgorde[s.aanZet]));
         break;
       case 'lopen':
         s = loopUit(s, b);

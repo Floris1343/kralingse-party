@@ -4,7 +4,7 @@
  * Het bord is al schuin getekend; rechtopstaande dingen worden naar achteren kleiner (diepteSchaal).
  * De camera verschuift en vergroot de hele wereld met één transform.
  */
-import type { Bord } from '../logic/bord';
+import type { Bord, VakjeType } from '../logic/bord';
 import { vakje } from '../logic/bord';
 import type { Figuur } from '../data/figuren';
 import { asset, plaatje } from '../ui/asset';
@@ -40,6 +40,10 @@ export class BordWeergave {
   readonly wereld: HTMLDivElement;
   readonly spriteLaag: HTMLDivElement;
   private vakjesLaag: SVGSVGElement;
+  /** Nachtlagen die over de daglagen in- en uitvloeien (§8). */
+  private nachtLagen: HTMLElement[] = [];
+  private nacht = false;
+  private typeOverschrijving = new Map<string, VakjeType>();
   private figuren: HTMLDivElement[] = [];
   private figuurPunten: [number, number][] = [];
   private sterren = new Map<string, HTMLElement>();
@@ -51,9 +55,17 @@ export class BordWeergave {
   constructor(
     private bord: Bord,
     private spelers: WeergaveSpeler[],
-    opties: { decor?: boolean; tijd?: 'dag' } = {},
+    opties: { decor?: boolean; tijd?: 'dag'; nacht?: boolean } = {},
   ) {
     const tijd = opties.tijd ?? 'dag';
+    const laag = (pad: string, klasse = '') => {
+      const img = document.createElement('img');
+      img.className = `bord-laag ${klasse}`;
+      img.src = asset(pad);
+      img.alt = '';
+      img.draggable = false;
+      return img;
+    };
     this.el = document.createElement('div');
     this.el.className = 'bord';
     this.wereld = document.createElement('div');
@@ -61,25 +73,25 @@ export class BordWeergave {
     this.wereld.style.width = `${bord.breedte}px`;
     this.wereld.style.height = `${bord.hoogte}px`;
 
-    const grond = document.createElement('img');
-    grond.className = 'bord-laag';
-    grond.src = asset(`bord/grond-${tijd}.svg`);
-    grond.alt = '';
-    grond.draggable = false;
+    const grond = laag(`bord/grond-${tijd}.svg`);
 
     this.vakjesLaag = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.vakjesLaag.classList.add('bord-laag');
     this.vakjesLaag.setAttribute('viewBox', `0 0 ${bord.breedte} ${bord.hoogte}`);
     this.tekenVakjes();
 
-    this.wereld.append(grond, this.vakjesLaag);
+    const metNacht = opties.nacht === true;
+    const grondNacht = metNacht ? [laag('bord/grond-nacht.svg', 'nacht-laag')] : [];
+    this.wereld.append(grond, ...grondNacht, this.vakjesLaag);
+    this.nachtLagen.push(...grondNacht);
     if (opties.decor !== false) {
-      const decor = document.createElement('img');
-      decor.className = 'bord-laag';
-      decor.src = asset(`bord/decor-${tijd}.svg`);
-      decor.alt = '';
-      decor.draggable = false;
-      this.wereld.append(decor);
+      this.wereld.append(laag(`bord/decor-${tijd}.svg`));
+      if (metNacht) {
+        const decorNacht = laag('bord/decor-nacht.svg', 'nacht-laag');
+        const effect = laag('bord/effect-nacht.svg', 'nacht-laag');
+        this.wereld.append(decorNacht, effect);
+        this.nachtLagen.push(decorNacht, effect);
+      }
     }
 
     this.spriteLaag = document.createElement('div');
@@ -110,7 +122,30 @@ export class BordWeergave {
   tekenVakjes(verberg: (zone: string) => boolean = (zone) => zone === 'ijspad'): void {
     this.vakjesLaag.innerHTML =
       `<defs>${VILT_FILTER}</defs>` +
-      `<g filter="url(#kp-vilt2)">${vakjesSvg(this.bord.vakjes.filter((v) => !verberg(v.zone)))}</g>`;
+      `<g filter="url(#kp-vilt2)">${vakjesSvg(
+        this.bord.vakjes.filter((v) => !verberg(v.zone)),
+        (v) => this.typeOverschrijving.get(v.id) ?? v.type,
+      )}</g>`;
+  }
+
+  /**
+   * Dag of nacht. De nachtlagen vloeien in ongeveer een seconde in of uit (alleen opacity,
+   * dus soepel op de iPad). `typen` = vakjes die nu een ander type hebben (de rode bosvakjes).
+   */
+  zetNacht(nacht: boolean, typen: Map<string, VakjeType>, duurMs = 1000): void {
+    const typenGelijk =
+      typen.size === this.typeOverschrijving.size && [...typen].every(([k, v]) => this.typeOverschrijving.get(k) === v);
+    if (!typenGelijk) {
+      this.typeOverschrijving = typen;
+      this.tekenVakjes();
+    }
+    if (nacht === this.nacht) return;
+    this.nacht = nacht;
+    this.el.classList.toggle('is-nacht', nacht);
+    for (const l of this.nachtLagen) {
+      l.style.transition = duurMs > 0 ? `opacity ${duurMs}ms ease-in-out` : 'none';
+      l.style.opacity = nacht ? '1' : '0';
+    }
   }
 
   // ------------------------------------------------------------------ figuren

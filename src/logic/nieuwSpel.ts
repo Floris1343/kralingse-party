@@ -45,6 +45,7 @@ export function nieuwSpel(bord: Bord, keuzes: NieuwSpelKeuzes, seed: number): Ga
     ronde: 1,
     fase: { soort: 'dobbelen' },
     sterren: [],
+    nacht: false,
     eindspelRegel: null,
     verslag: [],
     eindtelling: null,

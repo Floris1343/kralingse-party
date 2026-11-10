@@ -631,3 +631,301 @@
 .nieuw-pommie img { width: 120px; height: 132px; object-fit: contain; }
 .nieuw-pommie .ballon { margin-bottom: 34px; }
 .nieuw-pommie .ballon p { font-size: 17px; }
+
+/* ================================================================ nacht in de spelersbalk (design: bord-nacht.html) */
+.ronde-teller { transition: background-color 1s ease-in-out, border-color 1s ease-in-out; }
+.ronde-teller.nacht { background-color: #2F2347; border-color: #4B3A6B; }
+.ronde-teller.nacht .ronde-kop span, .ronde-teller.nacht .ronde-getal span { color: #C9BEE6; }
+.ronde-teller.nacht .ronde-getal { color: #FFFFFF; }
+
+/* ================================================================ item-icoontjes */
+.item-icoon { position: relative; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.item-icoon img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.item-icoon .item-vervanger { width: 100%; height: 100%; font-size: calc(var(--maat, 24px) * .55); }
+.item-badge {
+  position: absolute;
+  right: -6px;
+  bottom: -4px;
+  background: var(--kp-pompoen);
+  color: #FFFFFF;
+  font-family: var(--kp-font-kop);
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: var(--kp-r-pil);
+  border: 1.5px solid #FFFFFF;
+}
+.balk-item .item-badge { font-size: 7px; padding: 1px 2px; right: -5px; bottom: -4px; border-width: 1px; }
+
+/* ================================================================ items in het dobbelscherm (design: map 3 en 4) */
+.dobbel-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 8px 10px;
+  box-shadow: 0 4px 0 #E3CFAE;
+}
+.dobbel-item-icoon { width: 50px; height: 50px; border-radius: 50%; background: #FFF6E6; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dobbel-item-rechts { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.dobbel-item-naam { font-family: var(--kp-font-kop); font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dobbel-item-knop { min-height: 48px; font-size: 19px; padding: 0 10px; width: 100%; gap: 6px; }
+.dobbel-item-knop:disabled { opacity: 1; --knop-kleur: #EFE2CB; --knop-schaduw: #DCCAA8; --knop-rand: #EFE2CB; --knop-tekst: #B9A385; cursor: default; }
+.dobbel-item.actief .dobbel-item-knop:disabled { --knop-kleur: var(--kp-groen); --knop-schaduw: var(--kp-groen-d); --knop-rand: var(--kp-groen); --knop-tekst: #FFFFFF; }
+@media (max-height: 780px) { .dobbel-item { padding: 5px 8px; } .dobbel-item-icoon { width: 40px; height: 40px; } }
+
+/* Twee of drie blokken naast elkaar */
+.dobbel-midden.blokken-2, .dobbel-midden.blokken-3 { width: auto; display: flex; justify-content: center; }
+.dobbel-midden.blokken-2 .dobbel-knop, .dobbel-midden.blokken-3 .dobbel-knop { display: flex; }
+.blokken-2 .blok { scale: .72; margin: 0 -30px; }
+.blokken-3 .blok { scale: .56; margin: 0 -56px; }
+.dobbel-som {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--kp-font-kop);
+  font-weight: 700;
+  font-size: 120px;
+  line-height: 1;
+  color: #FFFFFF;
+  -webkit-text-stroke: 10px var(--kp-pompoen-d);
+  paint-order: stroke fill;
+  text-shadow: 0 8px 0 rgb(43 29 20 / .3);
+  margin-top: -60px;
+  animation: uitslag-in 300ms cubic-bezier(.3, 1.6, .5, 1);
+}
+.dobbel-som .teken { font-size: 90px; }
+.dobbel-som b { font-size: 190px; color: var(--kp-geel); -webkit-text-stroke-color: var(--kp-inkt); }
+
+/* Kies-je-worp (design: dobbel-kies-je-worp.html) */
+.kies-kop { text-align: center; }
+.kies-titel {
+  margin: 0;
+  font-family: var(--kp-font-kop);
+  font-weight: 700;
+  font-size: 64px;
+  line-height: 1;
+  color: #FFFFFF;
+  -webkit-text-stroke: 8px var(--kp-pompoen-d);
+  paint-order: stroke fill;
+}
+.kies-uitleg { margin: 10px 0 0; font-weight: 800; font-size: 20px; color: #FFFFFF; }
+.kies-raster { display: grid; grid-template-columns: repeat(5, 120px); gap: 18px 22px; margin-top: -60px; }
+.kies-getal {
+  height: 120px;
+  border: none;
+  border-radius: 28px;
+  background: #FFFFFF;
+  box-shadow: 0 8px 0 #E3CFAE, 0 14px 24px rgb(0 0 0 / .18);
+  font-family: var(--kp-font-kop);
+  font-weight: 700;
+  font-size: 64px;
+  color: var(--kp-pompoen);
+  cursor: pointer;
+}
+.kies-getal:active { transform: translateY(5px); box-shadow: 0 3px 0 #E3CFAE; }
+@media (max-width: 1100px) { .kies-raster { grid-template-columns: repeat(5, 100px); } .kies-getal { height: 100px; font-size: 54px; } }
+
+/* ================================================================ winkel en Ratje (design: bord-winkel.html) */
+.winkel-overlay { background: rgb(22 25 60 / .42); align-items: flex-start; padding-top: calc(120px + var(--veilig-boven)); }
+.winkel-paneel {
+  width: min(1060px, calc(100vw - 40px));
+  border: 4px solid #FFFFFF;
+  border-radius: 34px;
+  padding: 24px 28px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: uitslag-in 200ms ease-out;
+}
+.winkel-kop { display: flex; align-items: center; gap: 16px; }
+.winkel-kop-icoon img { width: 60px; height: 60px; display: block; object-fit: contain; }
+.winkel-kop-tekst { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.winkel-kop-tekst h2 { margin: 0; font-family: var(--kp-font-kop); font-weight: 700; font-size: 34px; line-height: 1.05; }
+.winkel-kop-tekst span { font-weight: 700; font-size: 16px; color: var(--kp-inkt-2); }
+.winkel-munten { display: flex; align-items: center; gap: 8px; background: #FFFFFF; border-radius: var(--kp-r-pil); padding: 8px 18px 8px 10px; }
+.winkel-munten b { font-family: var(--kp-font-kop); font-weight: 700; font-size: 26px; }
+.winkel-kaarten { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.winkel-kaarten.twee { grid-template-columns: repeat(2, minmax(0, 260px)); justify-content: center; gap: 22px; }
+.winkel-kaarten.doelen { display: flex; justify-content: center; gap: 18px; }
+.winkel-kaart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 10px 16px;
+  background: #FFFFFF;
+  border: 4px solid #FFFFFF;
+  border-radius: 24px;
+  box-shadow: 0 6px 0 #E3CFAE;
+  font-family: var(--kp-font-tekst);
+  color: var(--kp-inkt);
+  text-align: center;
+  cursor: pointer;
+  transition: transform 80ms ease-out;
+}
+.winkel-kaart:active { transform: translateY(4px); box-shadow: 0 2px 0 #E3CFAE; }
+.winkel-kaart.te-duur { opacity: .5; cursor: default; }
+.winkel-kaart.te-duur:active { transform: none; box-shadow: 0 6px 0 #E3CFAE; }
+.winkel-kaart-icoon { width: 88px; height: 88px; border-radius: 50%; background: #FFF6E6; display: flex; align-items: center; justify-content: center; }
+.winkel-kaart-naam { font-family: var(--kp-font-kop); font-weight: 600; font-size: 19px; line-height: 1.1; }
+.winkel-kaart-uitleg { font-weight: 700; font-size: 14px; color: var(--kp-inkt-2); line-height: 1.3; min-height: 54px; flex: 1; }
+.winkel-pil {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--kp-pompoen);
+  color: #FFFFFF;
+  border-radius: var(--kp-r-pil);
+  padding: 7px 16px 7px 8px;
+  font-family: var(--kp-font-kop);
+  font-weight: 600;
+  font-size: 19px;
+  box-shadow: 0 4px 0 var(--kp-pompoen-d);
+  white-space: nowrap;
+}
+.winkel-voet { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.winkel-hint { font-weight: 800; font-size: 16px; color: var(--kp-inkt-2); }
+.winkel-pommie {
+  position: absolute;
+  right: calc(16px + var(--veilig-rechts));
+  bottom: calc(8px + var(--veilig-onder));
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  pointer-events: none;
+  animation: pommie-in 250ms ease-out;
+}
+.winkel-pommie img { width: 110px; height: 120px; object-fit: contain; }
+.winkel-pommie .ballon { margin-bottom: 30px; }
+.winkel-pommie .ballon p { font-size: 18px; }
+.winkel-pommie .ballon::after { left: auto; right: -10px; bottom: 22px; }
+.ratje-overlay .winkel-kop-icoon img { width: 72px; height: 72px; }
+.ratje-doel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 170px;
+  padding: 16px 14px;
+  background: #FFFFFF;
+  border: 4px solid #FFFFFF;
+  border-radius: 24px;
+  box-shadow: 0 6px 0 #E3CFAE;
+  font-family: var(--kp-font-kop);
+  color: var(--kp-inkt);
+  cursor: pointer;
+}
+.ratje-doel:active { transform: translateY(4px); box-shadow: 0 2px 0 #E3CFAE; }
+.ratje-doel b { font-weight: 700; font-size: 22px; }
+.ratje-doel-figuur { width: 96px; height: 96px; border-radius: 50%; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
+.ratje-doel-plaatje.handgetekend { width: 84px; height: 96px; object-fit: cover; object-position: 50% 0; }
+.ratje-doel-plaatje.pion { width: 62px; height: 80px; object-fit: contain; }
+.ratje-doel-stand { display: flex; align-items: center; gap: 4px; font-weight: 700; font-size: 18px; }
+
+/* ================================================================ rad, kans en zeilwedstrijd */
+.gebeurtenis-overlay { background: rgb(22 25 60 / .42); }
+.gebeurtenis-paneel {
+  width: 560px;
+  border: 4px solid #FFFFFF;
+  border-radius: 34px;
+  padding: 24px 28px 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  animation: uitslag-in 200ms ease-out;
+}
+.gebeurtenis-kop h2 { margin: 0; font-family: var(--kp-font-kop); font-weight: 700; font-size: 38px; line-height: 1.05; }
+.gebeurtenis-kop p { margin: 6px 0 0; font-weight: 700; font-size: 17px; color: var(--kp-inkt-2); }
+.gebeurtenis-uitslag {
+  margin: 0;
+  min-height: 54px;
+  font-family: var(--kp-font-kop);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 1.15;
+  opacity: 0;
+  transform: scale(.9);
+  transition: opacity 150ms ease-out, transform 200ms cubic-bezier(.3, 1.6, .5, 1);
+}
+.gebeurtenis-uitslag.zichtbaar { opacity: 1; transform: none; }
+.gebeurtenis-verder { min-width: 220px; }
+.rad { position: relative; width: 300px; height: 300px; }
+.rad-draai { width: 300px; height: 300px; will-change: transform; filter: drop-shadow(0 8px 0 rgb(43 29 20 / .16)); }
+.rad-schijf text { font-family: var(--kp-font-kop); font-weight: 700; font-size: 20px; fill: #FFFFFF; }
+.rad-wijzer {
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  width: 0;
+  height: 0;
+  transform: translateX(-50%);
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 34px solid var(--kp-inkt);
+  filter: drop-shadow(0 3px 0 #FFFFFF);
+}
+.rad-bok .gebeurtenis-paneel { background-color: #2F2347; border-color: #4B3A6B; color: #FFFFFF; }
+.rad-bok .gebeurtenis-kop p { color: #C9BEE6; }
+.rad-bok .gebeurtenis-uitslag { color: #FFF3B0 !important; }
+
+.kans-rollen { display: grid; grid-template-columns: 120px 1fr 120px; gap: 12px; align-items: center; width: 100%; }
+.kans-rol {
+  height: 120px;
+  border-radius: 24px;
+  background: #FFFFFF;
+  box-shadow: inset 0 -6px 0 #E3CFAE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: var(--kp-font-kop);
+  font-weight: 600;
+  font-size: 20px;
+  padding: 0 10px;
+}
+.kans-rol.vast { box-shadow: inset 0 -6px 0 #E3CFAE, 0 0 0 4px var(--kp-geel); animation: uitslag-in 200ms cubic-bezier(.3, 1.6, .5, 1); }
+.kans-figuur { width: 96px; height: 96px; border-radius: 50%; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
+.kans-figuur-plaatje.handgetekend { width: 84px; height: 96px; object-fit: cover; object-position: 50% 0; }
+.kans-figuur-plaatje.pion { width: 62px; height: 80px; object-fit: contain; }
+.kans-figuur .vervanger { width: 96px; height: 96px; }
+
+.zeil-water {
+  position: relative;
+  width: 100%;
+  padding: 10px 0;
+  border-radius: 24px;
+  background: linear-gradient(#3C8EDC, #1E5BB0);
+  overflow: hidden;
+}
+.lampionnen .zeil-water { background: linear-gradient(#24306A, #121A44); }
+.lampionnen .gebeurtenis-paneel { background-color: #2F2347; border-color: #4B3A6B; color: #FFFFFF; }
+.lampionnen .gebeurtenis-kop p { color: #C9BEE6; }
+.zeil-finish { position: absolute; right: 18px; top: 0; bottom: 0; width: 8px; background: repeating-linear-gradient(#FFFFFF 0 8px, var(--kp-inkt) 8px 16px); opacity: .8; }
+.zeil-baan { position: relative; height: 66px; display: flex; align-items: center; padding-left: 8px; }
+.zeil-baan + .zeil-baan { border-top: 2px dashed rgb(255 255 255 / .25); }
+.zeil-boot { position: relative; display: flex; align-items: center; gap: 4px; will-change: transform; }
+.zeil-bootje { width: 46px; height: 46px; }
+.zeil-boot .kans-figuur { width: 48px; height: 48px; }
+.zeil-boot .kans-figuur-plaatje.handgetekend { width: 44px; height: 50px; }
+.zeil-boot .kans-figuur-plaatje.pion { width: 32px; height: 42px; }
+.zeil-worp {
+  display: none;
+  min-width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  font-family: var(--kp-font-kop);
+  font-weight: 700;
+  font-size: 18px;
+  align-items: center;
+  justify-content: center;
+  color: var(--kp-inkt);
+}
+.zeil-baan.klaar .zeil-worp { display: flex; }
+.zeil-baan.winnaar .zeil-worp { background: var(--kp-geel); box-shadow: 0 0 0 3px #FFFFFF; }
+.lampionnen .zeil-baan.winnaar .zeil-boot { filter: drop-shadow(0 0 10px #FFE478); }

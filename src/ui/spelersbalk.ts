@@ -6,10 +6,12 @@
 import { figuur } from '../data/figuren';
 import { plaatsen, spelerAanZet, type GameState } from '../logic';
 import { asset } from './asset';
+import { itemIcoon } from './itemIcoon';
 import { icoon } from './iconen';
 import { figuurPlaatje, maak, plaatsRondje, zetPlaats } from './onderdelen';
 
-export const MAX_ITEMS = 3;
+export { MAX_ITEMS } from '../logic';
+import { MAX_ITEMS } from '../logic';
 
 interface Kaart {
   el: HTMLElement;
@@ -22,6 +24,9 @@ interface Kaart {
 export class Spelersbalk {
   readonly el = maak('div', 'spelersbalk');
   private rondeGetal = maak('div', 'ronde-getal');
+  private ronde = maak('div', 'ronde-teller vilt');
+  private rondeIcoon!: HTMLImageElement;
+  private itemsSleutel: string[] = [];
   private kaarten: Kaart[] = [];
   private turboKnop: HTMLButtonElement;
 
@@ -29,9 +34,10 @@ export class Spelersbalk {
     state: GameState,
     acties: { turbo: () => void; menu: () => void },
   ) {
-    const ronde = maak('div', 'ronde-teller vilt');
+    const ronde = this.ronde;
     const kop = maak('div', 'ronde-kop');
     kop.innerHTML = `<img src="${asset('iconen/zon.svg')}" alt="" width="26" height="26"><span>RONDE</span>`;
+    this.rondeIcoon = kop.querySelector('img')!;
     ronde.append(kop, this.rondeGetal);
 
     const spelers = maak('div', 'balk-spelers');
@@ -83,7 +89,10 @@ export class Spelersbalk {
   werkBij(s: GameState): void {
     this.rondeGetal.innerHTML = `${s.ronde}<span>/${s.instellingen.aantalRondes}</span>`;
     const plek = plaatsen(s);
-    const beurtFase = ['dobbelen', 'lopen', 'splitsing', 'sterKopen'].includes(s.fase.soort);
+    this.ronde.classList.toggle('nacht', s.nacht);
+    const icoonPad = asset(s.nacht ? 'iconen/maan.svg' : 'iconen/zon.svg');
+    if (this.rondeIcoon.getAttribute('src') !== icoonPad) this.rondeIcoon.src = icoonPad;
+    const beurtFase = ['dobbelen', 'lopen', 'splitsing', 'sterKopen', 'winkel', 'ratje'].includes(s.fase.soort);
     const aanZet = beurtFase ? spelerAanZet(s) : -1;
     s.spelers.forEach((sp, i) => {
       const k = this.kaarten[i];
@@ -91,16 +100,18 @@ export class Spelersbalk {
       k.sterren.textContent = String(sp.sterren);
       k.munten.textContent = String(sp.munten);
       k.el.classList.toggle('actief', i === aanZet);
-      const vakjes = [];
+      // Alleen opnieuw tekenen als de items veranderd zijn.
+      const sleutel = sp.items.join(',');
+      if (this.itemsSleutel[i] === sleutel) return;
+      this.itemsSleutel[i] = sleutel;
+      const vakjes: HTMLElement[] = [];
       for (let n = 0; n < MAX_ITEMS; n++) {
         const item = sp.items[n];
-        vakjes.push(
-          item
-            ? `<div class="balk-item"><img src="${asset(`iconen/${item}.svg`)}" alt=""></div>`
-            : '<div class="balk-item leeg"></div>',
-        );
+        const vak = maak('div', item ? 'balk-item' : 'balk-item leeg');
+        if (item) vak.append(itemIcoon(item, 18));
+        vakjes.push(vak);
       }
-      k.items.innerHTML = vakjes.join('');
+      k.items.replaceChildren(...vakjes);
     });
   }
 

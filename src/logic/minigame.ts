@@ -1,4 +1,5 @@
 /** De minigame-uitslag verwerken en de volgende ronde starten (§3, §5). */
+import { wisseltBijRonde, wisselDagNacht } from './dagNacht';
 import { eersteEindspelRonde, kiesLaatsteSpeler } from './eindspel';
 import { doeEindtelling } from './eindtelling';
 import type { GameState } from './gameState';
@@ -56,6 +57,7 @@ function sluitRondeAf(s: GameState): void {
   }
   s.ronde += 1;
   s.aanZet = 0;
+  if (wisseltBijRonde(s.ronde)) wisselDagNacht(s, 'ronde');
   s.fase =
     s.ronde === eersteEindspelRonde(s)
       ? { soort: 'eindspelRad', speler: kiesLaatsteSpeler(s) }

@@ -27,10 +27,13 @@ export function vakjeSvg(type: VakjeType, x: number, y: number): string {
   );
 }
 
-/** Alle vakjes, van achter naar voren (zodat voorste vakjes over achterste vallen). */
-export function vakjesSvg(vakjes: readonly Vakje[]): string {
+/**
+ * Alle vakjes, van achter naar voren (zodat voorste vakjes over achterste vallen).
+ * `typeVan` kan het type aanpassen, bijvoorbeeld de bosvakjes die 's nachts rood zijn.
+ */
+export function vakjesSvg(vakjes: readonly Vakje[], typeVan: (v: Vakje) => VakjeType = (v) => v.type): string {
   return [...vakjes]
     .sort((a, b) => a.y - b.y)
-    .map((v) => vakjeSvg(v.type, v.x, v.y))
+    .map((v) => vakjeSvg(typeVan(v), v.x, v.y))
     .join('');
 }
