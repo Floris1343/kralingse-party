@@ -8,7 +8,7 @@ import { BOK_RAD, HERTEN_RAD, PECH_RAD, VLEERMUIS_RAD, type GameState, type Gebe
 import { asset } from './asset';
 import { icoon } from './iconen';
 import { figuurPlaatje, maak } from './onderdelen';
-import { KANS_TEKST, RADEN } from './uitkomsten';
+import { KANS_TEKST, RADEN, type RadVak } from './uitkomsten';
 
 const wacht = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 const VOLGORDE: Record<RadSoort, readonly string[]> = { hertenkamp: HERTEN_RAD, bok: BOK_RAD, pech: PECH_RAD, vleermuis: VLEERMUIS_RAD };
@@ -70,18 +70,54 @@ function radSvg(vakken: { kort: string; kleur: string }[], straal = 150): string
 export async function toonRad(laag: HTMLElement, s: GameState, g: Extract<Gebeurtenis, { soort: 'rad' }>): Promise<void> {
   const info = RADEN[g.rad];
   const volgorde = VOLGORDE[g.rad];
-  const vakken = volgorde.map((k) => info.vakken[k]);
-  const { paneel, klaar } = overlay(laag, `rad-overlay rad-${g.rad}`);
+  await draaiRad(laag, {
+    klasse: `rad-${g.rad}`,
+    titel: info.titel,
+    uitleg: `${s.spelers[g.speler].naam} · ${info.uitleg}`,
+    vakken: volgorde.map((k) => info.vakken[k]),
+    uitkomst: () => volgorde.indexOf(g.uitkomst),
+  });
+}
+
+/**
+ * Een rad met vakken. Met `draai` staat het rad eerst stil: een mens tikt op "Draai!", bij een bot
+ * draait het vanzelf (`draai: 'vanzelf'`). `uitkomst` wordt pas bij het draaien gevraagd, zodat de
+ * spellogica dan pas beslist. Klaar na "Verder".
+ */
+export async function draaiRad(
+  laag: HTMLElement,
+  opties: {
+    klasse?: string;
+    titel: string;
+    uitleg: string;
+    vakken: RadVak[];
+    uitkomst: () => number;
+    draai?: 'knop' | 'vanzelf';
+  },
+): Promise<void> {
+  const { vakken } = opties;
+  const { paneel, klaar } = overlay(laag, `rad-overlay ${opties.klasse ?? ''}`);
   paneel.innerHTML = `
     <div class="gebeurtenis-kop"><h2></h2><p></p></div>
     <div class="rad"><div class="rad-draai">${radSvg(vakken)}</div><div class="rad-wijzer"></div></div>
     <p class="gebeurtenis-uitslag"></p>`;
-  paneel.querySelector('h2')!.textContent = info.titel;
-  paneel.querySelector('.gebeurtenis-kop p')!.textContent = `${s.spelers[g.speler].naam} · ${info.uitleg}`;
+  paneel.querySelector('h2')!.textContent = opties.titel;
+  paneel.querySelector('.gebeurtenis-kop p')!.textContent = opties.uitleg;
   const uitslag = paneel.querySelector<HTMLElement>('.gebeurtenis-uitslag')!;
 
-  const i = volgorde.indexOf(g.uitkomst);
-  const midden = ((i + 0.5) * 360) / volgorde.length;
+  if (opties.draai === 'knop') {
+    const knop = maak('button', 'knop gebeurtenis-verder');
+    knop.type = 'button';
+    knop.textContent = 'Draai!';
+    paneel.append(knop);
+    await new Promise<void>((r) => knop.addEventListener('click', () => r(), { once: true }));
+    knop.remove();
+  } else if (opties.draai === 'vanzelf') {
+    await wacht(900);
+  }
+
+  const i = opties.uitkomst();
+  const midden = ((i + 0.5) * 360) / vakken.length;
   const eind = 360 * 4 - midden;
   const draai = paneel.querySelector<HTMLElement>('.rad-draai')!;
   await draai.animate([{ transform: 'rotate(0deg)' }, { transform: `rotate(${eind}deg)` }], {
@@ -89,8 +125,8 @@ export async function toonRad(laag: HTMLElement, s: GameState, g: Extract<Gebeur
     easing: 'cubic-bezier(.15,.7,.25,1)',
     fill: 'forwards',
   }).finished.catch(() => {});
-  uitslag.textContent = info.vakken[g.uitkomst].zin;
-  uitslag.style.color = info.vakken[g.uitkomst].kleur;
+  uitslag.textContent = vakken[i].zin;
+  uitslag.style.color = vakken[i].kleur;
   uitslag.classList.add('zichtbaar');
   await klaar();
 }

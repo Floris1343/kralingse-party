@@ -2,7 +2,7 @@
  * De teksten bij de raderen, de kans-rollen en de melding na een beurt.
  * (Wat Pommie zegt staat in src/data/teksten.ts.)
  */
-import type { GameState, Gebeurtenis, KansActie, MuntReden, RadSoort } from '../logic';
+import type { EindspelRegel, GameState, Gebeurtenis, KansActie, MuntReden, RadSoort } from '../logic';
 import { itemInfo, type ItemSoort } from '../logic';
 
 export interface RadVak {
@@ -56,6 +56,15 @@ export const RADEN: Record<RadSoort, { titel: string; uitleg: string; vakken: Re
       ster: { kort: 'Naar de ster', zin: 'Ze vliegen je naar het vakje vlak vóór de ster!', kleur: '#E39A00' },
     },
   },
+};
+
+/** De vakken van het eindspelrad (§9), in de volgorde van EINDSPEL_REGELS. */
+export const EINDSPEL_VAKKEN: Record<EindspelRegel, RadVak> = {
+  munten20: { kort: '+20', zin: '+20 munten voor de laatste!', kleur: '#2FAE5B' },
+  extraSter: { kort: 'Extra ster', zin: 'Er komt een extra ster bij!', kleur: '#E39A00' },
+  goedkopeSter: { kort: 'Ster 10', zin: 'Een ster kost vanaf nu maar 10 munten!', kleur: '#F47B20' },
+  eeuwigeNacht: { kort: 'Nacht', zin: 'Eeuwige nacht: het blijft nacht tot het einde!', kleur: '#4B3A6B' },
+  ratjeGratis: { kort: 'Ratje gratis', zin: 'Ratje werkt vanaf nu helemaal gratis!', kleur: '#D62839' },
 };
 
 export const KANS_TEKST: Record<KansActie, { kort: string; zin: (a: string, b: string) => string }> = {

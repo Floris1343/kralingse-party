@@ -8,6 +8,7 @@ import { bevestig, toonHoofdmenu } from './ui/hoofdmenu';
 import { toonNieuwSpel } from './ui/nieuwSpelScherm';
 import { toonSpelscherm } from './ui/spelscherm';
 import { startBijwerken, werkBijAlsKlaar } from './ui/bijwerken';
+import { startGeluid } from './audio/geluid';
 
 const root = document.querySelector<HTMLElement>('#app')!;
 
@@ -44,6 +45,7 @@ function spel(s: GameState) {
 }
 
 startBijwerken(() => document.querySelector('.hoofdmenu') !== null);
+startGeluid();
 
 if (new URLSearchParams(location.search).has('editor')) {
   import('./editor/editor').then((m) => m.toonEditor(root));

@@ -9,29 +9,23 @@ import { zeg } from '../data/teksten';
 import {
   BOOT_PRIJS, botActie, bewaar, dobbelen, draaiEindspelRad, gebruikItem, nachtTypen, nachtwinkelKeuze, ratjeKeuze,
   spelerAanZet, splitsingKeuze, stap, sterKeuze, sterPrijs, verwerkMinigame, wachtOpBot, winkelKeuze, zichtbareSterren,
-  type EindspelRegel, type GameState, type Gebeurtenis, type Splitsing,
+  EINDSPEL_REGELS, plaatsen, type EindspelRegel, type GameState, type Gebeurtenis, type Splitsing,
 } from '../logic';
 import { BordWeergave } from '../render/bordWeergave';
 import { asset } from './asset';
 import { toonDobbelscherm } from './dobbelscherm';
-import { toonKans, toonRad, toonZeilwedstrijd } from './gebeurtenissen';
-import { icoon } from './iconen';
+import { draaiRad, toonKans, toonRad, toonZeilwedstrijd } from './gebeurtenissen';
+import { namenLijst, toonEindscherm } from './eindscherm';
 import { vraagMinigameUitslag } from './minigameUitslag';
-import { maak } from './onderdelen';
+import { maak, plaatsRondje } from './onderdelen';
 import { Spelersbalk } from './spelersbalk';
-import { meldingDelen } from './uitkomsten';
+import { EINDSPEL_VAKKEN, meldingDelen } from './uitkomsten';
+import { muntGeluid, sterGeluid } from '../audio/geluid';
+import { pommieZegt } from './pommie';
 import { vraagItemDoel, vraagNachtwinkel, vraagRatje, vraagWinkel } from './winkelScherm';
 
 const wacht = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 const TURBO_SLEUTEL = 'kralingse-plas-party/turbo';
-
-const REGEL_TEKST: Record<EindspelRegel, string> = {
-  munten20: '+20 munten voor de laatste!',
-  extraSter: 'Er komt een extra ster bij: nu staan er twee op het bord!',
-  goedkopeSter: 'Een ster kost vanaf nu maar 10 munten!',
-  eeuwigeNacht: 'Eeuwige nacht: het blijft nacht tot het einde!',
-  ratjeGratis: 'Ratje werkt vanaf nu helemaal gratis!',
-};
 
 export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { naarMenu: () => void }): void {
   let s = start;
@@ -72,10 +66,28 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
   }
 
   function zet(nieuw: GameState) {
+    speelGeluid(s, nieuw);
     s = nieuw;
     bewaar(localStorage, s);
     balk.werkBij(s);
     tekenBord();
+  }
+
+  /**
+   * Geluidjes bij een nieuwe stand: een ster, of munten erbij of eraf. Met turbo hoor je de bots
+   * niet (dat zou één brij worden); mensen en de minigame-uitslag hoor je altijd.
+   */
+  function speelGeluid(oud: GameState, nieuw: GameState) {
+    const botBezig = nieuw.fase.soort !== 'minigame' && wachtOpBot(oud) && turbo;
+    if (botBezig) return;
+    const sterren = nieuw.spelers.reduce((n, sp) => n + sp.sterren, 0) - oud.spelers.reduce((n, sp) => n + sp.sterren, 0);
+    if (nieuw.verslag.length !== oud.verslag.length && nieuw.verslag.some((g) => g.soort === 'sterGekocht') && sterren !== 0) {
+      sterGeluid();
+      return;
+    }
+    const verschil = nieuw.spelers.map((sp, i) => sp.munten - (oud.spelers[i]?.munten ?? sp.munten));
+    if (verschil.some((d) => d > 0)) muntGeluid(true);
+    else if (verschil.some((d) => d < 0)) muntGeluid(false);
   }
 
   /** Sterren (of vraagtekens in de mist), valstrikken, dag/nacht en mist op het bord. */
@@ -113,24 +125,8 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
   const kies = (el: Element) =>
     Promise.race([klik(el, '[data-ja]').then(() => true), klik(el, '[data-nee]').then(() => false)]);
 
-  /** Pommie met een tekstballon; tik om weg te halen. */
-  function pommie(tekst: string): Promise<void> {
-    const el = maak('div', 'pommie-moment');
-    el.innerHTML = `
-      <img class="pommie-plaatje" src="${asset('personages/pommie.svg')}" alt="Pommie">
-      <div class="ballon ballon-links"><div class="ballon-naam">Pommie</div><p></p></div>`;
-    el.querySelector('p')!.textContent = tekst;
-    laag.append(el);
-    return new Promise((r) => {
-      const weg = () => {
-        clearTimeout(t);
-        el.remove();
-        r();
-      };
-      const t = setTimeout(weg, 4000);
-      el.addEventListener('click', weg, { once: true });
-    });
-  }
+  /** Pommie met een tekstballon en gebrabbel; tik om weg te halen. */
+  const pommie = (tekst: string) => pommieZegt(laag, tekst);
 
   /** Korte melding bovenin (niet blokkerend), zoals "Bot 2 gooide 7 · +3 munten · kocht een ster!". */
   function melding(spelerIdx: number) {
@@ -335,11 +331,18 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
   }
 
   // ------------------------------------------------------------------ minigame, eindspel, einde
+  /** Is het spel in deze sessie afgelopen? Dan komt de ceremonie; bij "Verder spelen" later niet. */
+  let zojuistAfgelopen = false;
+
   async function minigame() {
     weergave.overzicht();
     await wacht(300);
     const uitslag = await vraagMinigameUitslag(laag, s);
     zet(verwerkMinigame(s, uitslag, BORD));
+    if (s.fase.soort === 'einde') {
+      zojuistAfgelopen = true;
+      return;
+    }
     const iets = s.verslag.some((g) => ['dagNacht', 'mist', 'vallendeSter'].includes(g.soort));
     if (iets && actief) {
       await wacht(700); // eerst de overgang zien
@@ -347,50 +350,73 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
     }
   }
 
+  /**
+   * Begin van het eindspel (§9): Pommie maakt de tussenstand bekend, daarna draait de speler op de
+   * laatste plaats aan het rad. Een mens tikt op "Draai!", bij een bot draait het vanzelf.
+   */
   async function eindspelRad() {
     if (s.fase.soort !== 'eindspelRad') return;
     const laatste = s.fase.speler;
+    const naam = s.spelers[laatste].naam;
     weergave.overzicht();
     await pommie(zeg('eindspel'));
-    const el = paneel(`
-      <h2>Het eindspel!</h2>
-      <p></p>
-      <div class="overlay-knoppen"><button class="knop" data-draai>Draai!</button></div>`);
-    el.querySelector('p')!.textContent = zeg('eindspelRad', s.spelers[laatste].naam);
-    if (s.spelers[laatste].isBot) await wacht(1200);
-    else await klik(el, '[data-draai]');
-    zet(draaiEindspelRad(s, BORD));
-    const uitkomst = paneel(`
-      <h2>Het rad zegt...</h2>
-      <p>${REGEL_TEKST[s.eindspelRegel!]}</p>
-      <div class="overlay-knoppen"><button class="knop knop-groen" data-verder>${icoon.vinkje()}Verder</button></div>`);
-    await klik(uitkomst, '[data-verder]');
-    sluitPaneel();
+    if (!actief) return;
+    await tussenstand();
+    if (!actief) return;
+    await pommie(zeg('eindspelRad', naam));
+    let regel: EindspelRegel = 'munten20';
+    await draaiRad(laag, {
+      klasse: 'rad-eindspel',
+      titel: 'Het eindspel!',
+      uitleg: `${naam} draait aan het rad`,
+      vakken: EINDSPEL_REGELS.map((r) => EINDSPEL_VAKKEN[r]),
+      draai: s.spelers[laatste].isBot ? 'vanzelf' : 'knop',
+      uitkomst: () => {
+        zet(draaiEindspelRad(s, BORD));
+        regel = s.eindspelRegel!;
+        return EINDSPEL_REGELS.indexOf(regel);
+      },
+    });
+    if (actief) await pommie(zeg(`regel_${regel}`, naam));
   }
 
-  function einde() {
+  /** De tussenstand: een paneel met de ranglijst, terwijl Pommie de koploper noemt. */
+  async function tussenstand() {
+    const p = plaatsen(s);
+    const volgorde = s.spelers.map((_, i) => i).sort((a, b) => p[a] - p[b]);
+    const el = maak('div', 'tussenstand');
+    const paneel = maak('div', 'tussenstand-paneel vilt paneel');
+    paneel.append(maak('h2', '', 'Tussenstand'));
+    for (const i of volgorde) {
+      const sp = s.spelers[i];
+      const rij = maak('div', 'tussenstand-rij');
+      rij.append(plaatsRondje(p[i]), maak('b', '', sp.naam));
+      rij.insertAdjacentHTML('beforeend', `<span><img src="${asset('iconen/ster.svg')}" alt="" width="24" height="24">${sp.sterren}</span><span><img src="${asset('iconen/munt.svg')}" alt="" width="22" height="22">${sp.munten}</span>`);
+      paneel.append(rij);
+    }
+    el.append(paneel);
+    laag.append(el);
+    const koplopers = volgorde.filter((i) => p[i] === 1);
+    const sterren = s.spelers[koplopers[0]].sterren;
+    const tekst = koplopers.length > 1
+      ? zeg('tussenstandGelijk', namenLijst(koplopers.map((i) => s.spelers[i].naam)))
+      : zeg('tussenstand', { naam: s.spelers[koplopers[0]].naam, sterren: `${sterren} ${sterren === 1 ? 'ster' : 'sterren'}` });
+    await pommie(tekst);
+    el.remove();
+  }
+
+  /** Het eindscherm. Is het spel net afgelopen, dan eerst de bonussterren-ceremonie. */
+  function einde(ceremonie: boolean) {
     weergave.overzicht();
-    const t = s.eindtelling!;
-    const rijen = t.ranglijst
-      .map((i, k) => {
-        const sp = s.spelers[i];
-        return `<li><b>${k + 1}e</b> <span></span> <img src="${asset('iconen/ster.svg')}" alt="" width="22"> ${sp.sterren} <img src="${asset('iconen/munt.svg')}" alt="" width="20"> ${sp.munten}</li>`;
-      })
-      .join('');
-    const el = paneel(`
-      <h2></h2>
-      <ol class="einde-lijst">${rijen}</ol>
-      <div class="overlay-knoppen"><button class="knop" data-menu>Naar het hoofdmenu</button></div>`);
-    el.querySelector('h2')!.textContent = zeg('winnaar', s.spelers[t.winnaar].naam);
-    el.querySelectorAll('.einde-lijst span').forEach((sp, k) => (sp.textContent = s.spelers[t.ranglijst[k]].naam));
-    el.querySelector('[data-menu]')!.addEventListener('click', stop, { once: true });
+    sluitPaneel();
+    toonEindscherm(scherm, s, { ceremonie, naarMenu: stop });
   }
 
   // ------------------------------------------------------------------ de spelronde
   async function speel() {
     while (actief) {
       const soort = s.fase.soort;
-      if (soort === 'einde') return einde();
+      if (soort === 'einde') return einde(zojuistAfgelopen);
       if (soort === 'minigame') {
         await minigame();
         continue;

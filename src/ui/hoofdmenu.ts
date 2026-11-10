@@ -1,4 +1,5 @@
 import { zeg } from '../data/teksten';
+import { geluidAan, muntGeluid, zetGeluid } from '../audio/geluid';
 import { asset } from './asset';
 import { icoon } from './iconen';
 
@@ -44,7 +45,31 @@ export function toonHoofdmenu(root: HTMLElement, acties: HoofdmenuActies): void 
   if (klein) klein.textContent = acties.opgeslagenSpel;
   root.querySelector('[data-actie="nieuw"]')?.addEventListener('click', acties.nieuwSpel);
   root.querySelector('[data-actie="verder"]')?.addEventListener('click', acties.verderSpelen);
-  root.querySelector('[data-actie="instellingen"]')?.addEventListener('click', () => toonMelding('Instellingen komen later!'));
+  root.querySelector('[data-actie="instellingen"]')?.addEventListener('click', () => toonInstellingen(root));
+}
+
+/** Instellingen: het geluid (gebrabbel en geluidjes) aan of uit. */
+function toonInstellingen(root: HTMLElement): void {
+  const el = document.createElement('div');
+  el.className = 'overlay';
+  el.innerHTML = `
+    <div class="overlay-paneel vilt paneel instellingen" role="dialog">
+      <h2>Instellingen</h2>
+      <div class="instelling">
+        <div class="instelling-tekst"><span>Geluid</span><small>Het gebrabbel van Pommie en de geluidjes</small></div>
+        <button type="button" class="schakelaar" role="switch" aria-label="Geluid"><span></span></button>
+      </div>
+      <div class="overlay-knoppen"><button class="knop" data-klaar>Klaar</button></div>
+    </div>`;
+  const schakelaar = el.querySelector('.schakelaar')!;
+  schakelaar.setAttribute('aria-checked', String(geluidAan()));
+  schakelaar.addEventListener('click', () => {
+    zetGeluid(!geluidAan());
+    schakelaar.setAttribute('aria-checked', String(geluidAan()));
+    if (geluidAan()) muntGeluid(true);
+  });
+  el.querySelector('[data-klaar]')!.addEventListener('click', () => el.remove(), { once: true });
+  root.append(el);
 }
 
 /** Vraagt in de stijl van het spel om bevestiging. */

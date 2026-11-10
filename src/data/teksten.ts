@@ -1,7 +1,8 @@
 /**
  * Alle tekst van Pommie de host. Pas gerust aan!
  * Per moment staan er een paar varianten; het spel kiest er willekeurig één.
- * {naam} wordt vervangen door de naam van de speler.
+ * Tussen {haakjes} vult het spel iets in: {naam} is de naam van de speler, de andere staan
+ * bij het moment erbij.
  */
 export const teksten = {
   welkom: [
@@ -14,13 +15,69 @@ export const teksten = {
     'Minigame! Pak de controllers en kies een spel voor 4 spelers.',
     'Op naar de Switch! Wie wint deze minigame voor 4 spelers?',
   ],
+  /** Op het opstartscherm. {mensen} en {bots}: "Twee mensen", "twee bots". */
+  nieuwSpel: [
+    '{mensen}, {bots}. Ik zorg dat de bots razendsnel zijn!',
+  ],
+  nieuwSpelVier: [
+    'Vier mensen! Dat wordt een echt feestje.',
+  ],
+  nieuwSpelEen: [
+    'Jij tegen drie bots. Ik zorg dat ze razendsnel zijn!',
+  ],
+  winkel: [
+    'Welkom in mijn winkeltje!',
+    'Kijk maar rond! Eén item per bezoek.',
+  ],
+  nachtwinkel: [
+    'Psst… iets gemeens nodig?',
+    'Niet verder vertellen, hè? Alles hier is een beetje gemeen.',
+  ],
   eindspel: [
     'Nog maar vijf rondes! Nu tellen de vakjes dubbel.',
     'Het eindspel begint! Blauw en rood tellen vanaf nu dubbel.',
   ],
+  /** De tussenstand bij het begin van het eindspel. {sterren} = de sterren van de koploper. */
+  tussenstand: [
+    'Even kijken hoe het staat… {naam} staat eerste met {sterren}!',
+    'De tussenstand! {naam} gaat aan kop met {sterren}.',
+  ],
+  tussenstandGelijk: [
+    'Even kijken hoe het staat… Het is spannend: {naam} staan gelijk bovenaan!',
+  ],
   eindspelRad: [
     '{naam} staat laatste en mag aan het rad draaien!',
     'Even wat hulp voor {naam}: draai aan het rad!',
+  ],
+  /** Wat het rad van de laatste speler aan het eindspel toevoegt (§9). */
+  regel_munten20: ['+20 munten voor {naam}!'],
+  regel_extraSter: ['Er komt een extra ster bij: nu staan er twee op het bord!'],
+  regel_goedkopeSter: ['Een ster kost vanaf nu maar 10 munten!'],
+  regel_eeuwigeNacht: ['Eeuwige nacht: het blijft nacht tot het einde!'],
+  regel_ratjeGratis: ['Ratje werkt vanaf nu helemaal gratis!'],
+  /** De bonussterren-ceremonie (§10). */
+  bonusIntro: [
+    'Het spel is uit! Maar eerst… de bonussterren!',
+    'Klaar! Tijd voor de bonussterren. Wie krijgt er nog een ster bij?',
+  ],
+  bonus_minigame: [
+    'De Minigame-ster gaat naar {naam}! Die verdiende de meeste munten met minigames.',
+  ],
+  bonus_rijkaard: [
+    'De Rijkaard-ster gaat naar {naam}! Die had ooit de meeste munten tegelijk.',
+  ],
+  bonus_avonturier: [
+    'De Avonturier-ster gaat naar {naam}! Die kwam het vaakst op een avontuur.',
+  ],
+  bonusNiemand: [
+    'Deze bonusster gaat naar… niemand! Jammer.',
+  ],
+  bonusUit: [
+    'Het spel is uit! De bonussterren staan uit, dus we gaan meteen tellen.',
+  ],
+  /** Bij gelijke sterren en munten beslist een extra worp. {worpen} = "Floris 8, Bot 1 3". */
+  beslisworp: [
+    'Gelijk! Een extra worp beslist: {worpen}.',
   ],
   nacht: [
     'Het is donker in het bos… Wie durft langs het hertenkamp?',
@@ -45,14 +102,23 @@ export const teksten = {
     'De mist trekt op! Nu zie je de ster weer.',
     'Daar is de zon door de mist heen. Iedereen ziet de ster weer!',
   ],
+  /** De winnaar. Zet de naam aan het eind: het gebrabbel maakt het dan spannend. */
   winnaar: [
-    '{naam} wint! Wat een feest!',
-    'En de winnaar is... {naam}!',
+    'En de winnaar is… {naam}!',
+    'Tromgeroffel… De Plas-kampioen is {naam}!',
   ],
 } as const;
 
-/** Kiest een willekeurige variant en vult de naam in. */
-export function zeg(moment: keyof typeof teksten, naam = ''): string {
-  const lijst = teksten[moment];
-  return lijst[Math.floor(Math.random() * lijst.length)].replaceAll('{naam}', naam);
+export type Moment = keyof typeof teksten;
+
+/**
+ * Kiest een willekeurige variant en vult in wat tussen {haakjes} staat.
+ * `invullen` is de naam van de speler, of een lijstje zoals { naam: 'Floris', sterren: '3 sterren' }.
+ */
+export function zeg(moment: Moment, invullen: string | Record<string, string | number> = ''): string {
+  const lijst: readonly string[] = teksten[moment];
+  const waarden = typeof invullen === 'string' ? { naam: invullen } : invullen;
+  let tekst = lijst[Math.floor(Math.random() * lijst.length)];
+  for (const [k, v] of Object.entries(waarden)) tekst = tekst.replaceAll(`{${k}}`, String(v));
+  return tekst;
 }

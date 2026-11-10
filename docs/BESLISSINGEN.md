@@ -97,3 +97,25 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 - **De achtergrond is weggehaald** en de tekening is bijgesneden (PNG met een doorzichtige achtergrond, zoals Floris en Speler 2). Het wit binnen de lijnen van het konijn is gebleven.
 - **Kleuren:** de kikker is groen (zoals de groene pion), het konijn paars (de paarse kleur uit het design), zodat het niet botst met het blauw van Floris.
 - **Ze zijn breder dan hoog**, dus op het bord iets minder hoog (88 en 92 tegen 105 voor Floris), zodat ze ongeveer even groot lijken.
+
+## Stap 7: de host en de afwerking
+
+- **Pommie praat met gebrabbel:** per lettergreep een korte, lage brom met een licht wisselende toonhoogte. Aan het eind van een vraag gaat de toon iets omhoog, anders zakt hij wat. De tekst loopt mee met het gebrabbel. Een lange zin heeft hoogstens 22 brommetjes, zodat hij nooit langer dan ongeveer 3 seconden duurt.
+- **Elke ballon kun je wegtikken.** Tik je niet, dan verdwijnt hij vanzelf na de leestijd: ongeveer 1,6 s plus een beetje per letter, hoogstens 6 s.
+- **Alle tekst van Pommie staat in `src/data/teksten.ts`**, ook die van het opstartscherm, de winkel, de Nachtwinkel, het eindspel en de ceremonie. Tussen {haakjes} vult het spel iets in, zoals de naam.
+- **Geluid kan aan of uit** bij Instellingen (standaard aan). Dat geldt voor het gebrabbel en alle geluidjes. Op de iPad begint het geluid pas na de eerste tik; zo werkt Safari.
+- **Geluidjes:**
+  - een doffe bonk als je op het dobbelblok tikt, en een kort loopje bij de uitslag (hoger bij een hoge worp)
+  - twee tingeltjes bij munten erbij en een zakkend toontje bij munten eraf
+  - een fonkelend loopje bij een ster
+  - een fanfaretje bij de winnaar
+  - Met turbo hoor je de bots niet, anders wordt het één brij.
+- **Begin van het eindspel:** Pommie zegt dat het eindspel begint. Daarna laat hij de tussenstand zien (een paneel met de ranglijst) en noemt hij de koploper. Daarna draait de laatste speler aan een echt rad met de 5 regels. Een mens tikt op "Draai!"; bij een bot draait het vanzelf. Pommie leest de nieuwe regel daarna voor. Dit moment slaat de turbo niet over, want het hoort bij iedereen.
+- **Bonussterren-ceremonie** (alleen direct na de laatste minigame; via "Verder spelen" zie je meteen de uitslag):
+  - Het eindscherm uit het design staat klaar, met de bonussterren uit ONTWERP.md: Minigame-ster, Rijkaard-ster en Avonturier-ster (niet de Muntenster en Pechster uit het design).
+  - Per bonusster licht de rij op, verschijnt wie hem krijgt (met het getal) en vertelt Pommie het.
+  - Daarna noemt Pommie de winnaar, met de naam aan het eind van zijn zin. Pas dan komt de trap omhoog, met een fanfaretje en confetti.
+  - Staan de bonussterren uit, dan zegt Pommie dat en gaat hij meteen naar de winnaar. Bij gelijke sterren en munten noemt hij eerst de extra worp.
+- **De grafiek "Sterren per ronde"** volgt de stijl van het design: elke speler in zijn eigen kleur, met een merkteken in de vorm van zijn figuur. Lijnen die over elkaar vallen, schuiven 2 px uit elkaar, zodat je ze allemaal ziet. De bonussterren tellen in de grafiek niet mee, want die komen pas na de laatste ronde.
+- **Statistiek:** een knop op het eindscherm opent een tabel met per speler sterren, munten, munten met minigames, de hoogste muntenstand, gekochte sterren, hoe vaak op rood, hoe vaak de bok en het aantal avonturen. De hoogste waarde per rij is oranje.
+- **Nog niet:** Pommie bij het bevriezen van de plas (dat komt met de seizoenen in fase 8).

@@ -9,6 +9,7 @@ import { zeg } from '../data/teksten';
 import type { GameState, MinigameUitslag } from '../logic';
 import { asset } from './asset';
 import { icoon } from './iconen';
+import { brabbelIn } from './pommie';
 import { figuurPlaatje, maak, maakPodium, PLAATS_KLEUR } from './onderdelen';
 
 const SEIZOEN: Record<string, [string, string]> = {
@@ -51,7 +52,8 @@ export function vraagMinigameUitslag(laag: HTMLElement, s: GameState): Promise<M
         <button type="button" class="knop knop-groen" data-bevestig>${icoon.vinkje()}<span>Bevestigen</span></button>
       </div>
     </div>`;
-  scherm.querySelector('.minigame-pommie p')!.textContent = zeg('minigame');
+  const stopBrabbel = brabbelIn(scherm.querySelector('.minigame-pommie p')!, zeg('minigame'));
+  scherm.querySelector('.minigame-pommie')!.addEventListener('click', stopBrabbel, { once: true });
 
   const rij = scherm.querySelector('.minigame-figuren')!;
   const gelijkKnop = scherm.querySelector<HTMLButtonElement>('[data-gelijk]')!;

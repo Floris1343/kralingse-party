@@ -1065,3 +1065,125 @@
   justify-content: center;
 }
 .figuurkeuze-houder { min-height: 20px; font-weight: 600; font-size: 15px; color: var(--kp-inkt-2); }
+
+/* ================================================================ eindscherm (design: eindscherm.html) */
+.eind-laag { z-index: 60; background-color: #16457A; }
+.eindscherm .podium { background-color: #16457A; color: var(--kp-inkt); }
+.eind-boog { position: absolute; left: -120px; top: 300px; width: 760px; height: 760px; border-radius: 50%; background: #1E5BB0; }
+.eindscherm .vlaggetjes { position: absolute; left: 0; top: -14px; width: 1180px; height: 90px; }
+.eind-kop { position: absolute; left: 40px; top: 74px; display: flex; flex-direction: column; gap: 2px; transition: opacity 500ms ease-out, transform 500ms ease-out; }
+.eind-label { font-family: var(--kp-font-kop); font-weight: 600; font-size: 18px; letter-spacing: 1px; color: #A9D0FF; }
+.eind-kop h1 { margin: 0; font-family: var(--kp-font-kop); font-weight: 700; font-size: 50px; line-height: 1.05; color: #FFFFFF; max-width: 680px; }
+.eind-knoppen { position: absolute; right: 36px; top: 84px; display: flex; gap: 12px; }
+.eind-rest { position: absolute; left: 40px; top: 160px; display: flex; flex-direction: column; gap: 8px; transition: opacity 500ms ease-out; }
+.eind-rest-pil { display: flex; align-items: center; gap: 8px; background: rgb(255 255 255 / .14); border-radius: var(--kp-r-pil); padding: 6px 14px 6px 6px; font-family: var(--kp-font-kop); font-weight: 600; font-size: 17px; color: #FFFFFF; }
+.eind-rest-plaats { width: 32px; height: 32px; font-size: 13px; border: 3px solid #FFFFFF; box-shadow: 0 2px 0 rgb(43 29 20 / .25); }
+.eind-rest-plaatje { width: 30px; height: 39px; object-fit: contain; }
+.eind-rest-plaatje.handgetekend { width: 36px; height: 36px; object-fit: cover; object-position: 50% 0; border-radius: 50%; }
+
+.eind-trap { position: absolute; left: 30px; bottom: 0; display: flex; align-items: flex-end; gap: 4px; }
+.eind-kolom { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 150px; transition: transform 700ms cubic-bezier(.2,.9,.3,1.1); }
+.eind-kroon { width: 54px; height: 54px; animation: ster-zweef 2.4s ease-in-out infinite alternate; }
+.eind-figuur { width: 86px; height: 112px; object-fit: contain; display: block; }
+.eind-figuur.winnaar { width: 104px; height: 135px; }
+.eind-figuur.handgetekend { filter: drop-shadow(0 0 1.5px #FFFFFF) drop-shadow(0 0 1.5px #FFFFFF) drop-shadow(0 3px 3px rgb(43 29 20 / .3)); }
+.eind-naam { font-family: var(--kp-font-kop); font-weight: 600; font-size: 21px; color: #FFFFFF; white-space: nowrap; }
+.eind-trede {
+  width: 150px;
+  border-radius: 20px 20px 0 0;
+  border: 4px solid #FFFFFF;
+  border-bottom: none;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 12px;
+  gap: 6px;
+}
+.eind-plaats { font-family: var(--kp-font-kop); font-weight: 700; font-size: 40px; line-height: 1; }
+.eind-stand { display: flex; gap: 8px; }
+.eind-stand span { display: flex; align-items: center; gap: 4px; }
+.eind-stand b { font-family: var(--kp-font-kop); font-weight: 700; font-size: 20px; line-height: 1; }
+.eind-stand b.klein { font-size: 18px; }
+
+.eind-bonus, .eind-grafiek {
+  position: absolute;
+  right: 36px;
+  width: 560px;
+  box-sizing: border-box;
+  border: 4px solid #FFFFFF;
+  border-radius: 30px;
+  display: flex;
+  flex-direction: column;
+}
+.eind-bonus { top: 160px; padding: 20px 22px 22px; gap: 10px; }
+.eind-grafiek { bottom: 30px; padding: 18px 22px 16px; gap: 6px; }
+.eind-paneel-kop { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.eind-paneel-kop h2 { margin: 0; font-family: var(--kp-font-kop); font-weight: 700; font-size: 26px; }
+.eind-grafiek .eind-paneel-kop h2 { font-size: 22px; white-space: nowrap; }
+.eind-paneel-kop > span { font-weight: 800; font-size: 14px; color: var(--kp-inkt-2); }
+.eind-bonus-rijen { display: flex; flex-direction: column; gap: 10px; }
+.eind-bonus-rij { display: flex; align-items: center; gap: 12px; background: #FFFFFF; border-radius: 22px; padding: 10px 14px 10px 10px; box-shadow: 0 4px 0 #E3CFAE; transition: transform 250ms ease-out, box-shadow 250ms ease-out; }
+.eind-bonus-icoon { width: 52px; height: 52px; border-radius: 16px; background: #FFF0BF; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.eind-bonus-tekst { flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.eind-bonus-tekst span { font-family: var(--kp-font-kop); font-weight: 600; font-size: 19px; }
+.eind-bonus-tekst small { font-weight: 700; font-size: 13px; color: var(--kp-inkt-2); }
+.eind-bonus-wie { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.eind-pil { display: flex; align-items: center; gap: 8px; border-radius: var(--kp-r-pil); padding: 4px 12px 4px 4px; font-family: var(--kp-font-kop); font-weight: 600; font-size: 16px; white-space: nowrap; }
+.eind-pil-plaatje { width: 32px; height: 32px; display: block; flex-shrink: 0; }
+.eind-pil-plaatje.handgetekend { object-fit: cover; object-position: 50% 0; border-radius: 50%; filter: none; }
+.eind-pil-plaatje.pion { width: 25px; height: 33px; object-fit: contain; margin-top: 3px; }
+.eind-niemand { font-family: var(--kp-font-kop); font-weight: 600; font-size: 16px; color: var(--kp-inkt-2); }
+.eind-bonus-uit { margin: 4px 0 0; font-weight: 700; font-size: 15px; color: var(--kp-inkt-2); }
+
+.eind-legenda { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+.eind-legenda-item { display: flex; align-items: center; gap: 6px; font-family: var(--kp-font-kop); font-weight: 600; font-size: 14px; white-space: nowrap; }
+.eind-streep { width: 18px; height: 5px; border-radius: 3px; }
+.eind-grafiek-midden { display: flex; gap: 8px; }
+.eind-y { display: flex; flex-direction: column; justify-content: space-between; padding: 2px 0 2px; font-family: var(--kp-font-kop); font-weight: 600; font-size: 12px; color: var(--kp-inkt-2); }
+.eind-svg svg { display: block; }
+.eind-x { display: flex; justify-content: space-between; padding: 0 6px 0 24px; font-family: var(--kp-font-kop); font-weight: 600; font-size: 12px; color: var(--kp-inkt-2); }
+
+/* De ceremonie: eerst alleen de bonussterren, de trap en de titel komen pas bij de winnaar */
+.eindscherm .in-ceremonie .eind-kolom { transform: translateY(110%); }
+.eindscherm .in-ceremonie .eind-kop h1, .eindscherm .in-ceremonie .eind-rest, .eindscherm .in-ceremonie .eind-knoppen { opacity: 0; pointer-events: none; }
+.eindscherm .in-ceremonie .eind-bonus-wie { opacity: 0; transform: scale(.6); }
+.eindscherm .in-ceremonie .eind-bonus-rij.onthuld .eind-bonus-wie { opacity: 1; transform: none; }
+.eind-bonus-wie { transition: opacity 300ms ease-out, transform 300ms cubic-bezier(.2,.9,.3,1.4); }
+.eind-bonus-rij.uitgelicht { transform: scale(1.03); box-shadow: 0 0 0 4px #FFC928, 0 4px 0 #E3CFAE; }
+.eind-kop h1, .eind-knoppen { transition: opacity 500ms ease-out; }
+.onthulling .eind-kolom:nth-child(1) { transition-delay: 300ms; }
+.onthulling .eind-kolom:nth-child(2) { transition-delay: 600ms; }
+.onthulling .eind-kolom:nth-child(3) { transition-delay: 0ms; }
+.eind-pommie { z-index: 70; }
+
+/* Statistiek (§10) */
+.eind-stats { position: absolute; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; background: rgb(22 25 60 / .5); animation: overlay-in 180ms ease-out; }
+.eind-stats-paneel { border: 4px solid #FFFFFF; border-radius: 34px; padding: 22px 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 14px; animation: uitslag-in 200ms ease-out; }
+.eind-stats-titel { margin: 0; font-family: var(--kp-font-kop); font-weight: 700; font-size: 32px; }
+.eind-tabel { border-collapse: separate; border-spacing: 0 6px; font-family: var(--kp-font-kop); }
+.eind-tabel th { padding: 0 14px 6px; font-weight: 600; font-size: 17px; }
+.eind-tabel th span { display: block; margin-top: 4px; white-space: nowrap; }
+.eind-tabel-figuur { width: 52px; height: 52px; margin: 0 auto; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.eind-tabel-figuur .eind-pil-plaatje.handgetekend { width: 52px; height: 52px; }
+.eind-tabel td { background: #FFFFFF; padding: 8px 14px; text-align: center; font-weight: 700; font-size: 20px; }
+.eind-tabel td:first-child { border-radius: 16px 0 0 16px; }
+.eind-tabel td:last-child { border-radius: 0 16px 16px 0; }
+.eind-tabel td.eind-tabel-naam { text-align: left; font-family: var(--kp-font-tekst); font-weight: 800; font-size: 16px; color: var(--kp-inkt-2); padding-left: 18px; }
+.eind-tabel td.hoogste { color: var(--kp-pompoen-d); }
+
+/* Tussenstand bij het begin van het eindspel (§9) */
+.tussenstand { position: absolute; inset: 0; z-index: 25; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.tussenstand-paneel { border: 4px solid #FFFFFF; border-radius: 30px; padding: 20px 26px; display: flex; flex-direction: column; gap: 10px; min-width: 420px; animation: uitslag-in 200ms ease-out; }
+.tussenstand-paneel h2 { margin: 0; font-family: var(--kp-font-kop); font-weight: 700; font-size: 28px; text-align: center; }
+.tussenstand-rij { display: flex; align-items: center; gap: 12px; background: #FFFFFF; border-radius: 20px; padding: 6px 16px 6px 8px; box-shadow: 0 4px 0 #E3CFAE; font-family: var(--kp-font-kop); }
+.tussenstand-rij .plaats-rondje { width: 40px; height: 40px; font-size: 16px; }
+.tussenstand-rij b { flex: 1; font-weight: 600; font-size: 22px; }
+.tussenstand-rij span { display: flex; align-items: center; gap: 4px; font-weight: 700; font-size: 20px; }
+
+/* Instellingen */
+.instellingen { min-width: 460px; }
+.instelling { display: flex; align-items: center; gap: 16px; background: #FFFFFF; border-radius: 22px; padding: 14px 18px; box-shadow: 0 4px 0 #E3CFAE; text-align: left; }
+.instelling-tekst { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.instelling-tekst span { font-family: var(--kp-font-kop); font-weight: 600; font-size: 22px; }
+.instelling-tekst small { font-weight: 700; font-size: 14px; color: var(--kp-inkt-2); }

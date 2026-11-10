@@ -4,6 +4,7 @@
  * De laatste keuzes worden onthouden, zodat je de volgende keer alleen op Start hoeft te tikken.
  */
 import { FIGUREN, figuur, STANDAARD_FIGUREN, STANDAARD_NAMEN } from '../data/figuren';
+import { zeg } from '../data/teksten';
 import type { AantalRondes, NieuwSpelKeuzes, Seizoen } from '../logic';
 import { asset } from './asset';
 import { icoon } from './iconen';
@@ -35,11 +36,14 @@ function laatsteKeuzes(): NieuwSpelKeuzes {
 }
 
 function pommieTekst(mensen: number): string {
-  const bots = 4 - mensen;
-  if (mensen === 4) return 'Vier mensen! Dat wordt een echt feestje.';
-  if (mensen === 1) return 'Jij tegen drie bots. Ik zorg dat ze razendsnel zijn!';
+  if (mensen === 4) return zeg('nieuwSpelVier');
+  if (mensen === 1) return zeg('nieuwSpelEen');
   const woord = ['', 'Eén', 'Twee', 'Drie'];
-  return `${woord[mensen]} ${mensen === 1 ? 'mens' : 'mensen'}, ${woord[bots].toLowerCase()} ${bots === 1 ? 'bot' : 'bots'}. Ik zorg dat de bots razendsnel zijn!`;
+  const bots = 4 - mensen;
+  return zeg('nieuwSpel', {
+    mensen: `${woord[mensen]} ${mensen === 1 ? 'mens' : 'mensen'}`,
+    bots: `${woord[bots].toLowerCase()} ${bots === 1 ? 'bot' : 'bots'}`,
+  });
 }
 
 /** Een rij knoppen waarvan er één aan staat (design: "segment"). */

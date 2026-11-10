@@ -13,6 +13,7 @@ import {
   aantalDobbelstenen, dobbelMax, heeftDoel, itemInfo, kanItemGebruiken, MAX_ITEMS, plaatsen,
   type DoelItem, type GameState, type ItemSoort,
 } from '../logic';
+import { dobbelGeluid, worpGeluid } from '../audio/geluid';
 import { asset } from './asset';
 import { icoon } from './iconen';
 import { itemIcoon, SLAK_SVG } from './itemIcoon';
@@ -238,7 +239,10 @@ export async function toonDobbelscherm(laag: HTMLElement, speler: number, acties
     }
     if (fase?.gebruikt === 'kiesWorp') {
       stop = null;
-      void kiesGetal(rechts, max).then((n) => gooiEnToon(acties.gooi(n)));
+      void kiesGetal(rechts, max).then((n) => {
+        dobbelGeluid();
+        return gooiEnToon(acties.gooi(n));
+      });
       return;
     }
     wachtOpTik(aantalDobbelstenen(fase?.gebruikt), max);
@@ -268,6 +272,7 @@ export async function toonDobbelscherm(laag: HTMLElement, speler: number, acties
     zet();
     const wissel = setInterval(() => ((n = (n % max) + 1), zet()), max < 10 ? 140 : 60);
     const tik = () => {
+      dobbelGeluid();
       clearInterval(wissel);
       stop = null;
       const worpen = acties.gooi();
@@ -310,6 +315,7 @@ export async function toonDobbelscherm(laag: HTMLElement, speler: number, acties
     }
     rechts.append(maak('div', 'dobbel-pil', uitslagTekst(worp)));
     midden.insertAdjacentHTML('beforeend', [FONKEL(-60, 40, 46), FONKEL(330, -20, 38), FONKEL(360, 250, 50), FONKEL(-30, 300, 34)].join(''));
+    worpGeluid(hoog);
     if (hoog) rechts.append(confetti());
     await tikOfTijd(scherm, 1100);
 
@@ -325,7 +331,7 @@ export async function toonDobbelscherm(laag: HTMLElement, speler: number, acties
   });
 }
 
-function confetti(): HTMLElement {
+export function confetti(): HTMLElement {
   const el = maak('div', 'confetti');
   const delen: string[] = [];
   for (let i = 0; i < 34; i++) {

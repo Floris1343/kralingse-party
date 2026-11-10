@@ -4,12 +4,14 @@
  * Ook het kiezen van een speler voor een gemeen item gebeurt hier.
  */
 import { figuur } from '../data/figuren';
+import { zeg } from '../data/teksten';
 import {
   ITEM_SOORTEN, itemDoelen, itemInfo, kanKopen, kanRatjeDoen, NACHT_ITEM_SOORTEN, ratjeDoelen, ratjePrijs,
   ZAKKENROLLER_BUIT, type DoelItem, type GameState, type ItemSoort, type RatjeKeuze, type RatjeWat,
 } from '../logic';
 import { asset } from './asset';
 import { itemIcoon } from './itemIcoon';
+import { brabbelIn } from './pommie';
 import { figuurPlaatje, maak } from './onderdelen';
 
 const munt = (maat: number) => `<img src="${asset('iconen/munt.svg')}" alt="" width="${maat}" height="${maat}">`;
@@ -38,7 +40,7 @@ function winkelOverlay(
   if (kop.pommie) {
     const p = maak('div', 'winkel-pommie');
     p.innerHTML = `<div class="ballon"><div class="ballon-naam">Pommie</div><p></p></div><img src="${asset('personages/pommie.svg')}" alt="Pommie">`;
-    p.querySelector('p')!.textContent = kop.pommie;
+    brabbelIn(p.querySelector('p')!, kop.pommie);
     el.append(p);
   }
   laag.append(el);
@@ -77,7 +79,7 @@ export function vraagWinkel(laag: HTMLElement, s: GameState, speler: number): Pr
     icoon: 'iconen/vakje-item.svg',
     titel: 'Winkeltje',
     uitleg: 'Bij het restaurant · kies één item',
-    pommie: 'Welkom in mijn winkeltje!',
+    pommie: zeg('winkel'),
   });
 }
 
@@ -87,7 +89,7 @@ export function vraagNachtwinkel(laag: HTMLElement, s: GameState, speler: number
     icoon: 'iconen/maan.svg',
     titel: 'Nachtwinkel',
     uitleg: 'Bij de jachthaven · alleen open in het donker',
-    pommie: 'Psst… iets gemeens nodig?',
+    pommie: zeg('nachtwinkel'),
   }, 'nachtwinkel-overlay');
 }
 
