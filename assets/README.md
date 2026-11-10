@@ -10,8 +10,8 @@ Het script `node scripts/bord-uit-design.mjs` kopieert ze letterlijk naar `publi
 |---|---|---|
 | `figuren/` | `floris.png` en `speler2.png` (handgetekend), `pion-groen.svg` (Bot 1) en `pion-geel.svg` (Bot 2) | `floris.png`, `speler2.png`, `pawn3.svg`, `pawn4.svg` |
 | `personages/` | `pommie.svg` (host) en `ratje.svg` (de kerstrat) | `pommie.svg`, `ratje.svg` |
-| `iconen/` | munt, ster, zon, maan, sneeuw, dobbelsteen, vlaggetjes, vilttextuur en de vakje-iconen | gelijknamige SVG's |
-| `bord/` | het bord in lagen: `grond-*.svg`, `decor-*.svg` en `effect-*.svg` voor dag, nacht, winter en mist, plus de losse `ster.svg` en `ratje.svg` op het bord | `board_dag.svg`, `board_nacht.svg`, enz. |
+| `iconen/` | munt, ster, zon, maan, sneeuw, dobbelsteen, valstrik, vlaggetjes, vilttextuur en de vakje-iconen | gelijknamige SVG's |
+| `bord/` | het bord in lagen: `grond-*.svg`, `decor-*.svg` en `effect-*.svg` voor dag, nacht, winter en mist, plus de losse `ster.svg`, `ratje.svg` en `vraagteken.svg` (ochtendmist) op het bord | `board_dag.svg`, `board_nacht.svg`, enz. |
 
 ## Een figuur vervangen
 

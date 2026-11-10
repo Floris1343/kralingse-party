@@ -2,13 +2,13 @@
  * Bots doen dezelfde acties als mensen, maar beslissen meteen zelf.
  * `botActie` doet één stap (voor animaties); `speelBotsAf` alles tot er een mens nodig is (turbo).
  */
-import { dobbelen, ratjeKeuze, splitsingKeuze, stap, sterKeuze, winkelKeuze } from './beurt';
-import { botItemGebruik, botItemKoop, botKiesWorp } from './botKeuzes';
+import { dobbelen, nachtwinkelKeuze, ratjeKeuze, splitsingKeuze, stap, sterKeuze, winkelKeuze } from './beurt';
+import { botItemDoel, botItemGebruik, botItemKoop, botKiesWorp, botNachtKoop } from './botKeuzes';
 import { splitsingBij } from './bord';
 import type { Bord } from './bord';
 import { draaiEindspelRad } from './eindspel';
 import type { GameState } from './gameState';
-import { gebruikItem } from './items';
+import { gebruikItem, heeftDoel } from './items';
 import { botRatjeKeuze } from './ratje';
 import { spelerAanZet } from './regels';
 import { botKiestZijpad } from './splitsing';
@@ -21,6 +21,7 @@ export function wachtOpBot(state: GameState): boolean {
     case 'sterKopen':
     case 'splitsing':
     case 'winkel':
+    case 'nachtwinkel':
     case 'ratje':
       return state.spelers[spelerAanZet(state)].isBot;
     case 'eindspelRad':
@@ -38,7 +39,7 @@ export function botActie(state: GameState, bord: Bord): GameState | null {
       const speler = spelerAanZet(state);
       if (!state.fase.gebruikt) {
         const item = botItemGebruik(state, bord, speler);
-        if (item) return gebruikItem(state, item);
+        if (item) return gebruikItem(state, item, heeftDoel(item) ? botItemDoel(state, speler, item)! : undefined);
       }
       return dobbelen(state, state.fase.gebruikt === 'kiesWorp' ? botKiesWorp(state, bord, speler) : undefined);
     }
@@ -48,6 +49,8 @@ export function botActie(state: GameState, bord: Bord): GameState | null {
       return sterKeuze(state, bord, true);
     case 'winkel':
       return winkelKeuze(state, bord, botItemKoop(state, bord, spelerAanZet(state)));
+    case 'nachtwinkel':
+      return nachtwinkelKeuze(state, bord, botNachtKoop(state, spelerAanZet(state)));
     case 'ratje':
       return ratjeKeuze(state, bord, botRatjeKeuze(structuredClone(state), spelerAanZet(state)));
     case 'splitsing': {

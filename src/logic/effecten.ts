@@ -16,11 +16,19 @@ import { BLAUW_MUNTEN, kies, plaatsen, ROOD_MUNTEN, trek, wijzigMunten } from '.
 export const HERTEN_RAD = ['munten5', 'munten10', 'item', 'hertje'] as const;
 export const BOK_RAD = ['omver', 'naarStart', 'itemsKwijt', 'plas'] as const;
 export const PECH_RAD = ['min10', 'helft', 'iedereen3', 'ruilLaatste'] as const;
+/**
+ * Het vleermuizenrad (§8.3) heeft 6 even grote vakken: "naar de ster" is dan precies 1 op 6.
+ * "2 terug" staat er twee keer op, zodat er 3 goede en 3 nare vakken zijn.
+ */
+export const VLEERMUIS_RAD = ['terug', 'vooruit', 'munten5', 'terug', 'min5', 'ster'] as const;
 export const KANS_ACTIES: readonly KansActie[] = ['geef10', 'geef20', 'ruilMunten', 'geefSter', 'ruilSterren'];
 
 export type HertenUitkomst = (typeof HERTEN_RAD)[number];
 export type BokUitkomst = (typeof BOK_RAD)[number];
 export type PechUitkomst = (typeof PECH_RAD)[number];
+export type VleermuisUitkomst = (typeof VLEERMUIS_RAD)[number];
+export const VLEERMUIS_STAPPEN = 2;
+export const VLEERMUIS_MUNTEN = 5;
 
 export const STRANDTENT_MUNTEN = 5;
 export const KAMPVUUR_MUNTEN = 2;
@@ -83,6 +91,10 @@ export function handelVakjeAf(s: GameState, bord: Bord, speler: number): void {
       if (s.nacht) bok(s, bord, speler);
       else herten(s, bord, speler);
       break;
+    case 'vleermuis':
+      sp.stats.avontuurVakjes += 1;
+      vleermuizen(s, bord, speler);
+      break;
     case 'event':
       sp.stats.avontuurVakjes += 1;
       eventVakje(s, bord, speler, v.flags ?? []);
@@ -137,6 +149,59 @@ function bok(s: GameState, bord: Bord, speler: number): void {
       break;
     }
   }
+}
+
+// ------------------------------------------------------------------ vleermuizen (§8.3)
+
+function vleermuizen(s: GameState, bord: Bord, speler: number): void {
+  const uitkomst = kies(s, VLEERMUIS_RAD);
+  s.verslag.push({ soort: 'rad', speler, rad: 'vleermuis', uitkomst });
+  const hier = s.spelers[speler].vakje;
+  switch (uitkomst) {
+    case 'terug':
+      verplaats(s, speler, verschuif(bord, hier, -VLEERMUIS_STAPPEN), 'vleermuis');
+      break;
+    case 'vooruit':
+      verplaats(s, speler, verschuif(bord, hier, VLEERMUIS_STAPPEN), 'vleermuis');
+      break;
+    case 'munten5':
+      wijzigMunten(s, speler, VLEERMUIS_MUNTEN, 'vleermuis');
+      break;
+    case 'min5':
+      wijzigMunten(s, speler, -VLEERMUIS_MUNTEN, 'vleermuis');
+      break;
+    case 'ster': {
+      const doel = vakjeVoorSter(s, bord, hier);
+      if (doel) verplaats(s, speler, doel, 'vleermuis');
+      break;
+    }
+  }
+}
+
+/**
+ * Het vakje vlak vóór de dichtstbijzijnde ster (vooruit gerekend), ook als die in de mist staat:
+ * de vleermuizen weten waar hij is. Zo loop je je volgende beurt er meteen langs.
+ */
+export function vakjeVoorSter(s: GameState, bord: Bord, vanaf: string): string | null {
+  let beste: string | null = null;
+  let afstand = Infinity;
+  for (const st of s.sterren) {
+    const plek = bord.sterplekken.find((p) => p.id === st.plek);
+    if (!plek) continue;
+    const ervoor = vorigVakje(bord, plek.vakje);
+    const d = stappenTotPlek(bord, vanaf, ervoor);
+    if (d < afstand) [beste, afstand] = [ervoor, d];
+  }
+  return beste;
+}
+
+function stappenTotPlek(bord: Bord, van: string, naar: string): number {
+  let id = van;
+  for (let n = 0; n <= bord.vakjes.length; n++) {
+    if (id === naar) return n;
+    id = volgendVakje(bord, id);
+  }
+  return Infinity;
 }
 
 // ------------------------------------------------------------------ kans (§7.3) en pech (§7.4)

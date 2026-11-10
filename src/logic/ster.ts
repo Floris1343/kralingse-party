@@ -1,7 +1,34 @@
-/** Sterren kopen en verhuizen (§4). */
+/** Sterren kopen en verhuizen (§4), de vallende ster (§8.2) en de ster in de mist (§8.4). */
 import type { Bord } from './bord';
-import type { GameState } from './gameState';
-import { kies, STERPRIJS, STERPRIJS_GOEDKOOP, wijzigMunten } from './regels';
+import type { GameState, Ster } from './gameState';
+import { kies, STERPRIJS, STERPRIJS_GOEDKOOP, trek, wijzigMunten } from './regels';
+
+/** Kans (in procenten) op een vallende ster aan het begin van een nachtronde. */
+export const VALLENDE_STER_KANS = 20;
+
+/** Ziet iedereen deze ster? Bij ochtendmist pas als iemand erlangs is gelopen. */
+export function sterZichtbaar(state: GameState, ster: Ster): boolean {
+  return !state.mist || ster.ontdekt === true;
+}
+
+/** De sterren die je nu op het bord ziet (bots weten bij mist ook niet meer, §8.4). */
+export function zichtbareSterren(state: GameState): Ster[] {
+  return state.sterren.filter((st) => sterZichtbaar(state, st));
+}
+
+/**
+ * Aan het begin van een nachtronde: 20% kans op een vallende ster op een vrije sterplek.
+ * Er is er nooit meer dan één tegelijk. Werkt op een kopie.
+ */
+export function misschienVallendeSter(s: GameState, bord: Bord): void {
+  if (!s.nacht || s.sterren.some((st) => st.vallend)) return;
+  // Er moet daarna nog een vrije plek over zijn, zodat een gekochte gewone ster kan verhuizen.
+  if (bord.sterplekken.length - s.sterren.length < 2) return;
+  if (trek(s, 1, 100) > VALLENDE_STER_KANS) return;
+  const plek = kiesVrijeSterplek(s, bord);
+  s.sterren.push({ plek, vallend: true });
+  s.verslag.push({ soort: 'vallendeSter', plek });
+}
 
 export function sterPrijs(state: GameState): number {
   return state.eindspelRegel === 'goedkopeSter' ? STERPRIJS_GOEDKOOP : STERPRIJS;
@@ -42,6 +69,12 @@ export function koopSter(s: GameState, bord: Bord, speler: number, plek: string)
   sp.sterren += 1;
   sp.stats.sterrenGekocht += 1;
 
+  if (s.sterren[idx].vallend) {
+    // Een vallende ster verhuist niet: na aankoop is hij weg.
+    s.sterren.splice(idx, 1);
+    s.verslag.push({ soort: 'sterGekocht', speler, plek, nieuwePlek: '' });
+    return;
+  }
   const nieuwePlek = kiesVrijeSterplek(s, bord);
   s.sterren[idx] = { plek: nieuwePlek };
   s.verslag.push({ soort: 'sterGekocht', speler, plek, nieuwePlek });

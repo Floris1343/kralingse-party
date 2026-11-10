@@ -1,7 +1,7 @@
 /** Hulpjes voor de tests (wordt niet in het spel gebruikt). */
-import { loopUit, dobbelen, ratjeKeuze, splitsingKeuze, sterKeuze, winkelKeuze } from './beurt';
+import { loopUit, dobbelen, dobbelMax, nachtwinkelKeuze, ratjeKeuze, splitsingKeuze, sterKeuze, winkelKeuze } from './beurt';
 import { maakTestbord, type Bord } from './bord';
-import { ITEM_SOORTEN, gebruikItem, kanItemGebruiken, kanKopen } from './items';
+import { ITEM_SOORTEN, NACHT_ITEM_SOORTEN, gebruikItem, heeftDoel, itemDoelen, kanItemGebruiken, kanKopen } from './items';
 import { botRatjeKeuze } from './ratje';
 import { speelBotsAf } from './bot';
 import { draaiEindspelRad } from './eindspel';
@@ -88,7 +88,7 @@ export function speelUit(
     switch (s.fase.soort) {
       case 'minigame': {
         const [uitslag, na] = willekeurigeUitslag(s);
-        s = verwerkMinigame(na, uitslag);
+        s = verwerkMinigame(na, uitslag, b);
         break;
       }
       case 'dobbelen': {
@@ -98,8 +98,9 @@ export function speelUit(
         }
         // Mensen gebruiken hun eerste bruikbare item, en kiezen 7 met Kies-je-worp.
         const item = !s.fase.gebruikt && s.spelers[s.volgorde[s.aanZet]].items.find((i) => kanItemGebruiken(s, i));
-        if (item) s = gebruikItem(s, item);
-        else s = dobbelen(s, s.fase.gebruikt === 'kiesWorp' ? 7 : undefined);
+        const zelf = s.volgorde[s.aanZet];
+        if (item) s = gebruikItem(s, item, heeftDoel(item) ? itemDoelen(s, zelf, item).at(-1) : undefined);
+        else s = dobbelen(s, s.fase.gebruikt === 'kiesWorp' ? Math.min(7, dobbelMax(s, zelf)) : undefined);
         break;
       }
       case 'winkel': {
@@ -107,6 +108,12 @@ export function speelUit(
         const sp = s.volgorde[s.aanZet];
         const opties = ITEM_SOORTEN.filter((i) => kanKopen(s, sp, i));
         s = winkelKeuze(s, b, opties.length ? opties[s.ronde % opties.length] : null);
+        break;
+      }
+      case 'nachtwinkel': {
+        const sp = s.volgorde[s.aanZet];
+        const opties = NACHT_ITEM_SOORTEN.filter((i) => kanKopen(s, sp, i));
+        s = nachtwinkelKeuze(s, b, opties.length ? opties[s.ronde % opties.length] : null);
         break;
       }
       case 'ratje':

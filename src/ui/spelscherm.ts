@@ -7,8 +7,8 @@ import { BORD } from '../data/bord';
 import { figuur } from '../data/figuren';
 import { zeg } from '../data/teksten';
 import {
-  BOOT_PRIJS, botActie, bewaar, dobbelen, draaiEindspelRad, gebruikItem, nachtTypen, ratjeKeuze, spelerAanZet,
-  splitsingKeuze, stap, sterKeuze, sterPrijs, verwerkMinigame, wachtOpBot, winkelKeuze,
+  BOOT_PRIJS, botActie, bewaar, dobbelen, draaiEindspelRad, gebruikItem, nachtTypen, nachtwinkelKeuze, ratjeKeuze,
+  spelerAanZet, splitsingKeuze, stap, sterKeuze, sterPrijs, verwerkMinigame, wachtOpBot, winkelKeuze, zichtbareSterren,
   type EindspelRegel, type GameState, type Gebeurtenis, type Splitsing,
 } from '../logic';
 import { BordWeergave } from '../render/bordWeergave';
@@ -20,7 +20,7 @@ import { vraagMinigameUitslag } from './minigameUitslag';
 import { maak } from './onderdelen';
 import { Spelersbalk } from './spelersbalk';
 import { meldingDelen } from './uitkomsten';
-import { vraagRatje, vraagWinkel } from './winkelScherm';
+import { vraagItemDoel, vraagNachtwinkel, vraagRatje, vraagWinkel } from './winkelScherm';
 
 const wacht = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 const TURBO_SLEUTEL = 'kralingse-plas-party/turbo';
@@ -75,8 +75,29 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
     s = nieuw;
     bewaar(localStorage, s);
     balk.werkBij(s);
-    weergave.zetSterren(s.sterren.map((st) => st.plek));
-    weergave.zetNacht(s.nacht, nachtTypen(s.nacht, BORD));
+    tekenBord();
+  }
+
+  /** Sterren (of vraagtekens in de mist), valstrikken, dag/nacht en mist op het bord. */
+  function tekenBord(duurMs = 1000) {
+    weergave.zetSterren(zichtbareSterren(s), s.mist !== null);
+    weergave.zetValstrikken(s.valstrikken.map((v) => ({ vakje: v.vakje, kleur: figuur(s.spelers[v.speler].figuur).kleur })));
+    weergave.zetNacht(s.nacht, nachtTypen(s.nacht, BORD), duurMs);
+    weergave.zetMist(s.mist !== null, duurMs);
+  }
+
+  /**
+   * Pommie bij de wissel van dag en nacht, de ochtendmist, het optrekken van de mist en een
+   * vallende ster (§12). Hoogstens twee ballonnen achter elkaar, elk weg te tikken.
+   */
+  async function pommieMomenten(verslag: Gebeurtenis[]) {
+    const wissel = [...verslag].reverse().find((g) => g.soort === 'dagNacht');
+    const mistAan = verslag.some((g) => g.soort === 'mist' && g.aan);
+    const mistWeg = verslag.some((g) => g.soort === 'mist' && !g.aan);
+    if (wissel?.soort === 'dagNacht') await pommie(zeg(wissel.nacht ? 'nacht' : mistAan ? 'mist' : 'dag'));
+    else if (mistAan) await pommie(zeg('mist'));
+    else if (mistWeg) await pommie(zeg('mistWeg'));
+    if (actief && verslag.some((g) => g.soort === 'vallendeSter')) await pommie(zeg('vallendeSter'));
   }
 
   // ------------------------------------------------------------------ hulpjes voor schermpjes
@@ -151,17 +172,18 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
     weergave.boven(speler, getal > 0 ? el : null);
   }
   const resterend = () => ('resterend' in s.fase ? s.fase.resterend : 0);
-  const beurtBezig = () => ['lopen', 'splitsing', 'sterKopen', 'winkel', 'ratje'].includes(s.fase.soort);
+  const beurtBezig = () => ['lopen', 'splitsing', 'sterKopen', 'winkel', 'nachtwinkel', 'ratje'].includes(s.fase.soort);
 
   // ------------------------------------------------------------------ een beurt
   async function loopBeurt(speler: number) {
     snel = false;
     while (actief && s.spelers[speler].isBot === false && beurtBezig()) {
       const f = s.fase;
-      if (f.soort === 'sterKopen' || f.soort === 'winkel' || f.soort === 'ratje') {
+      if (f.soort === 'sterKopen' || f.soort === 'winkel' || f.soort === 'nachtwinkel' || f.soort === 'ratje') {
         weergave.boven(speler, null);
         if (f.soort === 'sterKopen') zet(sterKeuze(s, BORD, await vraagSter()));
         else if (f.soort === 'winkel') zet(winkelKeuze(s, BORD, await vraagWinkel(laag, s, speler)));
+        else if (f.soort === 'nachtwinkel') zet(nachtwinkelKeuze(s, BORD, await vraagNachtwinkel(laag, s, speler)));
         else zet(ratjeKeuze(s, BORD, await vraagRatje(laag, s, speler)));
         snel = false;
         toonTeller(speler, resterend());
@@ -204,8 +226,9 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       if (mens) weergave.volgSpeler(speler, 400);
       await wacht(mens ? 450 : 150);
     }
-    const wissel = [...verslag].reverse().find((g) => g.soort === 'dagNacht');
-    if (wissel && wissel.soort === 'dagNacht') await pommie(zeg(wissel.nacht ? 'nacht' : 'dag'));
+    // Een mens die in een valstrik trapt, ziet dat in de korte melding.
+    if (mens && verslag.some((g) => g.soort === 'valstrik')) melding(speler);
+    await pommieMomenten(verslag);
   }
 
   /** Een botbeurt: alles direct, ongeveer 80 ms per vakje. Met turbo zonder animatie. */
@@ -251,8 +274,9 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
     for (;;) {
       const einde = await toonDobbelscherm(laag, speler, {
         state: () => s,
-        gebruik: (item) => {
-          zet(gebruikItem(s, item));
+        kiesDoel: (item) => vraagItemDoel(laag, s, speler, item),
+        gebruik: (item, doel) => {
+          zet(gebruikItem(s, item, doel));
           if (item === 'wisseltruc') {
             weergave.plaatsFiguren(posities(), speler, 400);
             weergave.volgSpeler(speler, 400);
@@ -315,11 +339,11 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
     weergave.overzicht();
     await wacht(300);
     const uitslag = await vraagMinigameUitslag(laag, s);
-    zet(verwerkMinigame(s, uitslag));
-    const wissel = s.verslag.find((g) => g.soort === 'dagNacht');
-    if (wissel?.soort === 'dagNacht' && actief) {
+    zet(verwerkMinigame(s, uitslag, BORD));
+    const iets = s.verslag.some((g) => ['dagNacht', 'mist', 'vallendeSter'].includes(g.soort));
+    if (iets && actief) {
       await wacht(700); // eerst de overgang zien
-      await pommie(zeg(wissel.nacht ? 'nacht' : 'dag'));
+      await pommieMomenten(s.verslag);
     }
   }
 
@@ -400,8 +424,7 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
   }
 
   // ------------------------------------------------------------------ start
-  weergave.zetSterren(s.sterren.map((st) => st.plek));
-  weergave.zetNacht(s.nacht, nachtTypen(s.nacht, BORD), 0);
+  tekenBord(0);
   weergave.plaatsFiguren(posities(), s.fase.soort === 'minigame' ? -1 : spelerAanZet(s), 0);
   weergave.overzicht(0);
   const nieuwSpel = s.ronde === 1 && s.aanZet === 0 && s.fase.soort === 'dobbelen' && s.verslag.length === 0;

@@ -29,6 +29,8 @@ export function nieuwSpel(bord: Bord, keuzes: NieuwSpelKeuzes, seed: number): Ga
       sterren: 0,
       vakje: bord.start,
       items: [],
+      slak: false,
+      achteruit: false,
       stats: {
         minigameMunten: 0,
         hoogsteMunten: STARTMUNTEN,
@@ -47,6 +49,8 @@ export function nieuwSpel(bord: Bord, keuzes: NieuwSpelKeuzes, seed: number): Ga
     sterren: [],
     nacht: false,
     eindspelRegel: null,
+    valstrikken: [],
+    mist: null,
     verslag: [],
     eindtelling: null,
   };

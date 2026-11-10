@@ -3,7 +3,7 @@
  * (Wat Pommie zegt staat in src/data/teksten.ts.)
  */
 import type { GameState, Gebeurtenis, KansActie, MuntReden, RadSoort } from '../logic';
-import { WINKEL_ITEMS } from '../logic';
+import { itemInfo, type ItemSoort } from '../logic';
 
 export interface RadVak {
   /** Kort, past op het rad. */
@@ -13,7 +13,7 @@ export interface RadVak {
   kleur: string;
 }
 
-/** De vakken van elk rad, in de volgorde van HERTEN_RAD, BOK_RAD en PECH_RAD. */
+/** De vakken van elk rad, in de volgorde van HERTEN_RAD, BOK_RAD, PECH_RAD en VLEERMUIS_RAD. */
 export const RADEN: Record<RadSoort, { titel: string; uitleg: string; vakken: Record<string, RadVak> }> = {
   hertenkamp: {
     titel: 'Herten voeren',
@@ -45,6 +45,17 @@ export const RADEN: Record<RadSoort, { titel: string; uitleg: string; vakken: Re
       ruilLaatste: { kort: 'Ruil', zin: 'Je ruilt je munten met de speler op de laatste plaats!', kleur: '#1E5BB0' },
     },
   },
+  vleermuis: {
+    titel: 'Vleermuizen!',
+    uitleg: 'Een zwerm vleermuizen pakt je op…',
+    vakken: {
+      terug: { kort: '2 terug', zin: 'De vleermuizen fladderen je 2 vakjes terug!', kleur: '#4B3A6B' },
+      vooruit: { kort: '2 vooruit', zin: 'De vleermuizen dragen je 2 vakjes vooruit!', kleur: '#2F7DE1' },
+      munten5: { kort: '+5', zin: 'Ze laten iets glimmends vallen: +5 munten!', kleur: '#2FAE5B' },
+      min5: { kort: '−5', zin: 'Ze pikken een munt per vleugelslag: −5 munten!', kleur: '#D62839' },
+      ster: { kort: 'Naar de ster', zin: 'Ze vliegen je naar het vakje vlak vóór de ster!', kleur: '#E39A00' },
+    },
+  },
 };
 
 export const KANS_TEKST: Record<KansActie, { kort: string; zin: (a: string, b: string) => string }> = {
@@ -61,7 +72,16 @@ export interface MeldingDeel {
 }
 
 /** Munten die niet als "+3 munten" in de melding horen, omdat ze al als eigen deel staan. */
-const EIGEN_DEEL: MuntReden[] = ['ster', 'boot', 'winkel', 'ratje'];
+const EIGEN_DEEL: MuntReden[] = ['ster', 'boot', 'winkel', 'ratje', 'valstrik'];
+
+const naamKlein = (item: ItemSoort) => (item === 'kiesWorp' ? 'Kies-je-worp' : itemInfo(item).naam.toLowerCase());
+const metLidwoord = (item: ItemSoort) => (item === 'kiesWorp' ? 'Kies-je-worp' : `de ${naamKlein(item)}`);
+
+const GEMEEN_TEKST = {
+  zakkenroller: (doel: string, buit: number) => `rolde ${buit} munten van ${doel}`,
+  slakkendobbel: (doel: string) => `gaf ${doel} de slakkendobbel`,
+  achteruitpet: (doel: string) => `gaf ${doel} de achteruitpet`,
+} as const;
 
 /**
  * De korte melding na een beurt, bijvoorbeeld "Bot 2 gooide 7 · +3 munten · kocht een ster!".
@@ -85,9 +105,30 @@ export function meldingDelen(s: GameState, speler: number, verslag: Gebeurtenis[
         break;
       case 'item':
         if (g.speler !== speler) break;
-        if (g.actie === 'gekocht') delen.push({ tekst: `kocht ${WINKEL_ITEMS[g.item].naam.toLowerCase()}` });
-        else if (g.actie === 'gekregen') delen.push({ tekst: `kreeg ${WINKEL_ITEMS[g.item].naam.toLowerCase()}` });
-        else delen.push({ tekst: `gebruikte ${g.item === 'kiesWorp' ? 'Kies-je-worp' : `de ${WINKEL_ITEMS[g.item].naam.toLowerCase()}`}` });
+        if (g.actie === 'gekocht') delen.push({ tekst: `kocht ${metLidwoord(g.item)}` });
+        else if (g.actie === 'gekregen') delen.push({ tekst: `kreeg ${metLidwoord(g.item)}` });
+        // Gemene items op een ander krijgen hun eigen deel (hieronder), de valstrik ook.
+        else if (g.item !== 'zakkenroller' && g.item !== 'slakkendobbel' && g.item !== 'achteruitpet' && g.item !== 'valstrik') {
+          delen.push({ tekst: `gebruikte ${metLidwoord(g.item)}` });
+        }
+        break;
+      case 'gemeen':
+        delen.push({ tekst: GEMEEN_TEKST[g.item](naam(g.doel), g.buit) });
+        break;
+      case 'valstrikGelegd':
+        delen.push({ tekst: 'legde een valstrik', icoon: 'iconen/valstrik.svg' });
+        break;
+      case 'valstrik':
+        delen.push({ tekst: `trapte in de valstrik van ${naam(g.eigenaar)}: −${g.munten}`, icoon: 'iconen/valstrik.svg' });
+        break;
+      case 'sterOntdekt':
+        delen.push({ tekst: 'vond de ster in de mist!', icoon: 'iconen/ster.svg' });
+        break;
+      case 'vallendeSterWeg':
+        delen.push({ tekst: 'de vallende ster is weg' });
+        break;
+      case 'mist':
+        if (g.aan) delen.push({ tekst: 'ochtendmist!' });
         break;
       case 'rad':
         delen.push({ tekst: radKort(g.rad, g.uitkomst) });
@@ -127,6 +168,7 @@ export function meldingDelen(s: GameState, speler: number, verslag: Gebeurtenis[
 function radKort(rad: RadSoort, uitkomst: string): string {
   if (rad === 'bok') return `de bok! ${RADEN.bok.vakken[uitkomst].kort.toLowerCase()}`;
   if (rad === 'pech') return `pech: ${RADEN.pech.vakken[uitkomst].kort.toLowerCase()}`;
+  if (rad === 'vleermuis') return `vleermuizen! ${RADEN.vleermuis.vakken[uitkomst].kort.toLowerCase()}`;
   if (uitkomst === 'hertje') return 'een hertje duwde 3 vooruit';
   return 'voerde de herten';
 }

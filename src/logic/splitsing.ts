@@ -5,7 +5,7 @@
 import { splitsingBij, volgendVakje, type Bord, type Splitsing } from './bord';
 import type { GameState } from './gameState';
 import { BOOT_PRIJS } from './regels';
-import { sterPrijs } from './ster';
+import { sterPrijs, zichtbareSterren } from './ster';
 
 /** Kan deze speler hier het zijpad nemen? Zo niet, dan loopt hij vanzelf door. */
 export function zijpadOpen(state: GameState, splitsing: Splitsing, speler: number): boolean {
@@ -26,10 +26,13 @@ export function openSplitsing(state: GameState, bord: Bord, speler: number): Spl
   return splitsing && zijpadOpen(state, splitsing, speler) ? splitsing : undefined;
 }
 
-/** Aantal stappen vanaf `start` (via het hoofdpad) tot een vakje met een ster, of Infinity. */
+/**
+ * Aantal stappen vanaf `start` (via het hoofdpad) tot een vakje met een ster die je ziet, of Infinity.
+ * Bij ochtendmist weten bots dus niet waar de ster is (§8.4).
+ */
 export function stappenTotSter(state: GameState, bord: Bord, start: string): number {
   const sterVakjes = new Set(
-    state.sterren.map((st) => bord.sterplekken.find((p) => p.id === st.plek)?.vakje),
+    zichtbareSterren(state).map((st) => bord.sterplekken.find((p) => p.id === st.plek)?.vakje),
   );
   let id = start;
   for (let n = 0; n <= bord.vakjes.length; n++) {

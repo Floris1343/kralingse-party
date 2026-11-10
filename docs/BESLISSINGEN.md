@@ -66,3 +66,27 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 - **Het waarschuwingsbordje bij het hertenkamp** staat in het design niet als losse tekening. In de plaats daarvan waarschuwt de keuze bij de splitsing 's nachts: "Pas op! 's Nachts is de bok wild."
 - **Opslagversie 3.** Een bewaard spel uit stap 4 (versie 2) kan gewoon verder: het is dan overdag en niemand heeft items.
 - **Nog niet in deze stap** (komt in fase 5): de Nachtwinkel, de vallende ster, de vleermuizen en de ochtendmist. 's Nachts is de winkel dus dicht en er is nog niets anders open; de vleermuisvakjes zijn nog gewoon blauw.
+
+## Stap 6: het nachtleven (Nachtwinkel, vallende ster, vleermuizen, ochtendmist)
+
+- **De Nachtwinkel** krijg je alleen te zien als je iets kunt kopen, net als de gewone winkel. Volgorde op een vakje: ster, winkel, Nachtwinkel, Ratje. Gewone en gemene items tellen samen voor de 3 plekken in je zak.
+- **Gemene items gebruik je vóór het dobbelen** en ze tellen als je ene item van die beurt. Bij de Zakkenroller, de Slakkendobbel en de Achteruitpet kies je eerst een speler; met "Terug" kies je toch iets anders.
+- **Een gratis item** (itemvakje, herten) is altijd een gewoon item, nooit een gemeen item.
+- **Zakkenroller:** heeft iemand minder dan 5 munten, dan steel je wat hij heeft. Iemand zonder munten kun je niet kiezen.
+- **Slakkendobbel en Achteruitpet stapelen niet.** Heeft iemand er al een, dan kun je hem die niet nog eens geven. De slak geldt voor elke dobbelsteen van die worp: met de dubbele dobbelsteen gooi je 2× 1–3, met Kies-je-worp kies je 1–3.
+- **Achteruit lopen** gaat over het pad op land, zonder splitsingen (dus nooit terug de boot, het hertenkamp-pad of het ijs op). Achteruit langs de ster, de winkel of Ratje komen telt gewoon als langslopen.
+- **Valstrik:** je legt hem op het vakje waar je staat, en maar één per speler. Op een vakje ligt nooit meer dan één valstrik. Hij gaat af als een ander er zijn beurt **eindigt**: eerst betaalt die 10 munten (of wat hij heeft), daarna telt het vakje gewoon. Langslopen of erheen verplaatst worden (windvlaag, bok, vleermuizen) telt niet. Op je eigen valstrik gebeurt niets.
+- **Bots en de Nachtwinkel:** ze kopen alleen als ze daarna nog een ster kunnen betalen, het liefst de Achteruitpet, dan de Slakkendobbel, de Valstrik en de Zakkenroller. Ze gebruiken een gemeen item meteen en richten het op de speler op de 1e plaats (staan ze zelf eerst, dan op de 2e). Met de Achteruitpet gebruiken ze geen extra dobbelstenen; met Kies-je-worp kiezen ze dan 1.
+- **De vallende ster** kan alleen komen als er daarna nog een vrije sterplek over is, zodat een gekochte gewone ster altijd kan verhuizen. Hij heeft dezelfde tekening als de gewone ster, met een gloed, zodat je het verschil ziet.
+- **Vleermuizen:** het rad heeft 6 even grote vakken, zodat "naar de ster" precies 1 op 6 is: 2 terug, 2 vooruit, +5, 2 terug, −5, naar de ster. "2 terug" staat er twee keer op, zodat er 3 goede en 3 nare vakken zijn. "Naar de ster" brengt je naar het vakje vlak vóór de dichtstbijzijnde ster. De vleermuizen weten ook in de mist waar hij staat.
+- **Vleermuisvakje:** het design heeft er geen tekening voor. Tijdelijk is het een paars vakje met de maan uit het design.
+- **Ochtendmist:** na een volledige ronde trekt hij op, aan het begin van de ronde daarna. Komt de mist midden in een ronde door een lantaarnpaal, dan blijft hij tot de ronde daarna. Wordt het nacht, dan is de mist meteen weg (mist hoort bij de ochtend).
+- **Ster in de mist:** wie erlangs loopt, ontdekt hem, ook zonder genoeg munten. Daarna ziet iedereen hem weer, tot hij verhuist (dan staat hij weer verborgen). Bots weten bij mist niet waar de ster is: geen boot, geen Kies-je-worp en geen Wisseltruc om ernaartoe te gaan.
+- **De vraagtekenbordjes en de mistwaas** komen letterlijk uit het design (`board_mist.svg`). Het bordje wordt nu als losse tekening uitgeknipt, zodat het ook op de goede plek staat als je de sterplekken in de editor verschuift.
+- **Iconen:**
+  - De Valstrik krijgt de val uit het design (`item_val.svg`).
+  - De Slakkendobbel krijgt het slakje uit `dobbel-slakkendobbel.html`.
+  - De Zakkenroller en de Achteruitpet hebben geen tekening: tijdelijk een nachtpaarse cirkel met een letter.
+- **In de spelersbalk** staat een slakje of een pijltje terug bij wie een Slakkendobbel of Achteruitpet van een ander heeft.
+- **Pommie** komt in beeld bij de ochtendmist (in plaats van de gewone dag-tekst), als de mist optrekt en bij een vallende ster.
+- **Opslagversie 4.** Een bewaard spel uit stap 5 (versie 3) kan gewoon verder: er ligt dan nog geen valstrik en er hangt geen mist.

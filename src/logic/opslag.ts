@@ -1,7 +1,7 @@
 import type { GameState } from './gameState';
 
 /** Verhoog dit als de vorm van GameState verandert. */
-export const OPSLAG_VERSIE = 3;
+export const OPSLAG_VERSIE = 4;
 export const OPSLAG_SLEUTEL = 'kralingse-plas-party/spel';
 
 interface Opgeslagen {
@@ -28,7 +28,8 @@ export function laad(opslag: Opslag): GameState | null {
   try {
     const data = JSON.parse(ruw) as Opgeslagen;
     if (!data?.state || !Array.isArray(data.state.spelers)) return null;
-    if (data.versie === 2) return vanVersie2(data.state);
+    if (data.versie === 2) return vanVersie3(vanVersie2(data.state));
+    if (data.versie === 3) return vanVersie3(data.state);
     if (data.versie !== OPSLAG_VERSIE) return null;
     return data.state;
   } catch {
@@ -42,6 +43,18 @@ function vanVersie2(state: GameState): GameState {
   s.nacht = false;
   for (const sp of s.spelers) sp.items = [];
   for (const g of s.verslag) if (g.soort === 'worp' && !g.worpen) g.worpen = [g.waarde];
+  return s;
+}
+
+/** Een spel uit stap 5 (versie 3): nog geen valstrikken, geen mist en niemand heeft een slak of pet. */
+function vanVersie3(state: GameState): GameState {
+  const s = structuredClone(state);
+  s.valstrikken ??= [];
+  s.mist ??= null;
+  for (const sp of s.spelers) {
+    sp.slak ??= false;
+    sp.achteruit ??= false;
+  }
   return s;
 }
 

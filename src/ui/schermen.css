@@ -152,6 +152,20 @@
 .balk-figuur-plaatje.pion { width: 44px; height: 57px; object-fit: contain; margin-top: 4px; }
 .balk-figuur .vervanger { width: 56px; height: 56px; }
 .balk-plaats { position: absolute; left: -8px; top: -8px; }
+.balk-vloek { position: absolute; right: -8px; bottom: -6px; display: flex; gap: 1px; pointer-events: none; }
+.balk-vloek:empty { display: none; }
+.balk-vloek > span {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: overlay-in 200ms ease-out;
+}
+.balk-vloek-slak { background: #F0D3A4; }
+.balk-vloek-pet { background: #4B3A6B; }
 .balk-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
 .balk-naamrij { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .balk-naam {
@@ -929,3 +943,57 @@
 .zeil-baan.klaar .zeil-worp { display: flex; }
 .zeil-baan.winnaar .zeil-worp { background: var(--kp-geel); box-shadow: 0 0 0 3px #FFFFFF; }
 .lampionnen .zeil-baan.winnaar .zeil-boot { filter: drop-shadow(0 0 10px #FFE478); }
+
+/* ================================================================ slakkendobbel en achteruitpet (§8.1)
+   Kleuren letterlijk uit dobbel-slakkendobbel.html */
+.dobbel-banner {
+  position: absolute;
+  left: calc(296px + var(--veilig-links));
+  right: 0;
+  top: calc(40px + var(--veilig-boven));
+  width: max-content;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgb(43 29 20 / .82);
+  color: #FFFFFF;
+  font-family: var(--kp-font-kop);
+  font-weight: 600;
+  font-size: 22px;
+  padding: 8px 20px;
+  border-radius: var(--kp-r-pil);
+  white-space: nowrap;
+  z-index: 1;
+  pointer-events: none;
+}
+.dobbel-hint-rij { display: flex; gap: 14px; align-items: center; }
+.dobbel-slak-pil {
+  display: flex;
+  align-items: center;
+  background: #8A5F2E;
+  color: #FFFFFF;
+  font-family: var(--kp-font-kop);
+  font-weight: 600;
+  font-size: 18px;
+  padding: 8px 20px;
+  border-radius: var(--kp-r-pil);
+  white-space: nowrap;
+}
+.dobbel.slak .blok-vulling, .dobbel.slak .blok-onder { background: #8A5F2E; }
+.dobbel.slak .blok-boven { background: radial-gradient(circle at 40% 40%, #F0D3A4, #D9AE72 70%); }
+.dobbel.slak .blok-zij { background: radial-gradient(circle at var(--glans), #DDB27A, #B9874A 62%); }
+.dobbel.slak .blok-stiksel { border-color: rgb(255 246 230 / .65); }
+.dobbel.slak .blok-getal { -webkit-text-stroke-color: #5A3A16; }
+.dobbel.slak .blok-draai { animation-duration: 2.2s; }
+
+/* ================================================================ Nachtwinkel (§8.1)
+   Het winkelscherm uit het design, in de nachtkleuren van het bord (nachtpaars van het pech-vakje,
+   maangeel van de labels 's nachts). */
+.nachtwinkel-overlay { background: rgb(14 12 40 / .62); }
+.nachtwinkel-overlay .winkel-paneel { border-color: #4B3A6B; }
+.nachtwinkel-overlay .winkel-kop-icoon { width: 72px; height: 72px; border-radius: 50%; background: #2F2347; display: flex; align-items: center; justify-content: center; }
+.nachtwinkel-overlay .winkel-kop-icoon img { width: 52px; height: 52px; }
+.nachtwinkel-overlay .winkel-pil { background: #4B3A6B; box-shadow: 0 4px 0 #2F2347; color: #FFF3B0; }
+.nachtwinkel-overlay .winkel-kaart-icoon { background: #E9E4F2; }
+.winkel-kaarten.vier { grid-template-columns: repeat(4, minmax(0, 1fr)); }

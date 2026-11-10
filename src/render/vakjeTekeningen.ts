@@ -255,6 +255,14 @@ export const SPRITES = {
     "voetY": 116.256,
     "designX": 653.9,
     "designY": 764.6
+  },
+  "vraagteken": {
+    "breedte": 54.824,
+    "hoogte": 88.11,
+    "voetX": 27.412,
+    "voetY": 80.27799999999999,
+    "designX": 525.2,
+    "designY": 153.5
   }
 } as const;
 

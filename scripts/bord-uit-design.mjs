@@ -42,6 +42,8 @@ const tekeningen = [
   [SYSTEEM_ASSETS, 'snow.svg', 'iconen/sneeuw.svg'],
   [SYSTEEM_ASSETS, 'd10.svg', 'iconen/dobbelsteen.svg'],
   [SYSTEEM_ASSETS, 'item_dobbel.svg', 'iconen/dubbele-dobbelsteen.svg'],
+  // De val uit het design: gebruikt voor de Valstrik uit de Nachtwinkel (§8.1).
+  [SYSTEEM_ASSETS, 'item_val.svg', 'iconen/valstrik.svg'],
   [SYSTEEM_ASSETS, 'bunting.svg', 'iconen/vlaggetjes.svg'],
   [SYSTEEM_ASSETS, 'felt_tex.svg', 'iconen/vilt.svg'],
   [SCHERMEN_ASSETS, 'chart.svg', 'iconen/grafiek.svg'],
@@ -91,6 +93,8 @@ function leesBord(naam) {
 
 const isSter = (g) => g.includes('#8E5BD9') && g.includes('#B48AF0');
 const isRatje = (g) => g.includes('#FBF6EC') && g.length > 3000;
+/** Het paarse vraagtekenbordje op de sterplekken bij ochtendmist (board_mist.svg). */
+const isVraagteken = (g) => g.includes('#8E5BD9') && g.includes('M-7 -60') && g.length < 800;
 
 const sprites = {};
 for (const naam of ['dag', 'nacht', 'winter', 'mist']) {
@@ -100,6 +104,7 @@ for (const naam of ['dag', 'nacht', 'winter', 'mist']) {
   const rest = d.lijst.filter((g) => {
     if (isSter(g)) return (sprites[`ster-${naam}`] = g), false;
     if (isRatje(g)) return (sprites[`ratje-${naam}`] = g), false;
+    if (isVraagteken(g)) return (sprites[`vraagteken-${naam}`] ??= g), false;
     return true;
   });
   schrijf(join(PUBLIC, `bord/decor-${naam}.svg`), `${b.kop}${b.defs}${d.open}${rest.join('')}</g></svg>`);
@@ -135,6 +140,10 @@ let viltFilter = '';
   schrijf(join(PUBLIC, 'bord/ratje.svg'), ratje.svg);
   spriteMeta.ster = ster.meta;
   spriteMeta.ratje = ratje.meta;
+  const mist = leesBord('mist');
+  const vraag = spriteBestand(sprites['vraagteken-mist'], mist.defs, mist.kop, [-28, -82, 56, 90]);
+  schrijf(join(PUBLIC, 'bord/vraagteken.svg'), vraag.svg);
+  spriteMeta.vraagteken = vraag.meta;
   viltFilter = dag.defs.match(/<filter id="felt2".*?<\/filter>/s)[0].replace('id="felt2"', 'id="kp-vilt2"');
 }
 

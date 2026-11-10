@@ -4,13 +4,26 @@
  */
 import type { Vakje, VakjeType } from '../logic/bord';
 import { vakjeMaat } from './diepte';
-import { VAKJE_TEKENINGEN } from './vakjeTekeningen';
+import { VAKJE_TEKENINGEN, type VakjeTekening } from './vakjeTekeningen';
+
+/**
+ * Het design heeft geen vleermuisvakje (§8.3). Tijdelijke vervanger: de opbouw van het blauwe
+ * vakje in nachtpaars, met de maan uit het design (iconen/maan.svg) als icoon.
+ */
+const VLEERMUIS: VakjeTekening = {
+  ...VAKJE_TEKENINGEN.blauw,
+  onder: '#3A2A7A',
+  kleur: '#6A4FD0',
+  icoon:
+    '<g transform="scale(.8) translate(-50 -50)"><path d="M62 10 A40 40 0 1 0 90 66 A32 32 0 1 1 62 10 Z" fill="#FFE9A8"/>' +
+    '<circle cx="34" cy="60" r="5" fill="#E8CF85"/><circle cx="48" cy="78" r="3.5" fill="#E8CF85"/></g>',
+};
 
 const f = (n: number) => Math.round(n * 10) / 10;
 
 /** SVG voor één vakje. (x, y) is het midden van de bovenkant. */
 export function vakjeSvg(type: VakjeType, x: number, y: number): string {
-  const t = VAKJE_TEKENINGEN[type];
+  const t = type === 'vleermuis' ? VLEERMUIS : VAKJE_TEKENINGEN[type];
   if (!t) throw new Error(`Geen tekening voor vakje ${type}`);
   const { rx, ry, dikte } = vakjeMaat(y, type === 'start');
   const onderY = y + dikte;

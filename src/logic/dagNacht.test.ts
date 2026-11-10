@@ -9,7 +9,7 @@ import type { GameState } from './gameState';
 import { verwerkMinigame } from './minigame';
 import { nieuwSpel } from './nieuwSpel';
 import { botKiestZijpad, openSplitsing } from './splitsing';
-import { keuzes, met, metWorp, spel } from './testhulp';
+import { bord, keuzes, met, metWorp, spel } from './testhulp';
 
 const UITSLAG = [[0], [1], [2], [3]];
 
@@ -33,7 +33,7 @@ describe('dag en nacht wisselen', () => {
     let s = met(spel(), (x) => (x.fase = { soort: 'minigame' }));
     const nacht: boolean[] = [s.nacht];
     for (let r = 1; r < 10; r++) {
-      s = verwerkMinigame(s, UITSLAG);
+      s = verwerkMinigame(s, UITSLAG, bord);
       nacht.push(s.nacht);
       s = met(s, (x) => (x.fase = { soort: 'minigame' }));
     }
@@ -41,7 +41,7 @@ describe('dag en nacht wisselen', () => {
   });
 
   it('de wissel staat in het verslag, zodat Pommie het kan zeggen', () => {
-    const s = verwerkMinigame(met(spel(), (x) => ((x.ronde = 3), (x.fase = { soort: 'minigame' }))), UITSLAG);
+    const s = verwerkMinigame(met(spel(), (x) => ((x.ronde = 3), (x.fase = { soort: 'minigame' }))), UITSLAG, bord);
     expect(s.verslag).toContainEqual({ soort: 'dagNacht', nacht: true, reden: 'ronde' });
   });
 
@@ -59,7 +59,7 @@ describe('dag en nacht wisselen', () => {
     let s = met(spel(), (x) => pasRegelToe(x, BORD, 'eeuwigeNacht', 0));
     expect(s.nacht).toBe(true);
     s = met(s, (x) => ((x.ronde = 6), (x.fase = { soort: 'minigame' })));
-    s = verwerkMinigame(s, UITSLAG); // ronde 7 zou dag worden
+    s = verwerkMinigame(s, UITSLAG, bord); // ronde 7 zou dag worden
     expect(s.nacht).toBe(true);
     const lantaarn = loopUit(metWorp(opBord('noord3', (x) => ((x.nacht = true), (x.eindspelRegel = 'eeuwigeNacht'))), 1), BORD);
     expect(lantaarn.nacht).toBe(true);

@@ -43,12 +43,26 @@ export interface Speler {
   vakje: string;
   /** Hoogstens 3 items (§7.1). */
   items: ItemSoort[];
+  /** Iemand gaf je de Slakkendobbel: je volgende worp is maar 1–3 (§8.1). */
+  slak: boolean;
+  /** Iemand gaf je de Achteruitpet: je volgende beurt loop je achteruit (§8.1). Geldt tot het eind van die beurt. */
+  achteruit: boolean;
   stats: SpelerStats;
 }
 
 /** Een ster op het bord, bij een sterplek. */
 export interface Ster {
   plek: string;
+  /** Een vallende ster (§8.2): na aankoop weg, en hij verdwijnt als het dag wordt. */
+  vallend?: boolean;
+  /** Bij ochtendmist: iemand is erlangs gelopen, dus iedereen ziet hem weer (§8.4). */
+  ontdekt?: boolean;
+}
+
+/** Een valstrik op het bord (§8.1). Per speler hoogstens één. */
+export interface Valstrik {
+  speler: number;
+  vakje: string;
 }
 
 /** De regel die het rad van de laatste speler aan het eindspel toevoegt (§9). */
@@ -69,6 +83,8 @@ export type Fase =
   | { soort: 'sterKopen'; worp: number; resterend: number; plek: string }
   /** Een mens loopt langs de winkel (overdag): één item kopen of niets. */
   | { soort: 'winkel'; worp: number; resterend: number }
+  /** Een mens loopt 's nachts langs de Nachtwinkel bij de jachthaven (§8.1). */
+  | { soort: 'nachtwinkel'; worp: number; resterend: number }
   /**
    * Een mens kan Ratje inhuren: bij het langslopen, of met de Ratjebel vóór het dobbelen
    * (`voorDobbelen`; daarna wordt er gewoon gedobbeld).
@@ -83,12 +99,12 @@ export type Fase =
 
 export type MuntReden =
   | 'blauw' | 'rood' | 'ster' | 'minigame' | 'eindspel' | 'boot'
-  | 'winkel' | 'ratje' | 'item' | 'hertenkamp' | 'kans' | 'pech' | 'event';
+  | 'winkel' | 'ratje' | 'item' | 'hertenkamp' | 'kans' | 'pech' | 'event' | 'valstrik' | 'vleermuis';
 
 /** De raderen die op het scherm draaien. */
-export type RadSoort = 'hertenkamp' | 'bok' | 'pech';
+export type RadSoort = 'hertenkamp' | 'bok' | 'pech' | 'vleermuis';
 
-export type VerplaatsReden = 'windvlaag' | 'hertje' | 'bok' | 'plas' | 'wisseltruc';
+export type VerplaatsReden = 'windvlaag' | 'hertje' | 'bok' | 'plas' | 'wisseltruc' | 'vleermuis';
 
 /** De acties van het Kans-vakje (§7.3). */
 export type KansActie = 'geef10' | 'geef20' | 'ruilMunten' | 'geefSter' | 'ruilSterren';
@@ -98,6 +114,7 @@ export type Gebeurtenis =
   /** `worpen` = de losse worpen (meer dan één met een dubbele dobbelsteen); `gekozen` = Kies-je-worp. */
   | { soort: 'worp'; speler: number; waarde: number; worpen: number[]; gekozen?: boolean }
   | { soort: 'munten'; speler: number; verschil: number; reden: MuntReden }
+  /** `nieuwePlek` is leeg bij een vallende ster: die verhuist niet. */
   | { soort: 'sterGekocht'; speler: number; plek: string; nieuwePlek: string }
   | { soort: 'splitsing'; speler: number; splitsing: SplitsingSoort; zijpad: boolean }
   | { soort: 'eindspelRegel'; speler: number; regel: EindspelRegel }
@@ -110,7 +127,17 @@ export type Gebeurtenis =
   | { soort: 'strandtent'; speler: number; kampvuur: boolean }
   | { soort: 'windvlaag'; speler: number; stappen: number }
   | { soort: 'zeilwedstrijd'; speler: number; worpen: number[]; winnaars: number[]; prijs: number; lampionnen: boolean }
-  | { soort: 'ratje'; speler: number; doel: number; wat: 'munten' | 'ster'; buit: number };
+  | { soort: 'ratje'; speler: number; doel: number; wat: 'munten' | 'ster'; buit: number }
+  /** Een gemeen item uit de Nachtwinkel op iemand gericht. */
+  | { soort: 'gemeen'; speler: number; doel: number; item: 'zakkenroller' | 'slakkendobbel' | 'achteruitpet'; buit: number }
+  | { soort: 'valstrikGelegd'; speler: number; vakje: string }
+  /** `speler` trapte in de valstrik van `eigenaar` en betaalde `munten`. */
+  | { soort: 'valstrik'; speler: number; eigenaar: number; vakje: string; munten: number }
+  | { soort: 'vallendeSter'; plek: string }
+  | { soort: 'vallendeSterWeg'; plek: string }
+  | { soort: 'mist'; aan: boolean }
+  /** Bij ochtendmist: de ster is gevonden. */
+  | { soort: 'sterOntdekt'; speler: number; plek: string };
 
 export type BonusSoort = 'minigame' | 'rijkaard' | 'avonturier';
 
@@ -143,6 +170,10 @@ export interface GameState {
   /** Nacht (§8). Het spel begint overdag. */
   nacht: boolean;
   eindspelRegel: EindspelRegel | null;
+  /** Valstrikken op het bord (§8.1). */
+  valstrikken: Valstrik[];
+  /** Ochtendmist (§8.4): de mist trekt op aan het begin van ronde `totRonde`. */
+  mist: { totRonde: number } | null;
   /** Gebeurtenissen sinds de laatste beurt/uitslag begon. */
   verslag: Gebeurtenis[];
   eindtelling: Eindtelling | null;

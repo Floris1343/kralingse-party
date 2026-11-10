@@ -5,6 +5,7 @@ import {
   EINDSPEL_MUNTEN_LAATSTE, EINDSPEL_RONDES, kies, metKopie, plaatsen, vereisFase, wijzigMunten,
 } from './regels';
 import { kiesVrijeSterplek } from './ster';
+import { wisMist } from './dagNacht';
 
 export const EINDSPEL_REGELS: readonly EindspelRegel[] = [
   'munten20', 'extraSter', 'goedkopeSter', 'eeuwigeNacht', 'ratjeGratis',
@@ -47,11 +48,18 @@ export function pasRegelToe(s: GameState, bord: Bord, regel: EindspelRegel, laat
   if (regel === 'munten20') {
     wijzigMunten(s, laatste, EINDSPEL_MUNTEN_LAATSTE, 'eindspel');
   } else if (regel === 'extraSter') {
-    s.sterren.push({ plek: kiesVrijeSterplek(s, bord) });
+    const vallend = s.sterren.find((st) => st.vallend);
+    if (vallend && bord.sterplekken.length - s.sterren.length < 2) {
+      // Geen ruimte voor nog een ster (klein bord): dan blijft de vallende ster staan als extra ster.
+      delete vallend.vallend;
+    } else {
+      s.sterren.push({ plek: kiesVrijeSterplek(s, bord) });
+    }
   }
   if (regel === 'eeuwigeNacht' && !s.nacht) {
     s.nacht = true;
     s.verslag.push({ soort: 'dagNacht', nacht: true, reden: 'eindspel' });
+    wisMist(s);
   }
   // goedkopeSter werkt via sterPrijs(), ratjeGratis via ratjePrijs().
 }

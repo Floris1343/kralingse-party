@@ -5,30 +5,41 @@
  * bewaard kan worden. `loopUit` doet alle stappen in één keer, tot er een keuze nodig is.
  */
 import { splitsingBij, volgendVakje, type Bord } from './bord';
-import { botItemKoop } from './botKeuzes';
-import { handelVakjeAf } from './effecten';
+import { botItemKoop, botNachtKoop } from './botKeuzes';
+import { handelVakjeAf, vorigVakje } from './effecten';
 import type { GameState } from './gameState';
-import { aantalDobbelstenen, kanIetsKopen, koopItem, winkelOpen, type ItemSoort } from './items';
+import {
+  aantalDobbelstenen, isNachtItem, kanIetsKopen, koopItem, nachtwinkelOpen, SLAK_MAX, VALSTRIK_MUNTEN,
+  winkelOpen, type ItemSoort,
+} from './items';
 import { botRatjeKeuze, huurRatje, kanRatjeInhuren, type RatjeKeuze } from './ratje';
 import { BOOT_PRIJS, metKopie, spelerAanZet, trek, vereisFase, wijzigMunten } from './regels';
 import { botKiestZijpad, openSplitsing } from './splitsing';
-import { kanSterBetalen, koopSter, sterBijVakje } from './ster';
+import { kanSterBetalen, koopSter, sterBijVakje, sterZichtbaar } from './ster';
+
+/** Het hoogste getal op de dobbelsteen van deze speler: 10, of 3 met de Slakkendobbel (§8.1). */
+export function dobbelMax(state: GameState, speler: number): number {
+  return state.spelers[speler].slak ? SLAK_MAX : 10;
+}
 
 /**
  * Gooit de dobbelsteen (1–10) voor de speler die aan zet is. Met een dubbele of driedubbele
  * dobbelsteen worden de worpen opgeteld. Met Kies-je-worp geef je `gekozen` mee (1–10).
+ * Heeft iemand je de Slakkendobbel gegeven, dan gooit (of kiest) elke dobbelsteen maar 1–3.
  */
 export function dobbelen(state: GameState, gekozen?: number): GameState {
   const fase = vereisFase(state, 'dobbelen');
   const kiest = fase.gebruikt === 'kiesWorp';
-  if (kiest && !(Number.isInteger(gekozen) && gekozen! >= 1 && gekozen! <= 10)) {
-    throw new Error('Kies een getal van 1 tot 10');
+  const max = dobbelMax(state, spelerAanZet(state));
+  if (kiest && !(Number.isInteger(gekozen) && gekozen! >= 1 && gekozen! <= max)) {
+    throw new Error(`Kies een getal van 1 tot ${max}`);
   }
   return metKopie(state, (s) => {
     const speler = spelerAanZet(s);
     // Een nieuwe beurt begint met een leeg verslag. Is er al een item gebruikt, dan blijft dat erin staan.
     if (!fase.gebruikt) s.verslag = [];
-    const worpen = kiest ? [gekozen!] : Array.from({ length: aantalDobbelstenen(fase.gebruikt) }, () => trek(s, 1, 10));
+    const worpen = kiest ? [gekozen!] : Array.from({ length: aantalDobbelstenen(fase.gebruikt) }, () => trek(s, 1, max));
+    s.spelers[speler].slak = false;
     const worp = worpen.reduce((a, b) => a + b, 0);
     s.verslag.push({ soort: 'worp', speler, waarde: worp, worpen, ...(kiest ? { gekozen: true } : {}) });
     s.fase = { soort: 'lopen', worp, resterend: worp };
@@ -43,6 +54,12 @@ export function stap(state: GameState, bord: Bord): GameState {
   const fase = vereisFase(state, 'lopen');
   return metKopie(state, (s) => {
     const speler = spelerAanZet(s);
+    if (s.spelers[speler].achteruit) {
+      // Met de Achteruitpet: terug over het pad op land, zonder splitsingen (§8.1).
+      s.spelers[speler].vakje = vorigVakje(bord, s.spelers[speler].vakje);
+      langs(s, bord, fase.worp, fase.resterend - 1, 'ster');
+      return;
+    }
     const splitsing = openSplitsing(s, bord, speler);
     if (splitsing && !s.spelers[speler].isBot) {
       s.fase = { soort: 'splitsing', worp: fase.worp, resterend: fase.resterend, vakje: splitsing.vakje };
@@ -72,8 +89,8 @@ function zetStap(s: GameState, bord: Bord, worp: number, resterendVoor: number, 
   langs(s, bord, worp, resterendVoor - 1, 'ster');
 }
 
-type Halte = 'ster' | 'winkel' | 'ratje';
-const HALTES: Halte[] = ['ster', 'winkel', 'ratje'];
+type Halte = 'ster' | 'winkel' | 'nachtwinkel' | 'ratje';
+const HALTES: Halte[] = ['ster', 'winkel', 'nachtwinkel', 'ratje'];
 
 /**
  * Wat je tegenkomt op het vakje waar je net bent: de ster, de winkel en Ratje, in die volgorde.
@@ -86,7 +103,14 @@ function langs(s: GameState, bord: Bord, worp: number, resterend: number, vanaf:
   for (const halte of HALTES.slice(HALTES.indexOf(vanaf))) {
     if (halte === 'ster') {
       const plek = sterBijVakje(s, bord, sp.vakje);
-      if (!plek || !kanSterBetalen(s, speler)) continue;
+      if (!plek) continue;
+      // In de mist ontdek je de ster pas als je erlangs loopt (§8.4).
+      const ster = s.sterren.find((st) => st.plek === plek)!;
+      if (!sterZichtbaar(s, ster)) {
+        ster.ontdekt = true;
+        s.verslag.push({ soort: 'sterOntdekt', speler, plek });
+      }
+      if (!kanSterBetalen(s, speler)) continue;
       if (!sp.isBot) return void (s.fase = { soort: 'sterKopen', worp, resterend, plek });
       // Bots kopen een ster altijd als het kan.
       koopSter(s, bord, speler, plek);
@@ -94,6 +118,11 @@ function langs(s: GameState, bord: Bord, worp: number, resterend: number, vanaf:
       if (sp.vakje !== bord.plekken.winkel.vakje || !winkelOpen(s) || !kanIetsKopen(s, speler)) continue;
       if (!sp.isBot) return void (s.fase = { soort: 'winkel', worp, resterend });
       const item = botItemKoop(s, bord, speler);
+      if (item) koopItem(s, speler, item);
+    } else if (halte === 'nachtwinkel') {
+      if (sp.vakje !== bord.plekken.nachtwinkel.vakje || !nachtwinkelOpen(s) || !kanIetsKopen(s, speler, true)) continue;
+      if (!sp.isBot) return void (s.fase = { soort: 'nachtwinkel', worp, resterend });
+      const item = botNachtKoop(s, speler);
       if (item) koopItem(s, speler, item);
     } else {
       if (sp.vakje !== bord.plekken.ratje.vakje || !kanRatjeInhuren(s, speler)) continue;
@@ -117,6 +146,17 @@ export function sterKeuze(state: GameState, bord: Bord, kopen: boolean): GameSta
 /** Antwoord van een mens in de winkel: een item, of null voor "Niks kopen". */
 export function winkelKeuze(state: GameState, bord: Bord, item: ItemSoort | null): GameState {
   const fase = vereisFase(state, 'winkel');
+  if (item && isNachtItem(item)) throw new Error('Dat verkoopt de winkel niet');
+  return metKopie(state, (s) => {
+    if (item) koopItem(s, spelerAanZet(s), item);
+    langs(s, bord, fase.worp, fase.resterend, 'nachtwinkel');
+  });
+}
+
+/** Antwoord van een mens in de Nachtwinkel: een gemeen item, of null voor "Niks kopen". */
+export function nachtwinkelKeuze(state: GameState, bord: Bord, item: ItemSoort | null): GameState {
+  const fase = vereisFase(state, 'nachtwinkel');
+  if (item && !isNachtItem(item)) throw new Error('Dat verkoopt de Nachtwinkel niet');
   return metKopie(state, (s) => {
     if (item) koopItem(s, spelerAanZet(s), item);
     langs(s, bord, fase.worp, fase.resterend, 'ratje');
@@ -145,11 +185,27 @@ function gaVerder(s: GameState, bord: Bord, worp: number, resterend: number): vo
     s.fase = { soort: 'lopen', worp, resterend };
     return;
   }
-  handelVakjeAf(s, bord, spelerAanZet(s));
+  const speler = spelerAanZet(s);
+  valstrik(s, speler);
+  handelVakjeAf(s, bord, speler);
   volgendeBeurt(s);
 }
 
+/** Eindig je op de valstrik van een ander, dan geef je die 10 munten en is de valstrik weg (§8.1). */
+function valstrik(s: GameState, speler: number): void {
+  const vakje = s.spelers[speler].vakje;
+  const idx = s.valstrikken.findIndex((v) => v.vakje === vakje && v.speler !== speler);
+  if (idx < 0) return;
+  const eigenaar = s.valstrikken[idx].speler;
+  s.valstrikken.splice(idx, 1);
+  const munten = -wijzigMunten(s, speler, -VALSTRIK_MUNTEN, 'valstrik');
+  wijzigMunten(s, eigenaar, munten, 'valstrik');
+  s.verslag.push({ soort: 'valstrik', speler, eigenaar, vakje, munten });
+}
+
 function volgendeBeurt(s: GameState): void {
+  // De Achteruitpet geldt één beurt.
+  s.spelers[spelerAanZet(s)].achteruit = false;
   s.aanZet += 1;
   s.fase = s.aanZet >= s.volgorde.length ? { soort: 'minigame' } : { soort: 'dobbelen' };
 }

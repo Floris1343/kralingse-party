@@ -6,7 +6,7 @@
 import { figuur } from '../data/figuren';
 import { plaatsen, spelerAanZet, type GameState } from '../logic';
 import { asset } from './asset';
-import { itemIcoon } from './itemIcoon';
+import { itemIcoon, SLAK_SVG } from './itemIcoon';
 import { icoon } from './iconen';
 import { figuurPlaatje, maak, plaatsRondje, zetPlaats } from './onderdelen';
 
@@ -19,7 +19,13 @@ interface Kaart {
   sterren: HTMLElement;
   munten: HTMLElement;
   items: HTMLElement;
+  /** Klein teken bij het figuur: de Slakkendobbel of de Achteruitpet van iemand anders (§8.1). */
+  vloek: HTMLElement;
 }
+
+/** Pijltje terug, voor wie de Achteruitpet heeft. */
+const ACHTERUIT_SVG =
+  '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5 L3 11 L9 17 M4 11 H15 A5 5 0 0 1 15 21 H12" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 export class Spelersbalk {
   readonly el = maak('div', 'spelersbalk');
@@ -51,7 +57,8 @@ export class Spelersbalk {
       binnen.style.background = f.kleurLicht;
       binnen.append(figuurPlaatje(f, sp.naam, 'balk-figuur-plaatje'));
       const plaats = plaatsRondje(1, 'balk-plaats');
-      rond.append(binnen, plaats);
+      const vloek = maak('div', 'balk-vloek');
+      rond.append(binnen, plaats, vloek);
 
       const info = maak('div', 'balk-info');
       const naamRij = maak('div', 'balk-naamrij');
@@ -66,7 +73,7 @@ export class Spelersbalk {
       const items = maak('div', 'balk-items');
       el.append(rond, info, items, maak('div', 'aan-de-beurt', 'AAN DE BEURT'));
       spelers.append(el);
-      this.kaarten.push({ el, plaats, sterren, munten, items });
+      this.kaarten.push({ el, plaats, sterren, munten, items, vloek });
     });
 
     this.turboKnop = maak('button', 'hoekknop');
@@ -92,7 +99,7 @@ export class Spelersbalk {
     this.ronde.classList.toggle('nacht', s.nacht);
     const icoonPad = asset(s.nacht ? 'iconen/maan.svg' : 'iconen/zon.svg');
     if (this.rondeIcoon.getAttribute('src') !== icoonPad) this.rondeIcoon.src = icoonPad;
-    const beurtFase = ['dobbelen', 'lopen', 'splitsing', 'sterKopen', 'winkel', 'ratje'].includes(s.fase.soort);
+    const beurtFase = ['dobbelen', 'lopen', 'splitsing', 'sterKopen', 'winkel', 'nachtwinkel', 'ratje'].includes(s.fase.soort);
     const aanZet = beurtFase ? spelerAanZet(s) : -1;
     s.spelers.forEach((sp, i) => {
       const k = this.kaarten[i];
@@ -100,6 +107,13 @@ export class Spelersbalk {
       k.sterren.textContent = String(sp.sterren);
       k.munten.textContent = String(sp.munten);
       k.el.classList.toggle('actief', i === aanZet);
+      const vloek = `${sp.slak ? 's' : ''}${sp.achteruit ? 'a' : ''}`;
+      if (k.vloek.dataset.v !== vloek) {
+        k.vloek.dataset.v = vloek;
+        k.vloek.innerHTML =
+          (sp.slak ? `<span class="balk-vloek-slak" title="Slakkendobbel">${SLAK_SVG(22)}</span>` : '') +
+          (sp.achteruit ? `<span class="balk-vloek-pet" title="Achteruitpet">${ACHTERUIT_SVG}</span>` : '');
+      }
       // Alleen opnieuw tekenen als de items veranderd zijn.
       const sleutel = sp.items.join(',');
       if (this.itemsSleutel[i] === sleutel) return;

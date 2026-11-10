@@ -1,9 +1,11 @@
 /** De minigame-uitslag verwerken en de volgende ronde starten (§3, §5). */
-import { wisseltBijRonde, wisselDagNacht } from './dagNacht';
+import type { Bord } from './bord';
+import { wisMist, wisseltBijRonde, wisselDagNacht } from './dagNacht';
 import { eersteEindspelRonde, kiesLaatsteSpeler } from './eindspel';
 import { doeEindtelling } from './eindtelling';
 import type { GameState } from './gameState';
 import { metKopie, MINIGAME_BELONING, vereisFase, wijzigMunten } from './regels';
+import { misschienVallendeSter } from './ster';
 
 /**
  * De uitslag als groepen in volgorde van finish. Gelijke plekken staan in dezelfde groep.
@@ -35,7 +37,7 @@ export function minigameBeloning(uitslag: MinigameUitslag, aantalSpelers: number
 }
 
 /** Verwerkt de uitslag, sluit de ronde af en start de volgende (of de eindtelling). */
-export function verwerkMinigame(state: GameState, uitslag: MinigameUitslag): GameState {
+export function verwerkMinigame(state: GameState, uitslag: MinigameUitslag, bord: Bord): GameState {
   vereisFase(state, 'minigame');
   const beloning = minigameBeloning(uitslag, state.spelers.length);
   return metKopie(state, (s) => {
@@ -44,11 +46,11 @@ export function verwerkMinigame(state: GameState, uitslag: MinigameUitslag): Gam
       const echt = wijzigMunten(s, i, m, 'minigame');
       s.spelers[i].stats.minigameMunten += echt;
     });
-    sluitRondeAf(s);
+    sluitRondeAf(s, bord);
   });
 }
 
-function sluitRondeAf(s: GameState): void {
+function sluitRondeAf(s: GameState, bord: Bord): void {
   for (const sp of s.spelers) sp.stats.sterrenPerRonde.push(sp.sterren);
 
   if (s.ronde >= s.instellingen.aantalRondes) {
@@ -57,7 +59,9 @@ function sluitRondeAf(s: GameState): void {
   }
   s.ronde += 1;
   s.aanZet = 0;
+  if (s.mist && s.ronde >= s.mist.totRonde) wisMist(s);
   if (wisseltBijRonde(s.ronde)) wisselDagNacht(s, 'ronde');
+  misschienVallendeSter(s, bord);
   s.fase =
     s.ronde === eersteEindspelRonde(s)
       ? { soort: 'eindspelRad', speler: kiesLaatsteSpeler(s) }

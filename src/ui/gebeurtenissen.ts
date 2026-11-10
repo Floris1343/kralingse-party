@@ -4,14 +4,14 @@
  * laten hem alleen zien. Elk scherm is in ongeveer 2 seconden klaar en met één tik weg.
  */
 import { figuur } from '../data/figuren';
-import { BOK_RAD, HERTEN_RAD, PECH_RAD, type GameState, type Gebeurtenis, type RadSoort } from '../logic';
+import { BOK_RAD, HERTEN_RAD, PECH_RAD, VLEERMUIS_RAD, type GameState, type Gebeurtenis, type RadSoort } from '../logic';
 import { asset } from './asset';
 import { icoon } from './iconen';
 import { figuurPlaatje, maak } from './onderdelen';
 import { KANS_TEKST, RADEN } from './uitkomsten';
 
 const wacht = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
-const VOLGORDE: Record<RadSoort, readonly string[]> = { hertenkamp: HERTEN_RAD, bok: BOK_RAD, pech: PECH_RAD };
+const VOLGORDE: Record<RadSoort, readonly string[]> = { hertenkamp: HERTEN_RAD, bok: BOK_RAD, pech: PECH_RAD, vleermuis: VLEERMUIS_RAD };
 
 /** Een overlay met een vilten paneel. `klaar` wacht op "Verder" of een tik ernaast (of de tijd, voor bots). */
 function overlay(laag: HTMLElement, klasse: string): { el: HTMLElement; paneel: HTMLElement; klaar: (autoMs?: number) => Promise<void> } {

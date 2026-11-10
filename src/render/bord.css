@@ -149,3 +149,45 @@
 .bord.is-nacht { background: #1B2A4A; }
 .bord-label { transition: background-color 1s ease-in-out, color 1s ease-in-out; }
 .bord.is-nacht .bord-label { background: rgb(47 35 71 / .9); color: #FFF3B0; }
+
+/* Ochtendmist (§8.4): witte waas over het water, oevers wat vager */
+.mist-laag { opacity: 0; will-change: opacity; }
+.bord-vraagteken { animation: ster-zweef 2.8s ease-in-out infinite alternate; }
+
+/* Vallende ster (§8.2): dezelfde ster uit het design, met een warme gloed en sneller zweven */
+.bord-ster.vallend {
+  filter: drop-shadow(0 0 10px #FFE27A) drop-shadow(0 0 22px rgb(255 181 71 / .8));
+  animation: ster-zweef 1.2s ease-in-out infinite alternate, ster-twinkel 1.6s ease-in-out infinite;
+}
+@keyframes ster-twinkel {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .82; }
+}
+
+/* Valstrik (§8.1): de val uit het design op een ring in de kleur van wie hem legde */
+.bord-valstrik {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.bord-valstrik::before {
+  content: '';
+  position: absolute;
+  left: -19px;
+  top: -6px;
+  width: 38px;
+  height: 14px;
+  border-radius: 50%;
+  border: 3px solid var(--kleur);
+  background: rgb(255 255 255 / .35);
+}
+.bord-valstrik-plaatje {
+  position: absolute;
+  left: -17px;
+  top: -30px;
+  width: 34px;
+  height: 34px;
+}

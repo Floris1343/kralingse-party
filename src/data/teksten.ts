@@ -32,6 +32,19 @@ export const teksten = {
     'Het wordt dag! De winkel bij het restaurant is weer open.',
     'Daar is de zon weer! De herten zijn weer lief.',
   ],
+  vallendeSter: [
+    'Een vallende ster! Er staat nu een tweede ster op het bord.',
+    'Kijk omhoog! Een vallende ster! Koop hem voor het weer dag wordt.',
+    'Een vallende ster! Wie haalt hem voordat de zon opkomt?',
+  ],
+  mist: [
+    'Ochtendmist! De ster staat op een van de zes ?-plekken.',
+    'Wat een mist over de plas! Waar is de ster gebleven? Loop erlangs om hem te vinden.',
+  ],
+  mistWeg: [
+    'De mist trekt op! Nu zie je de ster weer.',
+    'Daar is de zon door de mist heen. Iedereen ziet de ster weer!',
+  ],
   winnaar: [
     '{naam} wint! Wat een feest!',
     'En de winnaar is... {naam}!',

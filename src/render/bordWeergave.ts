@@ -18,6 +18,18 @@ export interface WeergaveSpeler {
   figuur: Figuur;
 }
 
+/** Een ster zoals het bord hem laat zien. Een vallende ster krijgt een gloed (§8.2). */
+export interface BordSter {
+  plek: string;
+  vallend?: boolean;
+}
+
+/** Een valstrik op het bord (§8.1), in de kleur van wie hem legde. */
+export interface BordValstrik {
+  vakje: string;
+  kleur: string;
+}
+
 type SpriteMeta = { breedte: number; hoogte: number; voetX: number; voetY: number; designY: number };
 
 /** Een losse tekening uit het design (ster, Ratje), met het voetpunt op (x, y) en geschaald naar de diepte. */
@@ -47,6 +59,11 @@ export class BordWeergave {
   private figuren: HTMLDivElement[] = [];
   private figuurPunten: [number, number][] = [];
   private sterren = new Map<string, HTMLElement>();
+  /** Bij ochtendmist een vraagteken op de sterplekken waar je geen ster ziet (§8.4). */
+  private vraagtekens = new Map<string, HTMLElement>();
+  private mistLaag: HTMLElement | null = null;
+  private mist = false;
+  private valstrikken = new Map<string, HTMLElement>();
   private bovenEl: HTMLDivElement;
   private bovenSpeler = -1;
   cam: CameraStand = { x: 0, y: 0, schaal: 1 };
@@ -91,6 +108,9 @@ export class BordWeergave {
         const effect = laag('bord/effect-nacht.svg', 'nacht-laag');
         this.wereld.append(decorNacht, effect);
         this.nachtLagen.push(decorNacht, effect);
+        // De witte waas van de ochtendmist (§8.4) ligt klaar en vloeit in met opacity.
+        this.mistLaag = laag('bord/effect-mist.svg', 'mist-laag');
+        this.wereld.append(this.mistLaag);
       }
     }
 
@@ -213,21 +233,76 @@ export class BordWeergave {
 
   // ------------------------------------------------------------------ ster en Ratje
 
-  /** Zet de sterren op de gegeven sterplekken (alle andere sterren verdwijnen). */
-  zetSterren(plekken: string[]): void {
-    for (const [plek, el] of this.sterren) {
-      if (!plekken.includes(plek)) {
+  /**
+   * Zet de sterren die je ziet op hun sterplekken (alle andere sterren verdwijnen).
+   * Met `mist` staat er op elke andere sterplek een vraagteken.
+   */
+  zetSterren(sterren: BordSter[], mist = false): void {
+    const sleutel = (st: BordSter) => `${st.plek}${st.vallend ? '*' : ''}`;
+    const gewenst = new Set(sterren.map(sleutel));
+    for (const [k, el] of this.sterren) {
+      if (!gewenst.has(k)) {
         el.remove();
-        this.sterren.delete(plek);
+        this.sterren.delete(k);
       }
     }
-    for (const plek of plekken) {
-      if (this.sterren.has(plek)) continue;
-      const p = this.bord.sterplekken.find((s) => s.id === plek);
+    for (const st of sterren) {
+      const k = sleutel(st);
+      if (this.sterren.has(k)) continue;
+      const p = this.bord.sterplekken.find((s) => s.id === st.plek);
       if (!p) continue;
-      const el = this.sprite('bord/ster.svg', 'Ster', SPRITES.ster, p.x, p.y);
+      const el = this.sprite('bord/ster.svg', st.vallend ? 'Vallende ster' : 'Ster', SPRITES.ster, p.x, p.y);
       el.classList.add('bord-ster');
-      this.sterren.set(plek, el);
+      if (st.vallend) el.classList.add('vallend');
+      this.sterren.set(k, el);
+    }
+    const metSter = new Set(sterren.map((st) => st.plek));
+    for (const p of this.bord.sterplekken) {
+      const nodig = mist && !metSter.has(p.id);
+      const el = this.vraagtekens.get(p.id);
+      if (nodig && !el) {
+        const v = this.sprite('bord/vraagteken.svg', 'Hier kan de ster staan', SPRITES.vraagteken, p.x, p.y);
+        v.classList.add('bord-vraagteken');
+        this.vraagtekens.set(p.id, v);
+      } else if (!nodig && el) {
+        el.remove();
+        this.vraagtekens.delete(p.id);
+      }
+    }
+  }
+
+  /** Ochtendmist aan of uit: de waas vloeit in ongeveer een seconde in of uit. */
+  zetMist(mist: boolean, duurMs = 1000): void {
+    if (mist === this.mist || !this.mistLaag) return;
+    this.mist = mist;
+    this.el.classList.toggle('is-mist', mist);
+    this.mistLaag.style.transition = duurMs > 0 ? `opacity ${duurMs}ms ease-in-out` : 'none';
+    this.mistLaag.style.opacity = mist ? '1' : '0';
+  }
+
+  /** Zet de valstrikken op hun vakje: de val uit het design, op een ring in de kleur van de eigenaar. */
+  zetValstrikken(strikken: BordValstrik[]): void {
+    const sleutel = (v: BordValstrik) => `${v.vakje}|${v.kleur}`;
+    const gewenst = new Set(strikken.map(sleutel));
+    for (const [k, el] of this.valstrikken) {
+      if (!gewenst.has(k)) {
+        el.remove();
+        this.valstrikken.delete(k);
+      }
+    }
+    for (const v of strikken) {
+      const k = sleutel(v);
+      if (this.valstrikken.has(k)) continue;
+      const vak = vakje(this.bord, v.vakje);
+      const d = diepteSchaal(vak.y);
+      const el = document.createElement('div');
+      el.className = 'bord-valstrik';
+      el.style.setProperty('--kleur', v.kleur);
+      el.style.transform = `translate(${vak.x}px, ${vak.y}px) scale(${d})`;
+      el.style.zIndex = String(Math.round(vak.y) + 1);
+      el.append(plaatje('iconen/valstrik.svg', 'Valstrik', v.kleur, 'bord-valstrik-plaatje'));
+      this.spriteLaag.append(el);
+      this.valstrikken.set(k, el);
     }
   }
 

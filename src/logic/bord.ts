@@ -5,7 +5,9 @@
 
 export type VakjeType =
   | 'start' | 'blauw' | 'rood' | 'event' | 'item' | 'kans' | 'pech'
-  | 'hertenkamp' | 'boot' | 'ijs';
+  | 'hertenkamp' | 'boot' | 'ijs'
+  /** Alleen 's nachts: een blauw vakje met de vlag `nachtVleermuis` (§8.3). */
+  | 'vleermuis';
 
 /** Extra eigenschappen van een vakje: 's nachts anders, of welk event het is. */
 export type VakjeVlag =
