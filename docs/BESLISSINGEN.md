@@ -190,3 +190,4 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
   - Eerst liggen de bootjes ±1,1 s klaar bij de start ("Klaar…", dan "Af!").
   - Dan varen ze ±2,8 s (eerst 1,2 s). Elk bootje vaart in een eigen tempo, zodat ze elkaar kunnen inhalen, maar nooit terug. Aan het eind staat elk bootje precies waar zijn worp hoort.
   - Bij een bot blijft de uitslag ±2,2 s staan (eerst 1,5 s).
+- **Het Kans-rad duurt langer:** alle drie de rollen draaien tegelijk. Elke rol loopt steeds langzamer (van 70 ms tot ±320 ms per stap, met een tikje), en stopt met een bonk. Eerst speler A na ±1,7 s, dan de actie na ±3 s, dan speler B na ±4,3 s (eerst stonden ze na 0,6, 1 en 1,4 s stil). De tijden staan in `src/ui/tempo.ts`.

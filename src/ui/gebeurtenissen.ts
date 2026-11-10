@@ -10,6 +10,7 @@ import { icoon } from './iconen';
 import { figuurPlaatje, maak } from './onderdelen';
 import { KANS_TEKST, RADEN, type RadVak } from './uitkomsten';
 import { TEMPO } from './tempo';
+import { dobbelGeluid, muntTik } from '../audio/geluid';
 
 const wacht = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 const VOLGORDE: Record<RadSoort, readonly string[]> = { hertenkamp: HERTEN_RAD, bok: BOK_RAD, pech: PECH_RAD, vleermuis: VLEERMUIS_RAD };
@@ -150,26 +151,35 @@ export async function toonKans(laag: HTMLElement, s: GameState, g: Extract<Gebeu
   paneel.querySelector('.gebeurtenis-kop p')!.textContent = `${s.spelers[g.speler].naam} draait aan de rollen…`;
   const [rolA, rolActie, rolB] = ['[data-a]', '[data-actie]', '[data-b]'].map((q) => paneel.querySelector<HTMLElement>(q)!);
   const acties = Object.values(KANS_TEKST).map((k) => k.kort);
-  let n = 0;
-  const tik = setInterval(() => {
-    n++;
-    if (!rolA.dataset.vast) rolA.replaceChildren(figuurRondje(s, n % s.spelers.length));
-    if (!rolActie.dataset.vast) rolActie.textContent = acties[n % acties.length];
-    if (!rolB.dataset.vast) rolB.replaceChildren(figuurRondje(s, (n + 2) % s.spelers.length));
-  }, 70);
   const zet = (rol: HTMLElement, inhoud: HTMLElement | string) => {
-    rol.dataset.vast = '1';
     if (typeof inhoud === 'string') rol.textContent = inhoud;
     else rol.replaceChildren(inhoud);
-    rol.classList.add('vast');
   };
-  await wacht(600);
-  zet(rolA, figuurRondje(s, g.a));
-  await wacht(400);
-  zet(rolActie, KANS_TEKST[g.actie].kort);
-  await wacht(400);
-  zet(rolB, figuurRondje(s, g.b));
-  clearInterval(tik);
+  /**
+   * Eén rol draait en loopt steeds langzamer, tot hij na `duur` ms stilstaat op de uitkomst.
+   * Elke stap tikt even; bij het stoppen klinkt een bonk.
+   */
+  const draai = async (rol: HTMLElement, toon: (n: number) => HTMLElement | string, uitkomst: HTMLElement | string, duur: number, begin: number) => {
+    const start = performance.now();
+    let n = begin;
+    for (;;) {
+      const verstreken = performance.now() - start;
+      if (verstreken >= duur) break;
+      zet(rol, toon(n++));
+      muntTik(true);
+      // Eerst snel (70 ms per stap), op het eind steeds langzamer (tot ±320 ms).
+      const t = verstreken / duur;
+      await wacht(70 + 250 * t * t * t);
+    }
+    zet(rol, uitkomst);
+    rol.classList.add('vast');
+    dobbelGeluid();
+  };
+  await Promise.all([
+    draai(rolA, (n) => figuurRondje(s, n % s.spelers.length), figuurRondje(s, g.a), TEMPO.kansA, 0),
+    draai(rolActie, (n) => acties[n % acties.length], KANS_TEKST[g.actie].kort, TEMPO.kansActie, 1),
+    draai(rolB, (n) => figuurRondje(s, n % s.spelers.length), figuurRondje(s, g.b), TEMPO.kansB, 2),
+  ]);
   const uitslag = paneel.querySelector<HTMLElement>('.gebeurtenis-uitslag')!;
   uitslag.textContent = g.gelukt
     ? KANS_TEKST[g.actie].zin(s.spelers[g.a].naam, s.spelers[g.b].naam)

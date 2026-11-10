@@ -63,6 +63,11 @@ export const TEMPO = {
   naSterPoef: 1050,
   naSterTerug: 675,
 
+  // ---- het Kans-rad (§7.3): wanneer elke rol stopt (eerst 600, 1000 en 1400)
+  kansA: 1700,
+  kansActie: 3000,
+  kansB: 4300,
+
   // ---- de zeilwedstrijd (§7.5)
   /** De bootjes liggen klaar bij de start ("Klaar… Af!"). */
   zeilStart: 1100,
