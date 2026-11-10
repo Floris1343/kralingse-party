@@ -268,6 +268,22 @@ Daarna maakt de host de winnaar bekend. Tot slot volgt een kort statistiekensche
   - Een beurt begint met een aankondiging: de camera staat op je figuur, je figuur staat groot links in beeld en over het midden loopt een brede, licht schuine band: "Jouw beurt, Floris!". Tik om verder te gaan.
   - Daarna komt het **keuzemenu** (zie §13): Dobbelen, Items of Bord bekijken.
   - Het lopen gaat snel (ongeveer 150 ms per vakje), en met een tik op het scherm gaat het nog sneller. Keuzes maak je met grote knoppen.
+- **Aankomen op een vakje:** als je figuur stopt, zoomt de camera een stukje in en licht het vakje op in zijn eigen kleur.
+  - Boven het hoofd van je figuur ploft groot en vet wat je krijgt of kwijtraakt, met een icoontje ervoor: "+3" met een munt in een witte rand, "−3" in rood, of het icoon van een item met "+1". Het blijft ongeveer 1 seconde staan en zweeft dan omhoog weg.
+  - Tegelijk tellen de munten in de spelersbalk zichtbaar op of af (tik, tik, tik) en wiebelt het vakje van die speler in de balk.
+  - Het figuur maakt een sprongetje bij winst en deukt even in bij verlies (het plaatje zelf blijft stilstaan).
+  - Munten rinkelen; verlies klinkt lager.
+  - Dit geldt voor alles wat munten, sterren of items oplevert of kost: vakjes, de minigame-uitslag, Ratje, de bok, kans, pech, de Zeilwedstrijd, de winkel, enzovoort. Gebeurt er in één beurt meer, dan komen de effecten kort na elkaar.
+  - Bots krijgen hetzelfde, maar korter (±0,6 s); met turbo zonder animatie.
+- **Een ster kopen is een groot feest:**
+  - Het bord wordt donker, achter de ster draaien brede gouden lichtstralen en overal fonkelen sterretjes. De ster zweeft groot in het midden.
+  - De ster vliegt in een boog naar je figuur. Bij het raken komt er een uitbarsting van glitters en confetti, en je figuur maakt een sprongetje.
+  - Grote tekst: "Floris heeft een ster!". Pommie komt juichend in beeld, met een korte fanfare en zijn gebrabbel. In de spelersbalk springt het aantal sterren met een stuiter op +1.
+  - Duur ±2,5 s, met een tik over te slaan. Daarna zoomt de camera uit, verhuist de ster met een "poef" naar zijn nieuwe plek en gaat de camera terug naar je figuur.
+  - Bots krijgen dezelfde viering, maar korter (±1,5 s); met turbo alleen de korte melding.
+  - Hetzelfde geldt voor een vallende ster en voor een bonusster aan het eind.
+  - **Een ster kwijtraken** (aan Ratje of door kans) is de sippe versie: de ster vliegt van je figuur weg naar de ander, met een dalend geluid.
+- Alles blijft soepel op de iPad: alleen transform en opacity worden geanimeerd, met niet te veel losse deeltjes tegelijk.
 - De host en zijn gebrabbel zijn kort, en elke tekstballon kun je wegtikken.
 - Er zijn geen onnodige "Weet je het zeker?"-schermen, behalve bij het invoeren van de uitslag en bij "Nieuw spel" (want dan wordt het oude spel overschreven).
 

@@ -21,6 +21,11 @@ const VLEERMUIS: VakjeTekening = {
 
 const f = (n: number) => Math.round(n * 10) / 10;
 
+/** De kleur van een vakje (voor het oplichten bij aankomst). */
+export function vakjeKleur(type: VakjeType): string {
+  return type === 'vleermuis' ? VLEERMUIS.kleur : VAKJE_TEKENINGEN[type]?.kleur ?? '#FFFFFF';
+}
+
 /** SVG voor één vakje. (x, y) is het midden van de bovenkant. */
 export function vakjeSvg(type: VakjeType, x: number, y: number): string {
   const t = type === 'vleermuis' ? VLEERMUIS : VAKJE_TEKENINGEN[type];

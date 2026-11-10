@@ -10,6 +10,16 @@ export const teksten = {
     'Hoi hoi! Pommie hier. Pak je munten, we gaan rond de plas!',
     'Welkom, welkom! Wie haalt vandaag de meeste sterren?',
   ],
+  /** Een ster gekocht (§11). */
+  sterFeest: [
+    'Hoera! Gefeliciteerd, {naam}!',
+    'Joepie! Een ster voor {naam}!',
+    'Wat een glans! Goed gedaan, {naam}!',
+  ],
+  /** Een bonusster aan het eind. */
+  bonusFeest: [
+    'Een bonusster voor {naam}!',
+  ],
   /** De startworp (§2). */
   startworp: [
     'Eerst de startworp! Wie het hoogst gooit, mag beginnen!',

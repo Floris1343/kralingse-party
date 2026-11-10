@@ -33,6 +33,10 @@ export class Spelersbalk {
   private ronde = maak('div', 'ronde-teller vilt');
   private rondeIcoon!: HTMLImageElement;
   private itemsSleutel: string[] = [];
+  /** Spelers bij wie een effect nog moet komen: hun munten en sterren blijven even staan (§11). */
+  private vast = new Set<number>();
+  /** De getallen die nu in beeld staan. */
+  private getoond: { munten: number; sterren: number }[] = [];
   private kaarten: Kaart[] = [];
   private turboKnop: HTMLButtonElement;
 
@@ -104,8 +108,11 @@ export class Spelersbalk {
     s.spelers.forEach((sp, i) => {
       const k = this.kaarten[i];
       zetPlaats(k.plaats, plek[i]);
-      k.sterren.textContent = String(sp.sterren);
-      k.munten.textContent = String(sp.munten);
+      if (!this.vast.has(i)) {
+        k.sterren.textContent = String(sp.sterren);
+        k.munten.textContent = String(sp.munten);
+        this.getoond[i] = { munten: sp.munten, sterren: sp.sterren };
+      }
       k.el.classList.toggle('actief', i === aanZet);
       const vloek = `${sp.slak ? 's' : ''}${sp.achteruit ? 'a' : ''}`;
       if (k.vloek.dataset.v !== vloek) {
@@ -127,6 +134,63 @@ export class Spelersbalk {
       }
       k.items.replaceChildren(...vakjes);
     });
+  }
+
+  /** De munten en sterren die nu in de balk staan. */
+  getoondVoor(i: number): { munten: number; sterren: number } {
+    return this.getoond[i] ?? { munten: 0, sterren: 0 };
+  }
+
+  /** Houd de getallen van deze spelers vast tot hun effect komt. */
+  houdVast(spelers: number[]): void {
+    for (const i of spelers) this.vast.add(i);
+  }
+
+  /** Laat de getallen weer gewoon meelopen met de spelstand. */
+  laatLos(s: GameState, spelers: number[] = [...this.vast]): void {
+    for (const i of spelers) this.vast.delete(i);
+    this.werkBij(s);
+  }
+
+  /** De munten tellen zichtbaar op of af (tik, tik, tik) en het vakje wiebelt. `tik` speelt een tikje. */
+  telMunten(i: number, naar: number, duurMs: number, tik?: (erbij: boolean) => void): void {
+    const k = this.kaarten[i];
+    const van = this.getoond[i]?.munten ?? naar;
+    this.getoond[i] = { ...(this.getoond[i] ?? { sterren: 0 }), munten: naar };
+    this.wiebel(i, naar >= van);
+    const stappen = Math.min(Math.abs(naar - van), 12);
+    if (stappen === 0) return void (k.munten.textContent = String(naar));
+    for (let n = 1; n <= stappen; n++) {
+      setTimeout(() => {
+        k.munten.textContent = String(Math.round(van + ((naar - van) * n) / stappen));
+        tik?.(naar > van);
+      }, (duurMs * n) / stappen);
+    }
+  }
+
+  /** Het aantal sterren springt met een stuiter naar het nieuwe getal. */
+  stuiterSter(i: number, naar: number): void {
+    const k = this.kaarten[i];
+    this.getoond[i] = { ...(this.getoond[i] ?? { munten: 0 }), sterren: naar };
+    k.sterren.textContent = String(naar);
+    k.sterren.animate(
+      [{ transform: 'scale(1)' }, { transform: 'scale(1.9) translateY(-4px)', offset: 0.35 }, { transform: 'scale(.9)', offset: 0.7 }, { transform: 'scale(1)' }],
+      { duration: 600, easing: 'ease-out' },
+    );
+    this.wiebel(i, true);
+  }
+
+  /** Het vakje van een speler in de balk wiebelt even (groen bij winst, rood bij verlies). */
+  wiebel(i: number, winst: boolean): void {
+    const el = this.kaarten[i].el;
+    el.classList.remove('winst', 'verlies');
+    void el.offsetWidth;
+    el.classList.add(winst ? 'winst' : 'verlies');
+    el.animate(
+      [{ transform: 'rotate(0)' }, { transform: 'rotate(-2.5deg)', offset: 0.25 }, { transform: 'rotate(2.5deg)', offset: 0.5 }, { transform: 'rotate(-1deg)', offset: 0.75 }, { transform: 'rotate(0)' }],
+      { duration: 450, easing: 'ease-in-out' },
+    );
+    setTimeout(() => el.classList.remove('winst', 'verlies'), 700);
   }
 
   zetTurbo(aan: boolean): void {

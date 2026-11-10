@@ -191,3 +191,80 @@
   width: 34px;
   height: 34px;
 }
+
+/* ================================================================ effecten bij aankomst (§11) */
+/* Het vakje licht op in zijn eigen kleur */
+.vakje-gloed {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--kleur) 0%, color-mix(in srgb, var(--kleur) 55%, transparent) 45%, transparent 100%);
+  pointer-events: none;
+  animation: vakje-gloed 1.2s ease-out forwards;
+}
+@keyframes vakje-gloed {
+  0% { opacity: 0; scale: .5; }
+  20% { opacity: 1; scale: 1.1; }
+  60% { opacity: .85; scale: 1; }
+  100% { opacity: 0; scale: 1.25; }
+}
+
+/* "+3" boven het hoofd: ploft in beeld, blijft even staan en zweeft dan omhoog weg */
+.effect-zweef { position: absolute; left: 0; top: 0; width: 0; height: 0; pointer-events: none; }
+.effect-getal {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--kp-font-kop);
+  font-weight: 700;
+  font-size: 44px;
+  line-height: 1;
+  white-space: nowrap;
+  color: #FFC928;
+  -webkit-text-stroke: 9px #FFFFFF;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 4px 0 rgb(43 29 20 / .25));
+  animation: effect-plof var(--duur, 1400ms) ease-out forwards;
+}
+.effect-getal.min { color: #D62839; }
+.effect-getal img { width: 40px; height: 40px; }
+.effect-getal .item-icoon { background: #FFFFFF; border-radius: 50%; padding: 3px; box-sizing: content-box; }
+@keyframes effect-plof {
+  0% { transform: translateY(10px) scale(.2); opacity: 0; }
+  12% { transform: translateY(-6px) scale(1.25); opacity: 1; }
+  22% { transform: translateY(0) scale(1); }
+  70% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-56px) scale(.9); opacity: 0; }
+}
+
+/* De ster verhuist met een "poef" */
+.bord-ster.poef-in { animation: ster-poef-in 500ms cubic-bezier(.2,.9,.3,1.4) both, ster-zweef 2.4s ease-in-out 500ms infinite alternate; }
+.bord-ster.poef-weg { animation: ster-poef-weg 400ms ease-in forwards; }
+@keyframes ster-poef-in { from { opacity: 0; scale: .2; } }
+@keyframes ster-poef-weg { to { opacity: 0; scale: 1.6; } }
+.ster-poef { position: absolute; left: 0; top: 0; width: 0; height: 0; pointer-events: none; }
+.ster-poef i {
+  position: absolute;
+  left: -22px;
+  top: -22px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / .85);
+  animation: poef-wolk 700ms ease-out forwards;
+}
+.ster-poef i:nth-child(1) { --dx: -46px; --dy: -10px; }
+.ster-poef i:nth-child(2) { --dx: 46px; --dy: -14px; }
+.ster-poef i:nth-child(3) { --dx: -30px; --dy: 30px; }
+.ster-poef i:nth-child(4) { --dx: 32px; --dy: 30px; }
+.ster-poef i:nth-child(5) { --dx: 0px; --dy: -44px; }
+.ster-poef i:nth-child(6) { --dx: 0px; --dy: 10px; width: 70px; height: 70px; left: -35px; top: -35px; background: none; border: 5px solid #FFE27A; }
+@keyframes poef-wolk {
+  from { transform: translate(0, 0) scale(.3); opacity: 1; }
+  to { transform: translate(var(--dx), var(--dy)) scale(1.2); opacity: 0; }
+}

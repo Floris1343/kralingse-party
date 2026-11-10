@@ -156,3 +156,38 @@ export function fanfare(): void {
     toon(a, f / 2, nu + t, d, { type: 'triangle', volume: 0.25 });
   }
 }
+
+let laatsteTik = 0;
+
+/** Eén tikje bij het tellen van de munten: hoog als er munten bij komen, lager als ze eraf gaan. */
+export function muntTik(erbij: boolean): void {
+  const a = audio();
+  if (!a) return;
+  const nu = a.ctx.currentTime;
+  if (nu - laatsteTik < 0.045) return;
+  laatsteTik = nu;
+  if (erbij) toon(a, 1760 + Math.random() * 300, nu, 0.05, { type: 'square', volume: 0.06 });
+  else toon(a, 330 - Math.random() * 40, nu, 0.06, { type: 'triangle', volume: 0.18 });
+}
+
+/** Een ster gekocht: een korte fanfare met een fonkel erachteraan. */
+export function sterFanfare(): void {
+  const a = audio();
+  if (!a) return;
+  const nu = a.ctx.currentTime;
+  const noten: [number, number, number][] = [[784, 0, 0.12], [988, 0.12, 0.12], [1175, 0.24, 0.12], [1568, 0.36, 0.45]];
+  for (const [f, t, d] of noten) {
+    toon(a, f, nu + t, d, { type: 'square', volume: 0.09 });
+    toon(a, f / 2, nu + t, d, { type: 'triangle', volume: 0.22 });
+  }
+  [2093, 2637, 3136].forEach((f, i) => toon(a, f, nu + 0.5 + i * 0.06, 0.25, { type: 'sine', volume: 0.1 }));
+}
+
+/** De ster vliegt weg: een dalende toon, sip. */
+export function sterKwijtGeluid(): void {
+  const a = audio();
+  if (!a) return;
+  const nu = a.ctx.currentTime;
+  toon(a, 880, nu, 0.7, { type: 'triangle', volume: 0.28, naar: 220 });
+  toon(a, 440, nu + 0.1, 0.6, { type: 'sine', volume: 0.15, naar: 110 });
+}

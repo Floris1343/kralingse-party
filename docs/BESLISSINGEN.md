@@ -142,3 +142,21 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
   - Bij de winkel, de Nachtwinkel en Ratje staat een bordje, met erbij of de winkel open of dicht is.
   - Bovenin staat hoeveel vakjes de ster van je af ligt; bij twee sterren de dichtstbijzijnde. Bij mist staat er "Ochtendmist: waar is de ster?".
 - **Opslagversie 5.** Een bewaard spel van versie 4 (en ouder) speelt gewoon verder: de oude startworp wordt omgezet en de startworp komt niet opnieuw.
+
+## Stap 9: aankomen op een vakje en het sterfeest
+
+- **Volgorde van de effecten:**
+  - Munten met dezelfde reden die direct na elkaar komen, verschijnen tegelijk. Voorbeelden: de minigame-uitslag bij iedereen, en kans "A geeft B 10" bij A en B samen.
+  - Al het andere komt kort na elkaar. Een groep die op nul uitkomt, wordt weggelaten.
+- **Wanneer:**
+  - Wat je onderweg doet (een ster, de winkel, Ratje, de boot), zie je meteen na je keuze; daarna loop je verder.
+  - Wat het vakje doet, zie je als je figuur stopt, na het rad of de kans-rollen.
+  - De minigame-beloningen zie je direct na de uitslag, boven alle figuren tegelijk.
+- **Een ster kopen:** eerst ploft "−20" en tellen je munten af, dan volgt het feest. De ster op het bord blijft tijdens het feest op zijn oude plek staan. Na het feest zoomt de camera uit, vervaagt de oude ster en verschijnt de nieuwe met een "poef" (een paar wolkjes en een gouden ring). Een vallende ster verdwijnt na aankoop alleen met een poef.
+- **Ster kwijt:** door Ratje en door kans "A geeft B een ster" zie je de ster vliegen. Bij kans "ruilen alle sterren" springen de getallen in de balk gewoon om, zonder vliegende ster.
+- **Items:** een gekregen of gekocht item toont het icoon met "+1". Eet de bok je items op, dan zie je het eerste item met "−2" (of hoeveel het er waren). Een item gebruiken toont niets.
+- **Pommie juichend:** het design heeft geen blije pose van Pommie. Hij springt daarom juichend op en neer, met een tekst uit `teksten.ts` (sterFeest).
+- **Bonussterren aan het eind:** elke bonusster krijgt een korte viering (stralen, de ster en "Floris krijgt de Minigame-ster!"), zonder vlucht naar een figuur, want het eindscherm heeft geen bord.
+- **Overslaan:** met een tik sla je het sterfeest over; de balk en het figuur reageren dan meteen.
+- **Soepel op de iPad:** alleen transform en opacity bewegen. Er zijn hoogstens 16 fonkels en 18 confettistukjes per uitbarsting.
+- **Getallen in de balk:** de munten en sterren in de spelersbalk wachten tot hun effect komt en tellen dan op of af. Na de effecten staan ze altijd weer precies goed.

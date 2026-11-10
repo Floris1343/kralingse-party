@@ -237,13 +237,18 @@ export class BordWeergave {
    * Zet de sterren die je ziet op hun sterplekken (alle andere sterren verdwijnen).
    * Met `mist` staat er op elke andere sterplek een vraagteken.
    */
-  zetSterren(sterren: BordSter[], mist = false): void {
+  zetSterren(sterren: BordSter[], mist = false, poef = false): void {
     const sleutel = (st: BordSter) => `${st.plek}${st.vallend ? '*' : ''}`;
     const gewenst = new Set(sterren.map(sleutel));
     for (const [k, el] of this.sterren) {
       if (!gewenst.has(k)) {
-        el.remove();
         this.sterren.delete(k);
+        if (poef) {
+          el.classList.add('poef-weg');
+          setTimeout(() => el.remove(), 450);
+        } else {
+          el.remove();
+        }
       }
     }
     for (const st of sterren) {
@@ -254,6 +259,10 @@ export class BordWeergave {
       const el = this.sprite('bord/ster.svg', st.vallend ? 'Vallende ster' : 'Ster', SPRITES.ster, p.x, p.y);
       el.classList.add('bord-ster');
       if (st.vallend) el.classList.add('vallend');
+      if (poef) {
+        el.classList.add('poef-in');
+        this.poefWolk(p.x, p.y);
+      }
       this.sterren.set(k, el);
     }
     const metSter = new Set(sterren.map((st) => st.plek));
@@ -269,6 +278,17 @@ export class BordWeergave {
         this.vraagtekens.delete(p.id);
       }
     }
+  }
+
+  /** Een wolkje en een ring waar een ster verschijnt ("poef"). */
+  private poefWolk(x: number, y: number): void {
+    const el = document.createElement('div');
+    el.className = 'ster-poef';
+    el.style.transform = `translate(${x}px, ${y - 50}px)`;
+    el.style.zIndex = String(Math.round(y) + 1);
+    el.innerHTML = '<i></i><i></i><i></i><i></i><i></i><i></i>';
+    this.spriteLaag.append(el);
+    setTimeout(() => el.remove(), 800);
   }
 
   /** Ochtendmist aan of uit: de waas vloeit in ongeveer een seconde in of uit. */
@@ -353,10 +373,63 @@ export class BordWeergave {
     this.zetCamera(cameraOp(x, y, this.scherm(), this.bord, VOLG_ZOOM), duurMs);
   }
 
-  volgSpeler(i: number, duurMs = 450): void {
+  /** Breng een figuur in beeld; met `extraZoom` iets dichterbij (bij het aankomen op een vakje). */
+  volgSpeler(i: number, duurMs = 450, extraZoom = 1): void {
     const [x, y] = this.figuurPunten[i];
-    this.volg(x, y - this.figuurHoogte(i) / 3, duurMs);
+    this.doel.punt = [x, y - this.figuurHoogte(i) / 3];
+    this.zetCamera(cameraOp(x, y - this.figuurHoogte(i) / 3, this.scherm(), this.bord, VOLG_ZOOM * extraZoom), duurMs);
   }
+
+  /** Waar het midden van een figuur nu op het scherm staat (in pixels binnen het bord). */
+  figuurOpScherm(i: number): [number, number] {
+    const [x, y] = this.figuurPunten[i];
+    const h = this.figuurHoogte(i);
+    return [this.cam.x + x * this.cam.schaal, this.cam.y + (y - h * 0.55) * this.cam.schaal];
+  }
+
+  // ------------------------------------------------------------------ effecten (§11)
+
+  /** Het vakje licht even op in zijn eigen kleur. */
+  gloed(vakjeId: string, kleur: string): void {
+    const v = vakje(this.bord, vakjeId);
+    const { rx, ry } = vakjeMaat(v.y);
+    const el = document.createElement('div');
+    el.className = 'vakje-gloed';
+    el.style.setProperty('--kleur', kleur);
+    el.style.width = `${rx * 3.2}px`;
+    el.style.height = `${ry * 3.2}px`;
+    el.style.transform = `translate(${v.x - rx * 1.6}px, ${v.y - ry * 1.6}px)`;
+    el.style.zIndex = String(Math.round(v.y) - 1);
+    this.spriteLaag.append(el);
+    setTimeout(() => el.remove(), 1300);
+  }
+
+  /** Iets dat boven het hoofd van een figuur in beeld ploft en dan omhoog wegzweeft. */
+  zweef(i: number, inhoud: HTMLElement, duurMs = 1400): void {
+    const [x, y] = this.figuurPunten[i];
+    const el = document.createElement('div');
+    el.className = 'effect-zweef';
+    el.style.transform = `translate(${x}px, ${y - this.figuurHoogte(i) - 8}px)`;
+    el.style.setProperty('--duur', `${duurMs}ms`);
+    el.style.zIndex = '3000';
+    el.append(inhoud);
+    this.spriteLaag.append(el);
+    setTimeout(() => el.remove(), duurMs + 50);
+  }
+
+  /** Een sprongetje bij winst, even indeuken bij verlies. Het plaatje zelf blijft stilstaan. */
+  reageer(i: number, soort: 'spring' | 'deuk'): void {
+    const img = this.figuren[i]?.querySelector<HTMLElement>('.figuur-plaatje, .vervanger');
+    if (!img) return;
+    const frames: Keyframe[] =
+      soort === 'spring'
+        ? [{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(4px) scale(1.06, .92)', offset: 0.15 }, { transform: 'translateY(-26px) scale(.96, 1.06)', offset: 0.5 }, { transform: 'translateY(0) scale(1.05, .95)', offset: 0.85 }, { transform: 'translateY(0) scale(1)' }]
+        : [{ transform: 'scale(1)' }, { transform: 'scale(1.12, .78)', offset: 0.3 }, { transform: 'scale(.96, 1.04)', offset: 0.7 }, { transform: 'scale(1)' }];
+    img.style.transformOrigin = '50% 100%';
+    img.animate(frames, { duration: soort === 'spring' ? 520 : 460, easing: 'ease-out' });
+  }
+
+  /** Opnieuw uitrekenen na draaien of een ander schermformaat. */
 
   /** Het hele bord in beeld. */
   overzicht(duurMs = 600): void {

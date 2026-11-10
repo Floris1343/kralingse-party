@@ -14,6 +14,7 @@ import { asset } from './asset';
 import { confetti } from './dobbelscherm';
 import { grafiekSchaal, sterrenGrafiek } from './grafiek';
 import { leestijd, pommieZegt } from './pommie';
+import { sterFeest } from './sterFeest';
 import { figuurPlaatje, maak, maakPodium, PLAATS_KLEUR } from './onderdelen';
 
 const wacht = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
@@ -182,7 +183,15 @@ export function toonEindscherm(ouder: HTMLElement, s: GameState, opties: EindOpt
         rij.classList.add('uitgelicht');
         await wacht(450);
         rij.classList.add('onthuld');
-        if (b.spelers.length) sterGeluid();
+        if (b.spelers.length) {
+          // Een bonusster is ook een feest: stralen, de ster groot in beeld, een fanfaretje.
+          const namen = namenLijst(b.spelers.map((i) => s.spelers[i].naam));
+          await sterFeest(scherm, {
+            tekst: `${namen} ${b.spelers.length > 1 ? 'krijgen' : 'krijgt'} de ${BONUS_INFO[b.soort].naam}!`,
+            kort: true,
+            bijRaak: sterGeluid,
+          });
+        }
         const tekst = b.spelers.length
           ? zeg(`bonus_${b.soort}` as Moment, namenLijst(b.spelers.map((i) => s.spelers[i].naam)))
           : zeg('bonusNiemand');

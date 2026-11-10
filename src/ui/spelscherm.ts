@@ -9,7 +9,7 @@ import { zeg } from '../data/teksten';
 import {
   BOOT_PRIJS, botActie, bewaar, dobbelen, draaiEindspelRad, gebruikItem, nachtTypen, nachtwinkelKeuze, ratjeKeuze,
   spelerAanZet, splitsingKeuze, stap, sterKeuze, sterPrijs, verwerkMinigame, wachtOpBot, winkelKeuze, zichtbareSterren,
-  EINDSPEL_REGELS, plaatsen, annuleerItem, gooiStartworp, heeftDoel, startSpel, startwerper, stappenTotSter, type EindspelRegel, type GameState, type Gebeurtenis, type Splitsing,
+  EINDSPEL_REGELS, plaatsen, huidigType, vakje, annuleerItem, gooiStartworp, heeftDoel, startSpel, startwerper, stappenTotSter, type EindspelRegel, type GameState, type Gebeurtenis, type Splitsing,
 } from '../logic';
 import { BordWeergave } from '../render/bordWeergave';
 import { asset } from './asset';
@@ -20,7 +20,8 @@ import { vraagMinigameUitslag } from './minigameUitslag';
 import { maak, plaatsRondje } from './onderdelen';
 import { Spelersbalk } from './spelersbalk';
 import { EINDSPEL_VAKKEN, meldingDelen } from './uitkomsten';
-import { muntGeluid, sterGeluid } from '../audio/geluid';
+import { EffectSpeler } from './effecten';
+import { vakjeKleur } from '../render/vakjes';
 import { pommieZegt } from './pommie';
 import { vraagItem, vraagItemDoel, vraagNachtwinkel, vraagRatje, vraagWinkel } from './winkelScherm';
 import { toonAankondiging, toonBordBekijken, vraagMenuKeuze } from './beurtMenu';
@@ -57,6 +58,24 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
   });
   balk.zetTurbo(turbo);
   hud.append(balk.el);
+
+  /** De effecten na een actie: "+3" boven het hoofd, tellende munten, het sterfeest (§11). */
+  const effecten = new EffectSpeler({
+    weergave,
+    balk,
+    laag,
+    state: () => s,
+    overslaan: (bot) => bot && turbo,
+    naSter: async (speler) => {
+      // De camera uit, de ster verhuist met een "poef", en de camera weer terug.
+      weergave.overzicht(400);
+      await wacht(420);
+      tekenBord(1000, true);
+      await wacht(700);
+      weergave.volgSpeler(speler, 450);
+      await wacht(450);
+    },
+  });
   scherm.append(weergave.el, hud, laag);
   root.replaceChildren(scherm);
 
@@ -72,33 +91,17 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
   }
 
   function zet(nieuw: GameState) {
-    speelGeluid(s, nieuw);
+    effecten.plan(s, nieuw, wachtOpBot(s));
     s = nieuw;
     bewaar(localStorage, s);
     balk.werkBij(s);
     tekenBord();
   }
 
-  /**
-   * Geluidjes bij een nieuwe stand: een ster, of munten erbij of eraf. Met turbo hoor je de bots
-   * niet (dat zou één brij worden); mensen en de minigame-uitslag hoor je altijd.
-   */
-  function speelGeluid(oud: GameState, nieuw: GameState) {
-    const botBezig = nieuw.fase.soort !== 'minigame' && wachtOpBot(oud) && turbo;
-    if (botBezig) return;
-    const sterren = nieuw.spelers.reduce((n, sp) => n + sp.sterren, 0) - oud.spelers.reduce((n, sp) => n + sp.sterren, 0);
-    if (nieuw.verslag.length !== oud.verslag.length && nieuw.verslag.some((g) => g.soort === 'sterGekocht') && sterren !== 0) {
-      sterGeluid();
-      return;
-    }
-    const verschil = nieuw.spelers.map((sp, i) => sp.munten - (oud.spelers[i]?.munten ?? sp.munten));
-    if (verschil.some((d) => d > 0)) muntGeluid(true);
-    else if (verschil.some((d) => d < 0)) muntGeluid(false);
-  }
-
   /** Sterren (of vraagtekens in de mist), valstrikken, dag/nacht en mist op het bord. */
-  function tekenBord(duurMs = 1000) {
-    weergave.zetSterren(zichtbareSterren(s), s.mist !== null);
+  function tekenBord(duurMs = 1000, poef = false) {
+    // Tijdens het sterfeest blijft de ster nog even op zijn oude plek.
+    if (!effecten.sterrenVast) weergave.zetSterren(zichtbareSterren(s), s.mist !== null, poef);
     weergave.zetValstrikken(s.valstrikken.map((v) => ({ vakje: v.vakje, kleur: figuur(s.spelers[v.speler].figuur).kleur })));
     weergave.zetNacht(s.nacht, nachtTypen(s.nacht, BORD), duurMs);
     weergave.zetMist(s.mist !== null, duurMs);
@@ -217,6 +220,8 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
         else if (f.soort === 'winkel') zet(winkelKeuze(s, BORD, await vraagWinkel(laag, s, speler)));
         else if (f.soort === 'nachtwinkel') zet(nachtwinkelKeuze(s, BORD, await vraagNachtwinkel(laag, s, speler)));
         else zet(ratjeKeuze(s, BORD, await vraagRatje(laag, s, speler)));
+        // Een ster gekocht, een item of Ratje: eerst het effect, dan verder lopen.
+        if (beurtBezig()) await effecten.speel(false);
         snel = false;
         toonTeller(speler, resterend());
         continue;
@@ -224,6 +229,7 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       if (f.soort === 'splitsing') {
         const splitsing = BORD.splitsingen.find((x) => x.vakje === f.vakje)!;
         zet(splitsingKeuze(s, BORD, await vraagSplitsing(splitsing)));
+        if (beurtBezig()) await effecten.speel(false);
         snel = false;
       } else {
         zet(stap(s, BORD));
@@ -247,6 +253,13 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
    * Een mens ziet alles; bij een bot alleen de zeilwedstrijd (kort) en de wissel van dag en nacht.
    */
   async function toonGevolgen(speler: number, verslag: Gebeurtenis[], mens: boolean) {
+    // Aankomen op het vakje: de camera zoomt iets in en het vakje licht op in zijn eigen kleur.
+    if (mens || !turbo) {
+      const vakjeId = landingsPosities()[speler];
+      weergave.volgSpeler(speler, mens ? 350 : 220, 1.2);
+      weergave.gloed(vakjeId, vakjeKleur(huidigType(s, vakje(BORD, vakjeId))));
+      await wacht(mens ? 300 : 180);
+    }
     for (const g of verslag) {
       if (!actief) return;
       if (mens && g.soort === 'rad') await toonRad(laag, s, g);
@@ -260,6 +273,7 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
     }
     // Een mens die in een valstrik trapt, ziet dat in de korte melding.
     if (mens && verslag.some((g) => g.soort === 'valstrik')) melding(speler);
+    await effecten.speel(!mens);
     await pommieMomenten(verslag);
   }
 
@@ -340,8 +354,9 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       zet(ratjeKeuze(s, BORD, await vraagRatje(laag, s, speler)));
     } else if (heeftDoel(item) || item === 'valstrik') {
       // Laat even zien wat het gemene item deed.
-      await melding(speler);
+      void melding(speler);
     }
+    await effecten.speel(false);
   }
 
   /** Bord bekijken: vrij schuiven en zoomen; "Terug" zet de camera weer op je figuur. */
@@ -455,6 +470,9 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
     await wacht(300);
     const uitslag = await vraagMinigameUitslag(laag, s);
     zet(verwerkMinigame(s, uitslag, BORD));
+    // De beloningen van de minigame: bij iedereen tegelijk.
+    await wacht(250);
+    await effecten.speel(false);
     if (s.fase.soort === 'einde') {
       zojuistAfgelopen = true;
       return;
@@ -494,6 +512,7 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       },
     });
     if (actief) await pommie(zeg(`regel_${regel}`, naam));
+    await effecten.speel(false);
   }
 
   /** De tussenstand: een paneel met de ranglijst, terwijl Pommie de koploper noemt. */
