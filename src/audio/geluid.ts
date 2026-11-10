@@ -127,6 +127,53 @@ export function dobbelGeluid(): void {
   toon(a, 2200, nu, 0.03, { type: 'square', volume: 0.05 });
 }
 
+let ruisBuffer: AudioBuffer | null = null;
+
+/** Een halve seconde witte ruis, één keer gemaakt (voor het woesj). */
+function ruis(c: AudioContext): AudioBuffer {
+  if (!ruisBuffer || ruisBuffer.sampleRate !== c.sampleRate) {
+    ruisBuffer = c.createBuffer(1, Math.floor(c.sampleRate * 0.5), c.sampleRate);
+    const d = ruisBuffer.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  return ruisBuffer;
+}
+
+/**
+ * Het blok versnelt: een stijgend woesj (ruis door een filter dat omhoog schuift),
+ * dat bij het afremmen weer zakt en wegsterft. `versnel` en `rest` in seconden.
+ */
+export function woesjGeluid(versnel: number, rest: number): void {
+  const a = audio();
+  if (!a) return;
+  const nu = a.ctx.currentTime;
+  const bron = a.ctx.createBufferSource();
+  bron.buffer = ruis(a.ctx);
+  bron.loop = true;
+  const filter = a.ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.Q.value = 1.4;
+  filter.frequency.setValueAtTime(350, nu);
+  filter.frequency.exponentialRampToValueAtTime(2600, nu + versnel);
+  filter.frequency.exponentialRampToValueAtTime(500, nu + versnel + rest);
+  const g = a.ctx.createGain();
+  g.gain.setValueAtTime(0.0001, nu);
+  g.gain.exponentialRampToValueAtTime(0.32, nu + versnel);
+  g.gain.exponentialRampToValueAtTime(0.0001, nu + versnel + rest);
+  bron.connect(filter).connect(g).connect(a.uit);
+  bron.start(nu);
+  bron.stop(nu + versnel + rest + 0.05);
+}
+
+/** Het blok klikt vast: een droog houten "tok". */
+export function tokGeluid(): void {
+  const a = audio();
+  if (!a) return;
+  const nu = a.ctx.currentTime;
+  toon(a, 900, nu, 0.07, { type: 'sine', volume: 0.6, naar: 520 });
+  toon(a, 1800, nu, 0.025, { type: 'triangle', volume: 0.15 });
+}
+
 /** De uitslag van de worp: een kort opwaarts toontje. */
 export function worpGeluid(hoog: boolean): void {
   const a = audio();

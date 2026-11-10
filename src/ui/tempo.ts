@@ -37,8 +37,8 @@ export const TEMPO = {
   botWorpUitslag: 1500,
   /** Bij de startworp (eerst 1500). */
   startworpUitslag: 2250,
-  /** Een bot gooit na zo lang zelf (eerst 750). */
-  botGooit: 1000,
+  /** Een bot "tikt" na zo lang zelf op het blok (eerst 750, toen 1000). */
+  botGooit: 300,
   /** "Beurt van Bot 1" in beeld (eerst 600). */
   botAankondiging: 900,
   /** Na het dobbelscherm, voor het lopen begint (eerst 250). */
