@@ -1,3 +1,5 @@
+import type { SplitsingSoort } from './bord';
+
 /**
  * De volledige spelstand. Alles hierin is gewone JSON (geen klassen, geen functies),
  * zodat het spel na elke actie in localStorage bewaard kan worden.
@@ -57,6 +59,8 @@ export type Fase =
   | { soort: 'dobbelen' }
   /** De speler loopt; `resterend` = nog te lopen vakjes. */
   | { soort: 'lopen'; worp: number; resterend: number }
+  /** Een mens staat bij een splitsing en kiest: gewoon doorlopen of het zijpad (hertenkamp, boot). */
+  | { soort: 'splitsing'; worp: number; resterend: number; vakje: string }
   /** Een mens loopt langs een ster en heeft genoeg munten: kopen of niet? */
   | { soort: 'sterKopen'; worp: number; resterend: number; plek: string }
   /** Alle spelers zijn geweest: minigame op de Switch, wacht op de uitslag. */
@@ -66,13 +70,14 @@ export type Fase =
   /** Het spel is afgelopen; zie `eindtelling`. */
   | { soort: 'einde' };
 
-export type MuntReden = 'blauw' | 'rood' | 'ster' | 'minigame' | 'eindspel';
+export type MuntReden = 'blauw' | 'rood' | 'ster' | 'minigame' | 'eindspel' | 'boot';
 
 /** Wat er net gebeurd is, voor meldingen als "Bot 2 gooide 7 · +3 munten". */
 export type Gebeurtenis =
   | { soort: 'worp'; speler: number; waarde: number }
   | { soort: 'munten'; speler: number; verschil: number; reden: MuntReden }
   | { soort: 'sterGekocht'; speler: number; plek: string; nieuwePlek: string }
+  | { soort: 'splitsing'; speler: number; splitsing: SplitsingSoort; zijpad: boolean }
   | { soort: 'eindspelRegel'; speler: number; regel: EindspelRegel };
 
 export type BonusSoort = 'minigame' | 'rijkaard' | 'avonturier';

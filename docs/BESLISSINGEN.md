@@ -22,7 +22,23 @@ Keuzes die niet in `ONTWERP.md` stonden, met een korte reden.
 - **Aantal vakjes per zone volgt de vorm van het design-bord.** De oostkant is in het design korter dan de rest. Zodat het restaurantvakje naast het restaurant ligt, is de verdeling: Oostoever 3, Plaszoom 5, Zuidoever 7 (in plaats van 6, 4, 6). De hoofdroute heeft precies 38 vakjes.
 - **De bootsteiger is een eigen vakje** met het boot-icoon uit het design. Het geeft geen munten, net als het startvakje. Daarom zijn er 18 blauwe vakjes op de hoofdroute in plaats van 19.
 - **Het ijspad loopt van het Strand naar Plaszoom** (zoals in ONTWERP.md), niet van noord naar zuid zoals op het winterbord van het design. Het staat al in `board.json`, maar wordt pas getekend als de winter gebouwd wordt.
-- **Bij een splitsing loopt iedereen voorlopig over het hoofdpad.** Kiezen (en de boot betalen) komt in een latere stap.
+- **Bij een splitsing loopt iedereen voorlopig over het hoofdpad.** Kiezen (en de boot betalen) komt in een latere stap. *(Gebouwd in stap 4.)*
 - **De sterren staan in de plas naast het pad**, zodat ze geen vakjes bedekken. De ster bij Plaszoom staat precies waar het design hem heeft.
 - **Spelers 1 en 2 zijn de handgetekende figuren uit het design** ("Floris" en "Speler 2"), de bots zijn het groene en het gele pionnetje. Het rode en het blauwe pionnetje uit de PDF zitten niet in de HTML-bestanden en worden niet gebruikt.
-- **Tijdelijk in deze stap:** "Nieuw spel" start meteen met 2 mensen en 2 bots, 10 rondes, zomer. Bij de minigame krijgt iedereen 10 munten. Het opstartscherm en het invullen van de uitslag komen in de volgende stap.
+- **Tijdelijk in deze stap:** "Nieuw spel" start meteen met 2 mensen en 2 bots, 10 rondes, zomer. Bij de minigame krijgt iedereen 10 munten. Het opstartscherm en het invullen van de uitslag komen in de volgende stap. *(Vervangen in stap 4.)*
+
+## Stap 4: spelen op de iPad
+
+- **Eén tik om te dobbelen.** In het design staat eerst een "Gooi!"-knop op het bord en daarna het dobbelscherm met "Tik op het blok!". Dat zijn twee tikken. Volgens §11 is het er één: als je aan de beurt bent, schuift de camera naar je figuur en verschijnt meteen het dobbelscherm.
+- **Bots krijgen geen dobbelscherm.** Hun beurt blijft op het bord (binnen 2 seconden, §11). Het bot-dobbelscherm uit het design (map 4) bewaren we voor later.
+- **De uitslag na het dobbelen verdwijnt vanzelf** na ongeveer een seconde, of eerder als je tikt. Hoog (7–10) geeft confetti en een oranje pil, laag (1–3) een donkere pil, de rest een blauwe pil.
+- **Bij een splitsing kies je met twee grote knoppen.** Dat gebeurt op het vakje vóór de splitsing, voordat je verder loopt. De keuze telt niet als stap.
+  - Heb je minder dan 3 munten, dan krijg je de bootvraag niet (net als bij de ster).
+  - Het **ijspad** blijft dicht tot de winter gebouwd is (fase 8). Tot die tijd doet het seizoen nog niets, en vaart de boot ook als je "Winter" kiest.
+  - 's Nachts sluit de boot pas als dag en nacht gebouwd zijn (fase 4).
+- **Bots kiezen het zijpad alleen als ze daarmee sneller bij de ster zijn.** Voor de boot moeten ze na het betalen ook nog een ster kunnen kopen. Zo nemen ze de boot als de ster bij Plaszoom of Park Rozenburg staat (§6.2), en kiezen ze bij het hertenkamp het kortere hoofdpad.
+- **De turboknop blijft aan** tot je hem weer uitzet, ook na het herladen. Met turbo zijn de bots in één keer klaar, zonder lopen. Je ziet daarna alleen de korte melding.
+- **Minigame-uitslag:** tik de figuren op volgorde aan. "Gelijk met vorige" zet de volgende die je aantikt op dezelfde plek als de vorige. Heeft iedereen al een plek, dan schuift de laatste een plek op, naar de plek erboven. De laatste krijgt vanzelf de laatste plek. De knop "Bevestigen" is de bevestiging, en met "Opnieuw" begin je opnieuw.
+- **Het opstartscherm onthoudt je laatste keuzes** (namen, figuren, mens/bot, rondes). Tik je op een figuur, dan krijg je het volgende figuur. Heeft iemand anders dat figuur al, dan ruilen jullie. Er moet minstens één mens meedoen.
+- **Kleuren van de figuren zoals in het design:** Floris is blauw en Speler 2 is rood.
+- **Nieuw spel en de minigame-uitslag zijn precies op designmaat (1180 × 820) gebouwd** en schalen mee met het scherm. Zo zien ze er op elke iPad hetzelfde uit.

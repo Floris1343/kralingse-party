@@ -1,19 +1,25 @@
 /**
- * Het bordscherm met een eenvoudige speelronde: dobbelen, lopen, ster kopen, bots, minigame (tijdelijk)
- * en het eindspel. De spelersbalk, turboknop en het echte minigame-scherm komen in de volgende stap.
+ * Het bordscherm: een volledige speelronde. Mensen dobbelen op het dobbelscherm, lopen en kiezen
+ * bij splitsingen en sterren. Bots spelen hun beurt in ≤ 2 seconden (of direct met turbo).
+ * Daarna de minigame-uitslag, het eindspel en de einduitslag.
  */
 import { BORD } from '../data/bord';
 import { figuur } from '../data/figuren';
 import { zeg } from '../data/teksten';
 import {
-  bewaar, dobbelen, draaiEindspelRad, spelerAanZet, stap, sterKeuze, sterPrijs, verwerkMinigame,
-  type EindspelRegel, type GameState,
+  BOOT_PRIJS, botActie, bewaar, dobbelen, draaiEindspelRad, spelerAanZet, splitsingKeuze, stap, sterKeuze,
+  sterPrijs, verwerkMinigame, wachtOpBot, type EindspelRegel, type GameState, type Splitsing,
 } from '../logic';
 import { BordWeergave } from '../render/bordWeergave';
 import { asset } from './asset';
+import { toonDobbelscherm } from './dobbelscherm';
 import { icoon } from './iconen';
+import { vraagMinigameUitslag } from './minigameUitslag';
+import { maak } from './onderdelen';
+import { Spelersbalk } from './spelersbalk';
 
 const wacht = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+const TURBO_SLEUTEL = 'kralingse-plas-party/turbo';
 
 const REGEL_TEKST: Record<EindspelRegel, string> = {
   munten20: '+20 munten voor de laatste!',
@@ -27,17 +33,25 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
   let s = start;
   let actief = true;
   let snel = false;
+  let turbo = localStorage.getItem(TURBO_SLEUTEL) === 'aan';
 
-  const scherm = document.createElement('main');
-  scherm.className = 'spelscherm';
+  const scherm = maak('main', 'spelscherm');
   const weergave = new BordWeergave(
     BORD,
     s.spelers.map((sp) => ({ naam: sp.naam, figuur: figuur(sp.figuur) })),
   );
-  const hud = document.createElement('div');
-  hud.className = 'hud';
-  const laag = document.createElement('div');
-  laag.className = 'overlay-laag';
+  const hud = maak('div', 'hud');
+  const laag = maak('div', 'overlay-laag');
+  const balk = new Spelersbalk(s, {
+    turbo: () => {
+      turbo = !turbo;
+      localStorage.setItem(TURBO_SLEUTEL, turbo ? 'aan' : 'uit');
+      balk.zetTurbo(turbo);
+    },
+    menu: stop,
+  });
+  balk.zetTurbo(turbo);
+  hud.append(balk.el);
   scherm.append(weergave.el, hud, laag);
   root.replaceChildren(scherm);
 
@@ -55,25 +69,13 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
   function zet(nieuw: GameState) {
     s = nieuw;
     bewaar(localStorage, s);
-    tekenHud();
+    balk.werkBij(s);
     weergave.zetSterren(s.sterren.map((st) => st.plek));
   }
 
-  // ------------------------------------------------------------------ HUD
-  function tekenHud() {
-    hud.innerHTML = `
-      <div class="ronde-teller vilt">
-        <div class="ronde-kop"><img src="${asset('iconen/zon.svg')}" alt="" width="26" height="26"><span>RONDE</span></div>
-        <div class="ronde-getal">${s.ronde}<span>/${s.instellingen.aantalRondes}</span></div>
-      </div>
-      <button class="iconknop hud-menu" aria-label="Menu">${icoon.menu()}</button>`;
-    hud.querySelector('.hud-menu')!.addEventListener('click', stop);
-  }
-
   // ------------------------------------------------------------------ hulpjes voor schermpjes
-  function paneel(html: string): HTMLDivElement {
-    const el = document.createElement('div');
-    el.className = 'overlay';
+  function paneel(html: string, klasse = ''): HTMLDivElement {
+    const el = maak('div', `overlay ${klasse}`);
     el.innerHTML = `<div class="overlay-paneel vilt paneel">${html}</div>`;
     laag.replaceChildren(el);
     return el;
@@ -81,107 +83,129 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
   const sluitPaneel = () => laag.replaceChildren();
   const klik = (el: Element, selector: string) =>
     new Promise<void>((r) => el.querySelector(selector)!.addEventListener('click', () => r(), { once: true }));
+  const kies = (el: Element) =>
+    Promise.race([klik(el, '[data-ja]').then(() => true), klik(el, '[data-nee]').then(() => false)]);
 
   /** Pommie met een tekstballon; tik om weg te halen. */
   function pommie(tekst: string): Promise<void> {
-    const el = document.createElement('div');
-    el.className = 'pommie-moment';
+    const el = maak('div', 'pommie-moment');
     el.innerHTML = `
       <img class="pommie-plaatje" src="${asset('personages/pommie.svg')}" alt="Pommie">
-      <div class="ballon"><div class="ballon-naam">Pommie</div><p></p></div>`;
+      <div class="ballon ballon-links"><div class="ballon-naam">Pommie</div><p></p></div>`;
     el.querySelector('p')!.textContent = tekst;
     laag.append(el);
     return new Promise((r) => {
       const weg = () => {
+        clearTimeout(t);
         el.remove();
         r();
       };
+      const t = setTimeout(weg, 4000);
       el.addEventListener('click', weg, { once: true });
-      setTimeout(weg, 4000);
     });
   }
 
-  /** Korte melding bovenin (niet blokkerend), zoals "Bot 2 gooide 7 · +3 munten". */
-  function melding(spelerIdx: number, delen: string[]) {
-    const sp = s.spelers[spelerIdx];
-    const f = figuur(sp.figuur);
-    const el = document.createElement('div');
-    el.className = 'bot-melding';
-    el.innerHTML = `<div class="bot-melding-figuur" style="background:${f.kleurLicht}"><img src="${asset(f.bestand)}" alt=""></div><span></span><div class="bot-melding-balk"></div>`;
-    el.querySelector('span')!.textContent = delen.join(' · ');
+  /** Korte melding bovenin (niet blokkerend), zoals "Bot 2 gooide 7 · +3 munten · kocht een ster!". */
+  function melding(spelerIdx: number) {
+    const f = figuur(s.spelers[spelerIdx].figuur);
+    hud.querySelector('.bot-melding')?.remove();
+    const el = maak('div', 'bot-melding');
+    el.setAttribute('role', 'status');
+    el.innerHTML = `<div class="bot-melding-figuur" style="background:${f.kleurLicht}"><img src="${asset(f.bestand)}" alt=""></div>`;
+    verslagDelen(spelerIdx).forEach((deel, i) => {
+      if (i > 0) el.append(maak('span', 'bot-melding-punt'));
+      const span = maak('span', 'bot-melding-deel');
+      span.innerHTML = deel.icoon ? `<img src="${asset(deel.icoon)}" alt="" width="22" height="22">` : '';
+      span.append(deel.tekst);
+      el.append(span);
+    });
+    el.append(maak('div', 'bot-melding-balk'));
     hud.append(el);
-    setTimeout(() => el.remove(), 2500);
+    setTimeout(() => el.remove(), 1500);
   }
 
-  function verslagTekst(spelerIdx: number): string[] {
-    const delen: string[] = [];
+  function verslagDelen(spelerIdx: number): { tekst: string; icoon?: string }[] {
+    const delen: { tekst: string; icoon?: string }[] = [];
     let munten = 0;
     let ster = false;
+    let boot = false;
     for (const g of s.verslag) {
-      if (g.soort === 'worp') delen.push(`${s.spelers[g.speler].naam} gooide ${g.waarde}`);
-      if (g.soort === 'munten' && g.speler === spelerIdx && g.reden !== 'ster') munten += g.verschil;
+      if (g.soort === 'worp') delen.push({ tekst: `${s.spelers[g.speler].naam} gooide ${g.waarde}` });
+      if (g.soort === 'munten' && g.speler === spelerIdx && g.reden !== 'ster' && g.reden !== 'boot') munten += g.verschil;
       if (g.soort === 'sterGekocht') ster = true;
+      if (g.soort === 'splitsing' && g.splitsing === 'boot' && g.zijpad) boot = true;
     }
-    if (munten) delen.push(`${munten > 0 ? '+' : '−'}${Math.abs(munten)} munten`);
-    if (ster) delen.push('kocht een ster!');
+    if (boot) delen.push({ tekst: 'nam de boot' });
+    if (munten) delen.push({ tekst: `${munten > 0 ? '+' : '−'}${Math.abs(munten)} munten`, icoon: 'iconen/munt.svg' });
+    if (ster) delen.push({ tekst: 'kocht een ster!', icoon: 'iconen/ster.svg' });
     return delen;
   }
 
   const posities = () => s.spelers.map((sp) => sp.vakje);
-  /** De fase van nu (los opgevraagd, omdat elke actie de state vervangt). */
-  const fase = (): GameState['fase'] => s.fase;
-
-  // ------------------------------------------------------------------ dobbelknop boven het figuur
-  function wachtOpGooi(speler: number): Promise<void> {
-    const el = document.createElement('div');
-    el.className = 'gooi';
-    el.innerHTML = `
-      <button type="button" class="gooi-knop" aria-label="Gooi de dobbelsteen">
-        <img src="${asset('iconen/dobbelsteen.svg')}" alt="" width="70" height="70"><span>Gooi!</span>
-      </button>
-      <div class="pil-donker gooi-hint">Tik om te gooien</div>
-      <div class="gooi-pijl"></div>`;
-    weergave.boven(speler, el);
-    return new Promise((r) =>
-      el.querySelector('button')!.addEventListener(
-        'click',
-        (e) => {
-          e.stopPropagation();
-          r();
-        },
-        { once: true },
-      ),
-    );
-  }
 
   function toonTeller(speler: number, getal: number) {
-    const el = document.createElement('div');
-    el.className = 'stap-teller';
-    el.textContent = String(getal);
+    const el = maak('div', 'stap-teller', String(getal));
     weergave.boven(speler, getal > 0 ? el : null);
   }
+  const resterend = () => ('resterend' in s.fase ? s.fase.resterend : 0);
 
   // ------------------------------------------------------------------ een beurt
   async function loopBeurt(speler: number) {
-    const bot = s.spelers[speler].isBot;
     snel = false;
-    while (actief && (s.fase.soort === 'lopen' || s.fase.soort === 'sterKopen')) {
-      if (s.fase.soort === 'sterKopen') {
+    while (actief && s.spelers[speler].isBot === false && ['lopen', 'splitsing', 'sterKopen'].includes(s.fase.soort)) {
+      const f = s.fase;
+      if (f.soort === 'sterKopen') {
         weergave.boven(speler, null);
-        const kopen = bot ? true : await vraagSter();
-        zet(sterKeuze(s, BORD, kopen));
+        zet(sterKeuze(s, BORD, await vraagSter()));
+        toonTeller(speler, resterend());
         continue;
       }
-      const tempo = bot ? 80 : snel ? 60 : 150;
-      zet(stap(s, BORD));
-      const na = fase();
-      const rest = na.soort === 'lopen' || na.soort === 'sterKopen' ? na.resterend : 0;
-      weergave.plaatsFiguren(posities(), speler, tempo);
-      toonTeller(speler, rest);
-      weergave.volgSpeler(speler, 350);
-      await wacht(tempo);
+      if (f.soort === 'splitsing') {
+        const splitsing = BORD.splitsingen.find((x) => x.vakje === f.vakje)!;
+        zet(splitsingKeuze(s, BORD, await vraagSplitsing(splitsing)));
+        snel = false;
+      } else {
+        zet(stap(s, BORD));
+      }
+      if (s.fase.soort === 'splitsing') continue; // geen stap gezet: eerst kiezen
+      await toonStap(speler, snel ? 60 : 150);
     }
     weergave.boven(speler, null);
+  }
+
+  async function toonStap(speler: number, tempo: number) {
+    weergave.plaatsFiguren(posities(), speler, tempo);
+    toonTeller(speler, resterend());
+    weergave.volgSpeler(speler, 350);
+    await wacht(tempo);
+  }
+
+  /** Een botbeurt: alles direct, ongeveer 80 ms per vakje. Met turbo zonder animatie. */
+  async function botBeurt(speler: number) {
+    const beurt = s.aanZet;
+    const bezig = () => actief && s.aanZet === beurt && s.fase.soort !== 'minigame' && wachtOpBot(s);
+    if (turbo) {
+      while (bezig()) zet(botActie(s, BORD)!);
+      weergave.plaatsFiguren(posities(), -1, 0);
+      melding(speler);
+      return;
+    }
+    weergave.volgSpeler(speler, 300);
+    await wacht(300);
+    if (s.fase.soort === 'dobbelen') {
+      zet(dobbelen(s));
+      toonTeller(speler, resterend());
+      await wacht(250);
+    }
+    while (bezig()) {
+      zet(botActie(s, BORD)!);
+      if (turbo) continue; // turbo tijdens de beurt aangezet: rest direct
+      await toonStap(speler, 80);
+    }
+    weergave.boven(speler, null);
+    weergave.plaatsFiguren(posities(), -1, turbo ? 0 : 80);
+    melding(speler);
+    if (!turbo) await wacht(250);
   }
 
   async function vraagSter(): Promise<boolean> {
@@ -194,31 +218,41 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
         <button class="knop" data-ja><img src="${asset('iconen/munt.svg')}" alt="" width="28" height="28">Koop · ${prijs}</button>
         <button class="knop knop-wit" data-nee>Nee, lopen</button>
       </div>`);
-    const antwoord = await Promise.race([klik(el, '[data-ja]').then(() => true), klik(el, '[data-nee]').then(() => false)]);
+    const antwoord = await kies(el);
     sluitPaneel();
     return antwoord;
   }
 
-  // ------------------------------------------------------------------ minigame (tijdelijk), eindspel, einde
+  /** Keuze bij een splitsing (design: bord-boot-keuze.html). true = zijpad. */
+  async function vraagSplitsing(splitsing: Splitsing): Promise<boolean> {
+    const speler = spelerAanZet(s);
+    const boot = splitsing.soort === 'boot';
+    const tekst = boot
+      ? { icoon: 'iconen/vakje-boot.svg', kop: 'Boot nemen?', uitleg: 'Vaar in één keer naar het restaurant.', ja: 'Ja, varen!', nee: 'Nee, lopen' }
+      : { icoon: 'iconen/vakje-hert.svg', kop: 'Door het hertenkamp?', uitleg: 'Een vakje langer, langs de herten.', ja: 'Ja, herten!', nee: 'Nee, hoofdpad' };
+    const el = maak('div', 'overlay splitsing-overlay');
+    el.innerHTML = `
+      <div class="splitsing-paneel vilt paneel" role="dialog">
+        <div class="splitsing-kop"><img src="${asset(tekst.icoon)}" alt="" width="64" height="64">
+          <div><span class="splitsing-titel">${tekst.kop}</span><span class="splitsing-uitleg">${tekst.uitleg}</span></div></div>
+        ${boot ? `<div class="splitsing-kosten"><span>Kosten</span><div><img src="${asset('iconen/munt.svg')}" alt="" width="26" height="26"><b>${BOOT_PRIJS}</b><small>van je ${s.spelers[speler].munten}</small></div></div>` : ''}
+        <div class="splitsing-knoppen">
+          <button type="button" class="knop knop-blauw" data-ja>${tekst.ja}</button>
+          <button type="button" class="knop knop-wit" data-nee>${tekst.nee}</button>
+        </div>
+      </div>`;
+    laag.replaceChildren(el);
+    const antwoord = await kies(el);
+    sluitPaneel();
+    return antwoord;
+  }
+
+  // ------------------------------------------------------------------ minigame, eindspel, einde
   async function minigame() {
     weergave.overzicht();
-    await wacht(400);
-    const figuren = s.spelers
-      .map((sp) => {
-        const f = figuur(sp.figuur);
-        return `<div class="mini-speler"><div class="mini-figuur" style="background:${f.kleurLicht};border-color:${f.kleur}"><img src="${asset(f.bestand)}" alt=""></div><span></span></div>`;
-      })
-      .join('');
-    const el = paneel(`
-      <h2>Minigame!</h2>
-      <p>${zeg('minigame')} Kies op de Switch een minigame voor 4 spelers.</p>
-      <div class="mini-spelers">${figuren}</div>
-      <p class="overlay-klein">Het invullen van de uitslag komt in de volgende stap. Voor nu krijgt iedereen 10 munten.</p>
-      <div class="overlay-knoppen"><button class="knop knop-groen" data-verder>${icoon.vinkje()}Verder</button></div>`);
-    el.querySelectorAll('.mini-speler span').forEach((sp, i) => (sp.textContent = s.spelers[i].naam));
-    await klik(el, '[data-verder]');
-    sluitPaneel();
-    zet(verwerkMinigame(s, [s.spelers.map((_, i) => i)]));
+    await wacht(300);
+    const uitslag = await vraagMinigameUitslag(laag, s);
+    zet(verwerkMinigame(s, uitslag));
   }
 
   async function eindspelRad() {
@@ -226,12 +260,11 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
     const laatste = s.fase.speler;
     weergave.overzicht();
     await pommie(zeg('eindspel'));
-    const naam = s.spelers[laatste].naam;
     const el = paneel(`
       <h2>Het eindspel!</h2>
       <p></p>
       <div class="overlay-knoppen"><button class="knop" data-draai>Draai!</button></div>`);
-    el.querySelector('p')!.textContent = zeg('eindspelRad', naam);
+    el.querySelector('p')!.textContent = zeg('eindspelRad', s.spelers[laatste].naam);
     if (s.spelers[laatste].isBot) await wacht(1200);
     else await klik(el, '[data-draai]');
     zet(draaiEindspelRad(s, BORD));
@@ -275,26 +308,32 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
         continue;
       }
       const speler = spelerAanZet(s);
-      const bot = s.spelers[speler].isBot;
+      if (s.spelers[speler].isBot) {
+        await botBeurt(speler);
+        continue;
+      }
       weergave.plaatsFiguren(posities(), speler, 0);
       if (soort === 'dobbelen') {
-        weergave.volgSpeler(speler);
-        if (bot) await wacht(350);
-        else await wachtOpGooi(speler);
+        weergave.volgSpeler(speler, 400);
+        await wacht(400);
         if (!actief) return;
-        zet(dobbelen(s));
-        const gegooid = fase();
-        if (gegooid.soort === 'lopen') toonTeller(speler, gegooid.worp);
-        await wacht(bot ? 250 : 500);
+        await toonDobbelscherm(laag, s, speler, () => {
+          zet(dobbelen(s));
+          return s.fase.soort === 'lopen' ? s.fase.worp : 0;
+        });
+        toonTeller(speler, resterend());
+        await wacht(250);
+      } else {
+        // Verder spelen midden in een beurt.
+        weergave.volgSpeler(speler, 0);
+        toonTeller(speler, resterend());
       }
       await loopBeurt(speler);
-      if (bot && actief) melding(speler, verslagTekst(speler));
-      if (actief) await wacht(bot ? 300 : 600);
+      if (actief) await wacht(500);
     }
   }
 
   // ------------------------------------------------------------------ start
-  tekenHud();
   weergave.zetSterren(s.sterren.map((st) => st.plek));
   weergave.plaatsFiguren(posities(), s.fase.soort === 'minigame' ? -1 : spelerAanZet(s), 0);
   weergave.overzicht(0);

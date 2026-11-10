@@ -160,9 +160,7 @@ h1, h2, h3 { font-family: var(--kp-font-kop); margin: 0; }
 .hud > * { pointer-events: auto; }
 
 .ronde-teller {
-  position: absolute;
-  left: calc(12px + var(--veilig-links));
-  top: calc(12px + var(--veilig-boven));
+  flex-shrink: 0;
   width: 112px;
   height: 84px;
   border: 3px solid #FFFFFF;
@@ -188,17 +186,13 @@ h1, h2, h3 { font-family: var(--kp-font-kop); margin: 0; }
   line-height: 1.05;
 }
 .ronde-getal span { font-size: 20px; color: var(--kp-inkt-2); }
-.hud-menu {
-  position: absolute;
-  right: calc(12px + var(--veilig-rechts));
-  top: calc(26px + var(--veilig-boven));
-}
+
 
 /* Melding na een botbeurt (design: donkere pil met gele tijdbalk) */
 .bot-melding {
   position: absolute;
   left: 50%;
-  top: calc(110px + var(--veilig-boven));
+  top: calc(118px + var(--veilig-boven));
   transform: translateX(-50%);
   display: flex;
   align-items: center;
@@ -212,7 +206,7 @@ h1, h2, h3 { font-family: var(--kp-font-kop); margin: 0; }
   color: #FFFFFF;
   font-family: var(--kp-font-kop);
   font-weight: 600;
-  font-size: 22px;
+  font-size: 18px;
   pointer-events: none;
   animation: melding-in 180ms ease-out;
 }
@@ -234,7 +228,7 @@ h1, h2, h3 { font-family: var(--kp-font-kop); margin: 0; }
   width: 100%;
   background: var(--kp-geel);
   transform-origin: left;
-  animation: melding-balk 2.5s linear forwards;
+  animation: melding-balk 1.5s linear forwards;
 }
 @keyframes melding-in { from { opacity: 0; transform: translate(-50%, -8px); } }
 @keyframes melding-balk { to { transform: scaleX(0); } }

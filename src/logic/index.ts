@@ -2,7 +2,9 @@
 export * from './gameState';
 export * from './bord';
 export { nieuwSpel, type NieuwSpelKeuzes, type SpelerKeuze } from './nieuwSpel';
-export { dobbelen, stap, sterKeuze, loopUit } from './beurt';
+export { dobbelen, stap, sterKeuze, splitsingKeuze, loopUit } from './beurt';
+export { openSplitsing, zijpadOpen, botKiestZijpad, stappenTotSter } from './splitsing';
+export { BOOT_PRIJS } from './regels';
 export { verwerkMinigame, minigameBeloning, type MinigameUitslag } from './minigame';
 export { draaiEindspelRad, isEindspel, eersteEindspelRonde, EINDSPEL_REGELS } from './eindspel';
 export { bonusWinnaars } from './eindtelling';

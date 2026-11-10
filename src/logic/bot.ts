@@ -2,11 +2,13 @@
  * Bots doen dezelfde acties als mensen, maar beslissen meteen zelf.
  * `botActie` doet één stap (voor animaties); `speelBotsAf` alles tot er een mens nodig is (turbo).
  */
-import { dobbelen, stap, sterKeuze } from './beurt';
+import { dobbelen, splitsingKeuze, stap, sterKeuze } from './beurt';
+import { splitsingBij } from './bord';
 import type { Bord } from './bord';
 import { draaiEindspelRad } from './eindspel';
 import type { GameState } from './gameState';
 import { spelerAanZet } from './regels';
+import { botKiestZijpad } from './splitsing';
 
 /** Moet er nu een bot iets doen? (De minigame-uitslag vult altijd een mens in.) */
 export function wachtOpBot(state: GameState): boolean {
@@ -14,6 +16,7 @@ export function wachtOpBot(state: GameState): boolean {
     case 'dobbelen':
     case 'lopen':
     case 'sterKopen':
+    case 'splitsing':
       return state.spelers[spelerAanZet(state)].isBot;
     case 'eindspelRad':
       return state.spelers[state.fase.speler].isBot;
@@ -32,6 +35,12 @@ export function botActie(state: GameState, bord: Bord): GameState | null {
       return stap(state, bord);
     case 'sterKopen':
       return sterKeuze(state, bord, true);
+    case 'splitsing': {
+      // Normaal kiest een bot al in `stap`; dit is voor als een mens tijdens zijn keuze bot werd.
+      const speler = spelerAanZet(state);
+      const splitsing = splitsingBij(bord, state.spelers[speler].vakje)!;
+      return splitsingKeuze(state, bord, botKiestZijpad(state, bord, splitsing, speler));
+    }
     case 'eindspelRad':
       return draaiEindspelRad(state, bord);
     default:

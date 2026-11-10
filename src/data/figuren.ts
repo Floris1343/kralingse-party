@@ -23,12 +23,12 @@ export interface Figuur {
 
 export const FIGUREN: Figuur[] = [
   {
-    id: 'floris', bestand: 'figuren/floris.png', kleur: '#E8433A', kleurDonker: '#B42A23', kleurLicht: '#FFD9D4',
-    vorm: 'cirkel', verhouding: 659 / 1112, hoogte: 105, handgetekend: true,
+    id: 'floris', bestand: 'figuren/floris.png', kleur: '#2F7DE1', kleurDonker: '#1E5BB0', kleurLicht: '#D6E7FC',
+    vorm: 'driehoek', verhouding: 659 / 1112, hoogte: 105, handgetekend: true,
   },
   {
-    id: 'speler2', bestand: 'figuren/speler2.png', kleur: '#2F7DE1', kleurDonker: '#1E5BB0', kleurLicht: '#D6E7FC',
-    vorm: 'driehoek', verhouding: 727 / 1051, hoogte: 105, handgetekend: true,
+    id: 'speler2', bestand: 'figuren/speler2.png', kleur: '#E8433A', kleurDonker: '#B42A23', kleurLicht: '#FFD9D4',
+    vorm: 'cirkel', verhouding: 727 / 1051, hoogte: 105, handgetekend: true,
   },
   {
     id: 'pion-groen', bestand: 'figuren/pion-groen.svg', kleur: '#2FAE5B', kleurDonker: '#1F8344', kleurLicht: '#D3F1DC',
@@ -39,6 +39,9 @@ export const FIGUREN: Figuur[] = [
     vorm: 'ruit', verhouding: 100 / 130, hoogte: 93, handgetekend: false,
   },
 ];
+
+/** Standaardnamen bij een nieuw spel, in de volgorde van FIGUREN. */
+export const STANDAARD_NAMEN = ['Floris', 'Speler 2', 'Bot 1', 'Bot 2'];
 
 export function figuur(id: string): Figuur {
   return FIGUREN.find((f) => f.id === id) ?? FIGUREN[0];

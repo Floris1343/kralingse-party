@@ -1,5 +1,5 @@
 /** Hulpjes voor de tests (wordt niet in het spel gebruikt). */
-import { loopUit, dobbelen, sterKeuze } from './beurt';
+import { loopUit, dobbelen, splitsingKeuze, sterKeuze } from './beurt';
 import { maakTestbord, type Bord } from './bord';
 import { speelBotsAf } from './bot';
 import { draaiEindspelRad } from './eindspel';
@@ -62,7 +62,8 @@ export function willekeurigeUitslag(state: GameState): [MinigameUitslag, GameSta
 }
 
 /**
- * Speelt een heel spel uit. Mensen dobbelen, lopen uit, kopen altijd een ster en draaien het rad.
+ * Speelt een heel spel uit. Mensen dobbelen, lopen uit, kopen altijd een ster, kiezen bij een
+ * splitsing wisselend en draaien het rad.
  * `naElkeActie` kan de state vervangen (bijv. opslaan en weer laden).
  */
 export function speelUit(
@@ -88,6 +89,10 @@ export function speelUit(
         break;
       case 'sterKopen':
         s = sterKeuze(s, b, true);
+        break;
+      case 'splitsing':
+        // Mensen nemen in even rondes het zijpad.
+        s = splitsingKeuze(s, b, s.ronde % 2 === 0);
         break;
       case 'eindspelRad':
         s = draaiEindspelRad(s, b);

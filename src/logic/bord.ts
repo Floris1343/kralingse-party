@@ -89,12 +89,12 @@ export function splitsingBij(bord: Bord, id: string): Splitsing | undefined {
 }
 
 /**
- * Het volgende vakje op de route. Bij een splitsing is dat voorlopig altijd het hoofdpad;
- * kiezen komt in een latere stap.
+ * Het volgende vakje op de route. Bij een splitsing kies je met `zijpad` het hertenkamp-pad,
+ * de boot of het ijspad; anders loop je gewoon het hoofdpad.
  */
-export function volgendVakje(bord: Bord, id: string): string {
+export function volgendVakje(bord: Bord, id: string, zijpad = false): string {
   const splitsing = splitsingBij(bord, id);
-  if (splitsing) return splitsing.hoofdpad;
+  if (splitsing) return zijpad ? splitsing.zijpad : splitsing.hoofdpad;
   const v = vakje(bord, id);
   if (v.next.length === 0) throw new Error(`Vakje ${id} heeft geen vervolg`);
   return v.next[0];

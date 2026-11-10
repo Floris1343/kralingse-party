@@ -10,9 +10,9 @@ export const teksten = {
     'Welkom, welkom! Wie haalt vandaag de meeste sterren?',
   ],
   minigame: [
-    'Minigame! Pak de controllers erbij.',
-    'Tijd voor een minigame! Zet hem op!',
-    'Op naar de Switch! Wie wint deze?',
+    'Speel nu een minigame op de Switch! Kies er een voor 4 spelers.',
+    'Minigame! Pak de controllers en kies een spel voor 4 spelers.',
+    'Op naar de Switch! Wie wint deze minigame voor 4 spelers?',
   ],
   eindspel: [
     'Nog maar vijf rondes! Nu tellen de vakjes dubbel.',

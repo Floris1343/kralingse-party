@@ -14,6 +14,7 @@ export const ROOD_MUNTEN = 3;
 export const MINIGAME_BELONING = [10, 5, 2, 0] as const;
 export const EINDSPEL_RONDES = 5;
 export const EINDSPEL_MUNTEN_LAATSTE = 20;
+export const BOOT_PRIJS = 3;
 
 /** Maakt een diepe kopie, laat `wijzig` die aanpassen en geeft de kopie terug. Het origineel blijft heel. */
 export function metKopie(state: GameState, wijzig: (s: GameState) => void): GameState {
