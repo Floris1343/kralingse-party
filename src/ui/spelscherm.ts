@@ -307,7 +307,7 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
           state: () => s,
           gooi: () => {
             zet(volgende);
-            const w = s.verslag.find((g) => g.soort === 'worp');
+            const w = s.verslag.findLast((g) => g.soort === 'worp');
             return w && w.soort === 'worp' ? w.worpen : [];
           },
         }, { vanzelf: true, uitslag: (w) => `${s.spelers[speler].naam} loopt ${w} ${w === 1 ? 'stap' : 'stappen'}` });
@@ -412,7 +412,7 @@ export function toonSpelscherm(root: HTMLElement, start: GameState, opties: { na
       state: () => s,
       gooi: (gekozen) => {
         zet(dobbelen(s, gekozen));
-        const w = s.verslag.find((g) => g.soort === 'worp');
+        const w = s.verslag.findLast((g) => g.soort === 'worp');
         return w && w.soort === 'worp' ? w.worpen : [];
       },
     });
